@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/open.png</file>
+        <file>icons/save.png</file>
+        <file>icons/preferences.png</file>
+        <file>icons/exit.png</file>
+        <file>icons/Sc_insertrows.png</file>
+        <file>icons/start.png</file>
+        <file>icons/stop.png</file>
+        <file>icons/connect-1.png</file>
+        <file>icons/disconnect.png</file>
+    </qresource>
+</RCC>

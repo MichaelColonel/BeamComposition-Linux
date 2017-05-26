@@ -247,10 +247,14 @@ Parameters::initiate(QSettings *set)
         charge_counts_signals.clear();
         set->beginGroup("ChargeSignalMap");
         for ( int i = 1; i <= CARBON_Z; ++i) {
+            const int& z = charge_counts_data[i - 1].z;
+            const double& m = charge_counts_data[i - 1].mean;
+            const double& s = charge_counts_data[i - 1].sigma;
+
             set->beginGroup(QString("charge%1").arg(i));
-            int key = set->value( "charge", 0).toInt();
-            double mu = set->value( "mu", 0.0).toDouble();
-            double sigma = set->value( "sigma", 0.0).toDouble();
+            int key = set->value( "charge", z).toInt();
+            double mu = set->value( "mu", m).toDouble();
+            double sigma = set->value( "sigma", s).toDouble();
             set->endGroup();
             charge_counts_signals.insert(std::make_pair( key, SignalPair( mu, sigma)));
         }
@@ -561,17 +565,17 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
                 d.z->Fill(wcharge);
 */
 
-                ChannelsArray tmp = charge;
-                std::sort( tmp.begin(), tmp.end());
-                d.z->Fill(tmp[1]); // rank 2
+//                ChannelsArray tmp = charge;
+//                std::sort( tmp.begin(), tmp.end());
+//                d.z->Fill(tmp[1]); // rank 2
 //                ChannelsArray tmp = charge;
 //                std::for_each( tmp.begin(), tmp.end(),
 //                                [z](double ccharge) -> double { return fabs(ccharge - z); });
 //                std::copy( charge.begin(), charge.end(), tmp.begin());
 //                std::sort( tmp.begin(), tmp.end());
 //                d.z->Fill(tmp[1]); // rank 2
-//                double charge_mean = std::accumulate( charge.begin(), charge.end(), 0.) / CHANNELS;
-//                d.z->Fill(charge_mean);
+                double charge_mean = std::accumulate( charge.begin(), charge.end(), 0.) / CHANNELS;
+                d.z->Fill(charge_mean);
 /*
                 int position_max = std::max_element( tmp.begin(), tmp.end()) - tmp.begin();
 
@@ -730,10 +734,13 @@ Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
     for ( int i = 1; i <= CARBON_Z; ++i) {
         double r = 0.0;
         ChannelsArray delta;
+//        bool big = true;
         for ( int j = 0; j < CHANNELS; ++j) {
             double diff = z[j] - double(i);
             delta[j] = diff;
             r += diff * diff;
+//            if (delta[j] < 0.)
+//                big = false;
         }
 
 //        bool border = fabs(delta[0]) + fabs(delta[CHANNELS - 1]) <= 1.0;
@@ -744,7 +751,11 @@ Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
             pos_z = i;
             break;
         }
-    }
+/*        else if (i == CARBON_Z && big) {
+            pos_z = i;
+            break;
+        }
+*/    }
 
     return pos_z;
 }

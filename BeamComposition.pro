@@ -80,12 +80,8 @@ FORMS    += mainwindow.ui \
     settingsdialog.ui \
     signalvaluedialog.ui
 
-LIBS += -lftd2xx
+LIBS += -L/usr/local/GATE/lib64 -lftd2xx
 
 RESOURCES += BeamComposition.qrc
 
 TRANSLATIONS += BeamComposition_ru.ts
-
-win32: LIBS += -L$$PWD/../FTDI_DriverNew/i386/
-win32: INCLUDEPATH += $$PWD/../FTDI_DriverNew
-win32: DEPENDPATH += $$PWD/../FTDI_DriverNew

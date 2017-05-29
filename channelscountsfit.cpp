@@ -175,7 +175,7 @@ correction(double beta)
     return res;
 }
 
-double channel_amp[CHANNELS] = { 1.0, 1.007829, 0.950407, 1.011209 };
+const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.955349248, 1.025628856 };
 
 } // namespace
 
@@ -185,6 +185,8 @@ namespace CalibrationFitting {
 SharedParameters Parameters::instance_;
 
 Parameters::Parameters(QSettings* settings)
+    :
+      k(0.5)
 {
     std::fill( charge_radius, charge_radius + CARBON_Z, 1.0);
     std::fill( charge_beta, charge_beta + CARBON_Z, 0.739);
@@ -279,6 +281,7 @@ Parameters::initiate(QSettings *set)
     }
 
     // linear fit parameters
+/*
     int ch = 0, pos1 = -1, pos2 = -1;
     if (set) {
         set->beginGroup("LinearFit");
@@ -289,7 +292,7 @@ Parameters::initiate(QSettings *set)
         linear_fit[1] = set->value( "parameter-b", 0.0).toDouble();
         set->endGroup();
     }
-
+*/
     // charge-radius
     if (set) {
         set->beginGroup("ChargeRadius");
@@ -330,6 +333,8 @@ Parameters::initiate(QSettings *set)
         set->endGroup();
     }
 
+    recalculate();
+/*
     if (ch > 0 && pos1 != -1 && pos2 != -1) {
         recalculate( ch, pos1, pos2);
     }
@@ -341,11 +346,11 @@ Parameters::initiate(QSettings *set)
     }
     else
         recalculate( 4, 0, 3);
-
-    // tension and power
+*/
+    // tension
     tension_parameter = set->value( "tension-parameter", 0.0).toDouble();
 }
-
+/*
 void
 Parameters::recalculate(int ref_channel, int fit_pos_start, int fit_pos_stop)
 {
@@ -354,7 +359,7 @@ Parameters::recalculate(int ref_channel, int fit_pos_start, int fit_pos_stop)
     fit_points[1] = fit_pos_stop;
     recalculate();
 }
-
+*/
 void
 Parameters::restore_reference_signals()
 {
@@ -428,7 +433,7 @@ Parameters::recalculate()
     cspl( y2, x, p2, fitn, tension_parameter);
     cspl( y3, x, p3, fitn, tension_parameter);
     cspl( y4, x, p4, fitn, tension_parameter);
-
+/*
     double* ylin = y4;
     switch (reference_channel) {
     case 1:
@@ -452,6 +457,7 @@ Parameters::recalculate()
     double b = ylin[pos2] - a * x[pos2];
     linear_fit[0] = a;
     linear_fit[1] = b;
+*/
 }
 
 RunInfo
@@ -501,8 +507,9 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
             skip = false;
             for ( int i = 0; i < CHANNELS; ++i) {
-                values[i] = linear_fit[0] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
-                values[i] *= channel_amp[i];
+//                values[i] = linear_fit[0] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
+//                values[i] *= channel_amp[i];
+                values[i] = channel_amp[i] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
                 if (values[i] <= 0.)
                     skip = true;
             }
@@ -679,7 +686,7 @@ Parameters::save(QSettings *set)
     }
     set->endArray();
     set->endGroup();
-
+/*
     // linear fit parameters
     set->beginGroup("LinearFit");
     set->setValue( "reference-channel", reference_channel);
@@ -688,7 +695,7 @@ Parameters::save(QSettings *set)
     set->setValue( "parameter-a", linear_fit[0]);
     set->setValue( "parameter-b", linear_fit[1]);
     set->endGroup();
-
+*/
     // tension and power
     set->setValue( "tension-parameter", tension_parameter);
 }

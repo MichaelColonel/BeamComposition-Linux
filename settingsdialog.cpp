@@ -62,11 +62,13 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     hist1(nullptr),
     hist2(nullptr),
     settings(nullptr),
-    selected_row(-1),
+    selected_row(-1)
+/*  ,
     lfit_ch(0),
     lfit_pos1(-1),
     lfit_pos2(-1)
-{
+*/
+  {
     ui->setupUi(this);
 
     QHeaderView* hview = new QHeaderView( Qt::Orientation::Vertical, ui->signalCountsTableWidget);
@@ -126,11 +128,23 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     ui->chargeCountsTableWidget->setItemDelegate(charge_signal);
 
     ChargeSignalMap& ref_charge = params->charge_signals();
+/*
+    const SignalPair& p = ref_charge[1];
+    QString str = SignalValueDelegate::form_text(p);
+    QTableWidgetItem* item = new QTableWidgetItem(str);
+    ui->chargeCountsTableWidget->setItem( 0, 1, item);
+*/
 
     const SignalPair& p = ref_charge[1];
     QString str = SignalValueDelegate::form_text(p);
     QTableWidgetItem* item = new QTableWidgetItem(str);
     ui->chargeCountsTableWidget->setItem( 0, 1, item);
+
+    const SignalPair& p1 = ref_charge[CARBON_Z];
+    str = SignalValueDelegate::form_text(p1);
+    item = new QTableWidgetItem(str);
+    ui->chargeCountsTableWidget->setItem( CARBON_Z - 1, 1, item);
+
 /*
     for ( int i = 0; i < CARBON_Z; ++i) {
         const SignalPair& p = ref_charge[i + 1];
@@ -154,13 +168,14 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     }
 
     // fit charge
+    /*
     const bool* fit_charge = CalibrationFitting::BeamCompositionFit::charge_in_fit();
     for ( int i = 0; i < CARBON_Z; ++i) {
 //        QString text = (fit_charge[i]) ? tr("true") : tr("false");
         QTableWidgetItem* item = new QTableWidgetItem(QString("%1").arg(int(fit_charge[i])));
         ui->chargeCountsTableWidget->setItem( i, 4, item);
     }
-
+*/
     connect( ui->tensionSpinBox, SIGNAL(valueChanged(double)), this, SLOT(tensionParameterChanged(double)));
 
     connect( ui->actionAddReferenceRowBelow, SIGNAL(triggered()), SLOT(signalCountsAddRowBelowClicked()));
@@ -185,10 +200,10 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     connect( hview, SIGNAL(sectionClicked(int)), this, SLOT(signalCountsRowSelected(int)));
 
     ui->tensionSpinBox->setValue(params->tension());
-    ui->energyCountSpinBox->setValue(Hist1Parameters::energy_per_count);
-    const int* lfit = params->reference_channel_parameters(lfit_ch);
-    lfit_pos1 = lfit[0];
-    lfit_pos2 = lfit[1];
+//    ui->energyCountSpinBox->setValue(Hist1Parameters::energy_per_count);
+//    const int* lfit = params->reference_channel_parameters(lfit_ch);
+//    lfit_pos1 = lfit[0];
+//    lfit_pos2 = lfit[1];
 }
 
 SettingsDialog::~SettingsDialog()
@@ -247,13 +262,13 @@ SettingsDialog::setSettingsParameters( QSettings* set,
     ui->binSpinBox->setValue(histograms[0].bins);
     ui->maxSpinBox->setValue(histograms[0].max);
     ui->minSpinBox->setValue(histograms[0].min);
-
+/*
     settings->beginGroup("LinearFit");
     lfit_ch = settings->value( "reference-channel", 0).toInt();
     lfit_pos1 = settings->value( "reference-pos1", -1).toInt();
     lfit_pos2 = settings->value( "reference-pos2", -1).toInt();
     settings->endGroup();
-
+*/
     int timeout_peroid = settings->value( "update-timeout", 3).toInt();
     ui->timeoutPeriodSpinBox->setValue(timeout_peroid);
 
@@ -323,9 +338,9 @@ SettingsDialog::restoreReferenceMatrixClicked()
             }
             pos++;
         }
-        lfit_ch = 0;
-        lfit_pos1 = -1;
-        lfit_pos2 = -1;
+//        lfit_ch = 0;
+//        lfit_pos1 = -1;
+//        lfit_pos2 = -1;
     }
     else if (res == QMessageBox::No) {
 
@@ -387,8 +402,8 @@ SettingsDialog::applyChanges()
     settings->setValue( "max-fit-charge", ui->maxChargeSpinBox->value());
 
     settings->setValue( "run-directory", ui->runDirectoryLineEdit->text());
-    settings->setValue( "energy-per-count", ui->energyCountSpinBox->value());
-    Hist1Parameters::energy_per_count = ui->energyCountSpinBox->value();
+//    settings->setValue( "energy-per-count", ui->energyCountSpinBox->value());
+//    Hist1Parameters::energy_per_count = ui->energyCountSpinBox->value();
 
 /*
     // recalculate parameters if parameters are set
@@ -471,16 +486,17 @@ SettingsDialog::applyChanges()
         }
         ref_signals[key_value] = arr;
     }
-
+    params->recalculate();
+/*
     // recalculate fitting
     if (lfit_ch > 0 && lfit_pos1 != -1 && lfit_pos2 != -1) {
         params->recalculate( lfit_ch, lfit_pos1, lfit_pos2);
     }
     else // default (channel-4, pos 0, 1)
         params->recalculate( 4, 0, 3);
-
-    const double* lfit = params->fit_parameters();
-    qDebug() << QString(tr("Fit line equation: %1*x+%2").arg(lfit[0]).arg(lfit[1]));
+*/
+//    const double* lfit = params->fit_parameters();
+//    qDebug() << QString(tr("Fit line equation: %1*x+%2").arg(lfit[0]).arg(lfit[1]));
 }
 
 void
@@ -542,14 +558,17 @@ SettingsDialog::signalCountsAddRowAboveClicked()
     if (selected_row != -1) {
         addSignalCountsRow(selected_row);
     }
+
 }
 
 void
 SettingsDialog::signalCountsAddRowBelowClicked()
 {
+
     if (selected_row != -1) {
         addSignalCountsRow(++selected_row);
     }
+
 }
 
 void
@@ -717,30 +736,30 @@ SettingsDialog::showGraphClicked()
     }
 
     // final line transformation
-    int ch = lfit_ch - 1;
-    int& pos1 = lfit_pos1;
-    int& pos2 = lfit_pos2;
-    double lfit[2] = {};
-    lfit[0] = (y[ch][pos1] - y[ch][pos2]) / (x[ch][pos1] - x[ch][pos2]);
-    lfit[1] = y[ch][pos1] - lfit[0] * x[ch][pos1];
+//    int ch = lfit_ch - 1;
+//    int& pos1 = lfit_pos1;
+//    int& pos2 = lfit_pos2;
+//    double lfit[2] = {};
+//    lfit[0] = (y[ch][pos1] - y[ch][pos2]) / (x[ch][pos1] - x[ch][pos2]);
+//    lfit[1] = y[ch][pos1] - lfit[0] * x[ch][pos1];
 
     // set linear fit parameters
-    params->set_linear_fit_parameters( lfit[0], lfit[1]);
+//    params->set_linear_fit_parameters( lfit[0], lfit[1]);
 
-    TF1 *fline = new TF1( "line", "[0]*x+[1]", x[0][0], x[0][rows - 1]);
+//    TF1 *fline = new TF1( "line", "[0]*x+[1]", x[0][0], x[0][rows - 1]);
 //    TF1 *fpoly = new TF1( "c1poly", "pol3", x[0][0], x[0][rows - 1]);
 
-    fline->SetLineColor(kBlack);
-    fline->SetParameters(lfit);
+//    fline->SetLineColor(kBlack);
+//    fline->SetParameters(lfit);
 
-    qDebug() << QString(tr("Fit line equation: %1*x+%2").arg(lfit[0]).arg(lfit[1]));
+//    qDebug() << QString(tr("Fit line equation: %1*x+%2").arg(lfit[0]).arg(lfit[1]));
 
     TLegend* leg = new TLegend( 0.15, 0.5, 0.35, 0.85, "Channels");
     leg->AddEntry( err[0], "Channel-1", "l");
     leg->AddEntry( err[1], "Channel-2", "l");
     leg->AddEntry( err[2], "Channel-3", "l");
     leg->AddEntry( err[3], "Channel-4", "l");
-    leg->AddEntry( fline, "Fit line", "l");
+//    leg->AddEntry( fline, "Fit line", "l");
 
     // draw multigraph in the canvas pad
     TPad* pad = dialog->getPad();
@@ -759,7 +778,7 @@ SettingsDialog::showGraphClicked()
     mg->GetYaxis()->SetTitle("Amplitude (ADC count)");
 
     leg->Draw();
-    fline->Draw("lsame");
+//    fline->Draw("lsame");
 
 //    err[0]->Fit( "c1poly", "R");
 //    fpoly->Draw("lsame");
@@ -791,7 +810,7 @@ SettingsDialog::showGraphClicked()
         delete err[i];
     }
 
-    delete fline;
+//    delete fline;
 //    delete fpoly;
     delete mg;
     delete leg;
@@ -805,6 +824,7 @@ void
 SettingsDialog::signalCountsCellClicked( int, int)
 {
     // enable or disable linear fit calculation
+/*
     QList<QTableWidgetItem*> list = ui->signalCountsTableWidget->selectedItems();
     int pos1 = -1;
     int pos2 = -1;
@@ -824,7 +844,8 @@ SettingsDialog::signalCountsCellClicked( int, int)
             column = item1->column();
         }
     }
-    if (pos1 != -1 && pos2 != -1 && column) {
+*/
+/*    if (pos1 != -1 && pos2 != -1 && column) {
         lfit_pos1 = pos1;
         lfit_pos2 = pos2;
         lfit_ch = column;
@@ -836,6 +857,7 @@ SettingsDialog::signalCountsCellClicked( int, int)
         lfit_ch = 0;
         ui->showGraphMatrixButton->setEnabled(false);
     }
+*/
 }
 
 void
@@ -887,15 +909,15 @@ SettingsDialog::recalculate_linear_fit()
     }
 
     // final line transformation
-    int ch = lfit_ch - 1;
-    int& pos1 = lfit_pos1;
-    int& pos2 = lfit_pos2;
-    double lfit[2] = {};
-    lfit[0] = (y[ch][pos1] - y[ch][pos2]) / (x[ch][pos1] - x[ch][pos2]);
-    lfit[1] = y[ch][pos1] - lfit[0] * x[ch][pos1];
+//    int ch = lfit_ch - 1;
+//    int& pos1 = lfit_pos1;
+//    int& pos2 = lfit_pos2;
+//    double lfit[2] = {};
+//    lfit[0] = (y[ch][pos1] - y[ch][pos2]) / (x[ch][pos1] - x[ch][pos2]);
+//    lfit[1] = y[ch][pos1] - lfit[0] * x[ch][pos1];
 
     // set linear fit parameters
-    params->set_linear_fit_parameters( lfit[0], lfit[1]);
+//    params->set_linear_fit_parameters( lfit[0], lfit[1]);
 
     for ( int i = 0; i < CHANNELS; ++i) {
         delete [] x[i];

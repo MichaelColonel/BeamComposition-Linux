@@ -53,7 +53,7 @@ ChargeValueDelegate::createEditor( QWidget* parent,
     const QStyleOptionViewItem&,
     const QModelIndex& index) const
 {
-    if (index.column() == 1 && index.row() == 0) {
+    if (index.column() == 1) {
         SignalValueDialog* dialog = new SignalValueDialog(parent);
         connect( dialog, SIGNAL(accepted()),
             this, SLOT(commitAndCloseEditor()));
@@ -73,9 +73,9 @@ ChargeValueDelegate::createEditor( QWidget* parent,
     }
     else if (index.column() == 3) {
         QDoubleSpinBox *spinbox = new QDoubleSpinBox(parent);
-        spinbox->setRange( 0.000, 0.999);
+        spinbox->setRange( 0.00000, 0.99999);
         spinbox->setSingleStep(0.01);
-        spinbox->setDecimals(3);
+        spinbox->setDecimals(5);
         connect( spinbox, SIGNAL(editingFinished()),
                 this, SLOT(commitAndCloseEditor()));
         return spinbox;
@@ -96,7 +96,7 @@ void
 ChargeValueDelegate::setEditorData( QWidget* editor,
     const QModelIndex& index) const
 {
-    if (index.column() == 1 && index.row() == 0) {
+    if (index.column() == 1) {
         QString str = index.model()->data( index, Qt::DisplayRole).toString();
         SignalValueDialog* dialog = qobject_cast<SignalValueDialog*>(editor);
         SignalPair p = SignalValueDelegate::parse_text(str);
@@ -126,7 +126,7 @@ void
 ChargeValueDelegate::setModelData( QWidget* editor,
     QAbstractItemModel* model, const QModelIndex& index) const
 {
-    if (index.column() == 1 && index.row() == 0) {
+    if (index.column() == 1) {
         SignalValueDialog* dialog = qobject_cast<SignalValueDialog*>(editor);
         SignalPair pair = dialog->getMeanSigmaValues();
         QString str = SignalValueDelegate::form_text(pair);

@@ -47,6 +47,7 @@ public:
     void restore_charge_signals();
 //    void recalculate( int ref_channel, int fit_pos_start, int fit_pos_stop);
     void recalculate();
+    void recalculate_charge_fit(int charge = CARBON_Z);
 //    TH1* rebin( int channel, double min, double max, int bins, Diagrams& diagrams);
 //    double* refit_channel( int i, int bins, double min, double max) const;
 //    const double* fit_parameters() const { return linear_fit; }
@@ -80,7 +81,8 @@ private:
     typedef std::array< double, CHANNELS> ChannelsArray;
     void initiate(QSettings* set = nullptr);
 //    double count_to_charge(double count);
-    int counts_to_charge( const ChannelsArray& counts, ChannelsArray& charges, double beta_mip) const;
+    int counts_to_charge( const ChannelsArray& counts, ChannelsArray& charges,
+                          double mip_signal, double beta, double power) const;
     int majority_scheme(const ChannelsArray& counts/*, double charge_radius*/) const;
 
     Parameters(QSettings* settings = nullptr);

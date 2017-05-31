@@ -72,7 +72,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     ui->setupUi(this);
 
     QHeaderView* hview = new QHeaderView( Qt::Orientation::Vertical, ui->signalCountsTableWidget);
-
     hview->setClickable(true);
     ui->signalCountsTableWidget->setVerticalHeader(hview);
 
@@ -134,7 +133,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     QTableWidgetItem* item = new QTableWidgetItem(str);
     ui->chargeCountsTableWidget->setItem( 0, 1, item);
 */
-
+/*
     const SignalPair& p = ref_charge[1];
     QString str = SignalValueDelegate::form_text(p);
     QTableWidgetItem* item = new QTableWidgetItem(str);
@@ -144,15 +143,19 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     str = SignalValueDelegate::form_text(p1);
     item = new QTableWidgetItem(str);
     ui->chargeCountsTableWidget->setItem( CARBON_Z - 1, 1, item);
+*/
 
-/*
+    QHeaderView* hview1 = new QHeaderView( Qt::Orientation::Vertical, ui->chargeCountsTableWidget);
+    hview1->setClickable(true);
+    ui->chargeCountsTableWidget->setVerticalHeader(hview1);
+
     for ( int i = 0; i < CARBON_Z; ++i) {
         const SignalPair& p = ref_charge[i + 1];
         QString str = SignalValueDelegate::form_text(p);
         QTableWidgetItem* item = new QTableWidgetItem(str);
         ui->chargeCountsTableWidget->setItem( i, 1, item);
     }
-*/
+
     // Ion charge radius parameter
     const double* radius = params->charge_radius_parameter();
     for ( int i = 0; i < CARBON_Z; ++i) {
@@ -198,6 +201,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     connect( ui->chargeCountsTableWidget, SIGNAL(cellChanged(int,int)), this, SLOT(chargeCountsCellChanged( int, int)));
 
     connect( hview, SIGNAL(sectionClicked(int)), this, SLOT(signalCountsRowSelected(int)));
+    connect( hview1, SIGNAL(sectionClicked(int)), this, SLOT(chargeSignalRowSelected(int)));
 
     ui->tensionSpinBox->setValue(params->tension());
 //    ui->energyCountSpinBox->setValue(Hist1Parameters::energy_per_count);
@@ -464,6 +468,7 @@ SettingsDialog::applyChanges()
         ref_signals[key_value] = arr;
     }
     params->recalculate();
+    params->recalculate_charge_fit();
 /*
     // recalculate fitting
     if (lfit_ch > 0 && lfit_pos1 != -1 && lfit_pos2 != -1) {
@@ -590,13 +595,19 @@ void
 SettingsDialog::signalCountsRowSelected(int r)
 {
     selected_row = r;
-    qDebug() << r;
+    qDebug() << "Signal counts row: " << r;
     int rows = ui->signalCountsTableWidget->rowCount();
     ui->actionDeleteReferenceRow->setEnabled(rows);
 
     ui->actionAddReferenceRowAbove->setEnabled(selected_row);
     bool end_of_table = (selected_row == (rows - 1));
     ui->actionAddReferenceRowBelow->setEnabled(!end_of_table);
+}
+
+void
+SettingsDialog::chargeSignalRowSelected(int r)
+{
+    qDebug() << "Charge signal row: " << r;
 }
 
 void

@@ -163,6 +163,7 @@ splfit( double w, double *x, double *y, double *z, int m, double tn)
     return (tn != 0.) ? tnsfit( w, x, y, z, m, tn) : csfit( w, x, y, z, m);
 }
 
+/*
 const double mc2e = 511000.; // eV
 const double Imean = 173.; // eV
 
@@ -174,6 +175,7 @@ correction(double beta)
     double res = (::log(k) - beta * beta) / (beta * beta);
     return res;
 }
+*/
 
 const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.955349248, 1.025628856 };
 
@@ -483,16 +485,25 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
     const SignalArray& back = background_signals;
 
-    double& beta1 = charge_beta[CARBON_Z - 1];
-    double corr1 = correction(beta1);
-
     double* pp[CHANNELS] = { p1, p2, p3, p4 };
     double* yy[CHANNELS] = { y1, y2, y3, y4 };
+
+    ChargeSignalMap::const_iterator iter = charge_counts_signals.begin();
+    const SignalPair& mip_charge = iter->second;
+
+    double signal = mip_charge.first;
+    double beta = charge_beta[0];
+    double kpower = 1 / k;
 
     for ( const CountsArray& array : list) {
         ChannelsArray values;
 
         std::copy( array.begin(), array.end(), values.begin());
+
+        d.channels[0]->Fill(array[0]);
+        d.channels[1]->Fill(array[1]);
+        d.channels[2]->Fill(array[2]);
+        d.channels[3]->Fill(array[3]);
 
         bool skip = false;
         if (!background_flag) {
@@ -507,7 +518,6 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
             skip = false;
             for ( int i = 0; i < CHANNELS; ++i) {
-                d.channels[i]->Fill(array[i]);
 //                values[i] = linear_fit[0] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
 //                values[i] *= channel_amp[i];
                 values[i] = channel_amp[i] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
@@ -523,7 +533,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
         if (!background_flag) {
 
             ChannelsArray charge;
-            int z = counts_to_charge( values, charge, corr1);
+            int z = counts_to_charge( values, charge, signal, beta, kpower);
 
 
             ChannelsArray rank(values);
@@ -697,36 +707,33 @@ Parameters::save(QSettings *set)
     set->setValue( "tension-parameter", tension_parameter);
 }
 
-int
-Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charges, double mip_corr) const
+void
+Parameters::recalculate_charge_fit(int charge)
 {
-    ChargeSignalMap::const_iterator iter = charge_counts_signals.begin();
-    const SignalPair& charge1 = iter->second;
-//    const SignalArray& ref_back = reference_counts_signals[0.0];
-//    SignalArray& back = background_signals;
+    const SignalPair& mip = charge_counts_signals[1];
+    const SignalPair& charge_signal = charge_counts_signals[charge];
+    double beta = charge_beta[0];
+    k = log(charge_signal.first / (mip.first * beta * beta)) / log(charge);
+}
 
+int
+Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charges,
+    double signal, double beta, double power) const
+{
     int charge_detect = 0;
 
     for ( int i = 0; i < CHANNELS; ++i) {
         if (values[i] > 0.) {
+            charges[i] = pow( values[i] / (signal * beta * beta), power);
 //            charges[i] = pow( values[i] / (charge1.first * 0.5637), 1.0 / 2.33745);
-            charges[i] = sqrt(values[i] / charge1.first);
+//            charges[i] = sqrt(values[i] / charge1.first);
             charge_detect++;
         }
         else
             charges[i] = -1.0;
     }
 
-    int res = (charge_detect >= CHANNELS - 2) ? majority_scheme(charges) : -1;
-
-    if (res > 0) {
-        double beta = charge_beta[res - 1];
-        double corr = correction(beta);
-        double k = sqrt(mip_corr / corr);
-        std::for_each( charges.begin(), charges.end(), [k](double& ccharge){ ccharge *= k; });
-
-        res = majority_scheme(charges);
-    }
+    int res = (charge_detect >= CHANNELS - 1) ? majority_scheme(charges) : -1;
 
     return res;
 }
@@ -747,11 +754,11 @@ Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
 //                big = false;
         }
 
-//        bool border = fabs(delta[0]) + fabs(delta[CHANNELS - 1]) <= 1.0;
+        bool border = fabs(delta[0]) + fabs(delta[CHANNELS - 1]) <= 1.0;
 
         r = sqrt(r / (CHANNELS - 1));
 
-        if (/*border && */r <= charge_radius[i - 1]) {
+        if (border && r <= charge_radius[i - 1]) {
             pos_z = i;
             break;
         }

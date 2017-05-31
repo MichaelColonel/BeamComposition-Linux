@@ -180,8 +180,8 @@ SignalValueDelegate::parse_text(const QString& str)
 QString
 SignalValueDelegate::form_text(const SignalPair& p)
 {
-    QString m(tr("%1").arg( p.first, 4, 'f', 1));
-    QString s(tr("%1").arg( p.second, 4, 'f', 1));
+    QString m(tr("%1").arg( p.first, 4, 'f', 2));
+    QString s(tr("%1").arg( p.second, 4, 'f', 2));
 
     return QString(tr("%1 %2 %3").arg(m).arg(QChar(0xB1)).arg(s));
 }

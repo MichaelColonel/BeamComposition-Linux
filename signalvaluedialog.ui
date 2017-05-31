@@ -60,9 +60,6 @@
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
-     <property name="decimals">
-      <number>1</number>
-     </property>
      <property name="maximum">
       <double>4095.000000000000000</double>
      </property>
@@ -88,9 +85,6 @@
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="decimals">
-      <number>1</number>
      </property>
      <property name="maximum">
       <double>4095.000000000000000</double>

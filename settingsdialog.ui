@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>505</width>
-    <height>638</height>
+    <width>640</width>
+    <height>623</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -328,7 +328,7 @@
              </sizepolicy>
             </property>
             <property name="selectionMode">
-             <enum>QAbstractItemView::NoSelection</enum>
+             <enum>QAbstractItemView::MultiSelection</enum>
             </property>
             <property name="rowCount">
              <number>6</number>

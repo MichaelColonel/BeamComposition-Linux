@@ -49,7 +49,8 @@ private slots:
     void signalCountsCellClicked( int, int);
     void signalCountsCellChanged( int, int);
     void chargeCountsCellChanged( int, int);
-    void signalCountsRowSelected(int);
+    void signalCountsRowSelected(int); // Reference signal, Channels counts matrix
+    void chargeSignalRowSelected(int); // Charge, Reference signal matrix
     void signalCountsDeleteRowClicked();
     void signalCountsAddRowBelowClicked();
     void signalCountsAddRowAboveClicked();

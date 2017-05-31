@@ -430,34 +430,11 @@ SettingsDialog::applyChanges()
     }
 
     // parameters for channel correlation
-    Hist1Parameters& c1 = hist1[0];
-    Hist1Parameters& c2 = hist1[1];
-    Hist1Parameters& c3 = hist1[2];
-    Hist1Parameters& c4 = hist1[3];
-
-    Hist2Parameters& c12 = hist2[0];
-    c12.setBinsX(c1);
-    c12.setBinsY(c2);
-
-    Hist2Parameters& c23 = hist2[1];
-    c23.setBinsX(c2);
-    c23.setBinsY(c3);
-
-    Hist2Parameters& c34 = hist2[2];
-    c34.setBinsX(c3);
-    c34.setBinsY(c4);
-
-    Hist2Parameters& c14 = hist2[3];
-    c14.setBinsX(c1);
-    c14.setBinsY(c4);
-
-    Hist2Parameters& c13 = hist2[4];
-    c13.setBinsX(c1);
-    c13.setBinsY(c3);
-
-    Hist2Parameters& c24 = hist2[5];
-    c24.setBinsX(c2);
-    c24.setBinsY(c4);
+    for ( int i = 0; i < 6; ++i) {
+        Hist2Parameters& cc = hist2[i];
+        cc.setBinsX(fitted);
+        cc.setBinsY(fitted);
+    }
 
     // parameters for charge correlation
     Hist1Parameters& z = histograms[6];

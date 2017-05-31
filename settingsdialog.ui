@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>595</width>
-    <height>564</height>
+    <width>505</width>
+    <height>638</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -319,26 +319,6 @@
           <string>Charge Reference Matrix</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="2" column="0">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="2" column="1">
-           <widget class="QPushButton" name="restoreReferenceChargeButton">
-            <property name="text">
-             <string>Restore initial values</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0" colspan="2">
            <widget class="QTableWidget" name="chargeCountsTableWidget">
             <property name="sizePolicy">
@@ -384,7 +364,7 @@
             </column>
             <item row="0" column="0">
              <property name="text">
-              <string>Z = 1</string>
+              <string>Z = 1 (M.I.P.)</string>
              </property>
             </item>
             <item row="1" column="0">
@@ -412,6 +392,26 @@
               <string>Z = 6</string>
              </property>
             </item>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="2" column="1">
+           <widget class="QPushButton" name="restoreReferenceChargeButton">
+            <property name="text">
+             <string>Restore initial values</string>
+            </property>
            </widget>
           </item>
          </layout>

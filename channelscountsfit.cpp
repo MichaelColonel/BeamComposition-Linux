@@ -507,6 +507,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
             skip = false;
             for ( int i = 0; i < CHANNELS; ++i) {
+                d.channels[i]->Fill(array[i]);
 //                values[i] = linear_fit[0] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
 //                values[i] *= channel_amp[i];
                 values[i] = channel_amp[i] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
@@ -516,10 +517,6 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
             if (skip)
                 continue;
         }
-        d.channels[0]->Fill(values[0]);
-        d.channels[1]->Fill(values[1]);
-        d.channels[2]->Fill(values[2]);
-        d.channels[3]->Fill(values[3]);
 
         // if it's not a background measurement and signals in channels
         // are higher than background then calculate the charge

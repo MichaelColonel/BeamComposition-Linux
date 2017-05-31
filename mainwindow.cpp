@@ -1663,22 +1663,10 @@ MainWindow::updateDiagrams(bool background_data)
     Diagrams& d = diagrams;
 
     if (background_data) {
-
         for ( int i = 0; i < CHANNELS; ++i) {
             TH1* hist = d.channels[i];
             hist->SetBins( 500, 0., 4095.);
         }
-/*
-        d.fitted->SetBins( 500, 0., 4095.);
-        d.linfit->SetBins( 500, 0., 4095.);
-        d.z->SetBins( 500, 0., 8.);
-*/
-        d.c12->SetBins( 500, 0., 4095., 500, 0., 4095.);
-        d.c23->SetBins( 500, 0., 4095., 500, 0., 4095.);
-        d.c34->SetBins( 500, 0., 4095., 500, 0., 4095.);
-        d.c13->SetBins( 500, 0., 4095., 500, 0., 4095.);
-        d.c14->SetBins( 500, 0., 4095., 500, 0., 4095.);
-        d.c24->SetBins( 500, 0., 4095., 500, 0., 4095.);
     }
     else {
         TH1* h1 = d.channels[0];
@@ -1707,12 +1695,12 @@ MainWindow::updateDiagrams(bool background_data)
         action.setEnergyRange();
 
         d.z->SetBins( zhp.bins, zhp.min, zhp.max);
-        d.c12->SetBins( c1hp.bins, c1hp.min, c1hp.max, c2hp.bins, c2hp.min, c2hp.max);
-        d.c23->SetBins( c2hp.bins, c2hp.min, c2hp.max, c3hp.bins, c3hp.min, c3hp.max);
-        d.c34->SetBins( c3hp.bins, c3hp.min, c3hp.max, c4hp.bins, c4hp.min, c4hp.max);
-        d.c13->SetBins( c1hp.bins, c1hp.min, c1hp.max, c3hp.bins, c3hp.min, c3hp.max);
-        d.c14->SetBins( c1hp.bins, c1hp.min, c1hp.max, c4hp.bins, c4hp.min, c4hp.max);
-        d.c24->SetBins( c2hp.bins, c2hp.min, c2hp.max, c4hp.bins, c4hp.min, c4hp.max);
+        d.c12->SetBins( fhp.bins, fhp.min, fhp.max, fhp.bins, fhp.min, fhp.max);
+        d.c23->SetBins( fhp.bins, fhp.min, fhp.max, fhp.bins, fhp.min, fhp.max);
+        d.c34->SetBins( fhp.bins, fhp.min, fhp.max, fhp.bins, fhp.min, fhp.max);
+        d.c13->SetBins( fhp.bins, fhp.min, fhp.max, fhp.bins, fhp.min, fhp.max);
+        d.c14->SetBins( fhp.bins, fhp.min, fhp.max, fhp.bins, fhp.min, fhp.max);
+        d.c24->SetBins( fhp.bins, fhp.min, fhp.max, fhp.bins, fhp.min, fhp.max);
         d.z12->SetBins( zhp.bins, zhp.min, zhp.max, zhp.bins, zhp.min, zhp.max);
         d.z23->SetBins( zhp.bins, zhp.min, zhp.max, zhp.bins, zhp.min, zhp.max);
         d.z34->SetBins( zhp.bins, zhp.min, zhp.max, zhp.bins, zhp.min, zhp.max);

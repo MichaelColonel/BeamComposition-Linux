@@ -1792,12 +1792,12 @@ MainWindow::fitChargeDiagram(DiagramType)
     legend->AddEntry( charge, "Data", "lpe");
     legend->AddEntry( fit, TString::Format( "Total fit : %2.1f %%", datapercent));
 
-    const bool* fit_charge = CalibrationFitting::BeamCompositionFit::charge_in_fit();
+//    const bool* fit_charge = CalibrationFitting::BeamCompositionFit::charge_in_fit();
 
     std::map< int, TF1* > charges;
     for ( int i = zmin; i <= zmax; i++) {
-        if (!(fit_charge[i - 1]))
-            continue;
+//        if (!(fit_charge[i - 1]))
+//            continue;
         double p[gparams];
         size_t pos = gparams * (i - zmin);
         for ( int j = 0; j < gparams; ++j)

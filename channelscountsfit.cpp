@@ -336,6 +336,8 @@ Parameters::initiate(QSettings *set)
     }
 
     recalculate();
+    recalculate_charge_fit();
+
 /*
     if (ch > 0 && pos1 != -1 && pos2 != -1) {
         recalculate( ch, pos1, pos2);

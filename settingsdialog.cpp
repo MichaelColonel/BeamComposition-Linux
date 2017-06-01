@@ -171,7 +171,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     }
 
     // fit charge
-    /*
+/*
     const bool* fit_charge = CalibrationFitting::BeamCompositionFit::charge_in_fit();
     for ( int i = 0; i < CARBON_Z; ++i) {
 //        QString text = (fit_charge[i]) ? tr("true") : tr("false");

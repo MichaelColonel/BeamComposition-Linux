@@ -188,7 +188,8 @@ SharedParameters Parameters::instance_;
 
 Parameters::Parameters(QSettings* settings)
     :
-      k(0.5)
+    k(0.5),
+    reference_charge(CARBON_Z)
 {
     std::fill( charge_radius, charge_radius + CARBON_Z, 1.0);
     std::fill( charge_beta, charge_beta + CARBON_Z, 0.739);
@@ -335,9 +336,6 @@ Parameters::initiate(QSettings *set)
         set->endGroup();
     }
 
-    recalculate();
-    recalculate_charge_fit();
-
 /*
     if (ch > 0 && pos1 != -1 && pos2 != -1) {
         recalculate( ch, pos1, pos2);
@@ -353,7 +351,14 @@ Parameters::initiate(QSettings *set)
 */
     // tension
     tension_parameter = set->value( "tension-parameter", 0.0).toDouble();
+
+    // reference charge
+    reference_charge = set->value( "reference-charge", CARBON_Z).toInt();
+
+    recalculate();
+    recalculate_charge_fit(reference_charge);
 }
+
 /*
 void
 Parameters::recalculate(int ref_channel, int fit_pos_start, int fit_pos_stop)
@@ -706,6 +711,7 @@ Parameters::save(QSettings *set)
     set->endGroup();
 */
     // tension and power
+    set->setValue( "reference-charge", reference_charge);
     set->setValue( "tension-parameter", tension_parameter);
 }
 

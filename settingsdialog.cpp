@@ -608,6 +608,7 @@ void
 SettingsDialog::chargeSignalRowSelected(int r)
 {
     qDebug() << "Charge signal row: " << r;
+    params->reference_charge_parameter() = r + 1;
 }
 
 void

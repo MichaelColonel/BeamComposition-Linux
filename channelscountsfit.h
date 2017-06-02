@@ -51,6 +51,7 @@ public:
 //    TH1* rebin( int channel, double min, double max, int bins, Diagrams& diagrams);
 //    double* refit_channel( int i, int bins, double min, double max) const;
 //    const double* fit_parameters() const { return linear_fit; }
+    int& reference_charge_parameter() { return reference_charge; }
     double* charge_radius_parameter() { return charge_radius; }
     double* charge_beta_parameter() { return charge_beta; }
 //    void set_linear_fit_parameters( double a, double b) {
@@ -74,6 +75,7 @@ protected:
 //    int reference_channel;
 //    int fit_points[2];
     double k;
+    int reference_charge;
     double charge_radius[CARBON_Z];
     double charge_beta[CARBON_Z];
 

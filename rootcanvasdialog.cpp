@@ -44,13 +44,13 @@ RootCanvasDialog::RootCanvasDialog( QWidget* parent, DiagramType dtype)
         for ( int i = 0; i < CHANNELS; ++i) {
             TPad* p = dynamic_cast<TPad*>(canvas->GetPad(i + 1));
             canvas->cd(i + 1);
-            p->SetGrid();
+//            p->SetGrid();
             pad[i] = p;
         }
     }
     else {
         TPad* p = new TPad( "pad", "Grid", 0., 0., 1., 1.);
-        p->SetGrid();
+//        p->SetGrid();
         p->Draw();
         pad[0] = p;
     }

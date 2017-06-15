@@ -545,8 +545,8 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
             ChannelsArray rank(values);
             std::sort( rank.begin(), rank.end());
+
             for ( int i = 0; i < CHANNELS; ++i) {
-                d.fit->Fill(values[i]);
                 d.rank[i]->Fill(rank[i]);
                 if (values[i] > 0)
                     d.sqrt_fit->Fill(sqrt(values[i]));
@@ -554,6 +554,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
             if (z > 0) {
 
+                d.fit->Fill(values[0]);
                 d.z12->Fill( charge[0], charge[1]);
                 d.z23->Fill( charge[1], charge[2]);
                 d.z34->Fill( charge[2], charge[3]);
@@ -750,6 +751,37 @@ int
 Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
 {
     int pos_z = -1;
+/*
+    for ( int i = 1; i <= CARBON_Z; ++i) {
+        double rms = 0.;
+        for ( int j = 0; j < CHANNELS; ++j) {
+            rms += (z[j] - double(i)) * (z[j] - double(i));
+        }
+        rms /= CHANNELS;
+        rms = sqrt(rms);
+        if (fabs(rms) < 0.2) {
+            pos_z = i;
+            break;
+        }
+        else {
+            ChannelsArray tmp = z;
+            int position_max = std::max_element( tmp.begin(), tmp.end()) - tmp.begin();
+
+            rms = 0.;
+            for ( int j = 0; j < CHANNELS; ++j) {
+                if (j != position_max)
+                    rms += (z[j] - double(i)) * (z[j] - double(i));
+            }
+            rms /= CHANNELS - 1;
+            rms = sqrt(rms);
+
+            if (fabs(rms) < 0.2) {
+                pos_z = i;
+                break;
+            }
+        }
+    }
+*/
     for ( int i = 1; i <= CARBON_Z; ++i) {
         double r = 0.0;
         ChannelsArray delta;
@@ -762,19 +794,19 @@ Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
 //                big = false;
         }
 
-        bool border = fabs(delta[0]) + fabs(delta[CHANNELS - 1]) <= 1.0;
+//        bool border = fabs(delta[0]) + fabs(delta[CHANNELS - 1]) <= 1.0;
 
         r = sqrt(r / (CHANNELS - 1));
 
-        if (border && r <= charge_radius[i - 1]) {
+        if (/*border && */r <= charge_radius[i - 1]) {
             pos_z = i;
             break;
         }
-/*        else if (i == CARBON_Z && big) {
-            pos_z = i;
-            break;
-        }
-*/    }
+//        else if (i == CARBON_Z && big) {
+//            pos_z = i;
+//            break;
+//        }
+    }
 
     return pos_z;
 }

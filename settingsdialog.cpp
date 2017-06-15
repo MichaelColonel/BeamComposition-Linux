@@ -714,13 +714,13 @@ SettingsDialog::showGraphClicked()
 //            y_[j] = sp.first - back[i].first;
             y_[j] = sp.first - ref_back.first;
 //            y_[j] += back[0].first;
-            yerr_[j] = 3. * sp.second;
+            yerr_[j] = sp.second;
         }
         err[i] = new TGraphErrors( rows, x_, y_, xerr_, yerr_);
         err[i]->SetLineColor(colors[i]);
         err[i]->SetLineWidth(2);
         err[i]->SetMarkerColor(colors[i]);
-        err[i]->SetMarkerStyle(21);
+//        err[i]->SetMarkerStyle(21);
         mg->Add( err[i], "lp");
     }
 

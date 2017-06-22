@@ -179,6 +179,9 @@ correction(double beta)
 
 const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.955349248, 1.025628856 };
 
+//size_t accepted[6] = {};
+//size_t rejected[6] = {};
+
 } // namespace
 
 
@@ -541,8 +544,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
             ChannelsArray charge;
             int z = counts_to_charge( values, charge, signal, beta, kpower);
-
-
+/*
             ChannelsArray rank(values);
             std::sort( rank.begin(), rank.end());
 
@@ -551,10 +553,9 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
                 if (values[i] > 0)
                     d.sqrt_fit->Fill(sqrt(values[i]));
             }
+*/
 
             if (z > 0) {
-
-                d.fit->Fill(values[0]);
                 d.z12->Fill( charge[0], charge[1]);
                 d.z23->Fill( charge[1], charge[2]);
                 d.z34->Fill( charge[2], charge[3]);
@@ -568,6 +569,10 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
                 d.c14->Fill( values[0], values[3]);
                 d.c13->Fill( values[0], values[2]);
                 d.c24->Fill( values[1], values[3]);
+
+//                accepted[z - 1]++;
+                d.sqrt_fit->Fill(charge[0] * charge[0]);
+                d.rank[0]->Fill(values[0]);
 
                 charge_events[z - 1]++; // increase a number of proccessed events for particular charge
                 events_processed++; // increase a number of all proccessed events
@@ -608,11 +613,21 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 */
             }
             else {
-
+                d.rank[1]->Fill(values[0]);
             }
         }
     }
+/*
+    std::cout << "accepted ";
+    for ( int i = 0; i < CARBON_Z; ++i)
+        std::cout << accepted[i] << " ";
+    std::cout << std::endl;
 
+    std::cout << "rejected ";
+    for ( int i = 0; i < CARBON_Z; ++i)
+        std::cout << rejected[i] << " ";
+    std::cout << std::endl;
+*/
     return RunInfo( events_counted, events_processed, charge_events);
 }
 
@@ -795,7 +810,29 @@ Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
         }
 
 //        bool border = fabs(delta[0]) + fabs(delta[CHANNELS - 1]) <= 1.0;
+/*
+        bool b1_4 = fabs(delta[0]) <= 0.5 && fabs(delta[1]) <= 0.5 && fabs(delta[2]) <= 0.5 && fabs(delta[3]) <= 0.5;
+        bool b12 = fabs(delta[0]) <= 0.5 && fabs(delta[1]) <= 0.5;
+        bool b23 = fabs(delta[1]) <= 0.5 && fabs(delta[2]) <= 0.5;
+        bool b34 = fabs(delta[2]) <= 0.5 && fabs(delta[3]) <= 0.5;
+        bool b1_3 = fabs(delta[0]) <= 0.5 && fabs(delta[1]) <= 0.5 && fabs(delta[2]) <= 0.5;
+        bool b2_4 = fabs(delta[1]) <= 0.5 && fabs(delta[2]) <= 0.5 && fabs(delta[3]) <= 0.5;
 
+        if (i == 6 && b1_4)
+            accepted[0]++;
+        else
+            rejected[0]++;
+
+        if (i == 6 && (b12 || b23 || b34) && !b1_4 && !b1_3 && !b2_4)
+            accepted[1]++;
+        else
+            rejected[1]++;
+
+        if (i == 6 && (b1_3 || b2_4) && !b1_4)
+            accepted[2]++;
+        else
+            rejected[2]++;
+*/
         r = sqrt(r / (CHANNELS - 1));
 
         if (/*border && */r <= charge_radius[i - 1]) {

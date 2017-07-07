@@ -544,18 +544,26 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
             ChannelsArray charge;
             int z = counts_to_charge( values, charge, signal, beta, kpower);
-/*
+
             ChannelsArray rank(values);
             std::sort( rank.begin(), rank.end());
+//            double mean = std::accumulate( values.begin(), values.end(), 0.) / CHANNELS;
+            double median = (rank[1] + rank[2]) / 2.;
+            d.fit->Fill(median);
+            if (median >= 0.)
+                d.sqrt_fit->Fill(sqrt(median));
 
             for ( int i = 0; i < CHANNELS; ++i) {
-                d.rank[i]->Fill(rank[i]);
-                if (values[i] > 0)
-                    d.sqrt_fit->Fill(sqrt(values[i]));
+                d.rank[i]->Fill(values[i]);
+//                if (values[i] > 0)
+//                    d.sqrt_fit->Fill(sqrt(values[i]));
             }
-*/
 
             if (z > 0) {
+//                accepted[z - 1]++;
+//                d.sqrt_fit->Fill(charge[0] * charge[0]);
+//                d.rank[0]->Fill(values[0]);
+
                 d.z12->Fill( charge[0], charge[1]);
                 d.z23->Fill( charge[1], charge[2]);
                 d.z34->Fill( charge[2], charge[3]);
@@ -569,10 +577,6 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
                 d.c14->Fill( values[0], values[3]);
                 d.c13->Fill( values[0], values[2]);
                 d.c24->Fill( values[1], values[3]);
-
-//                accepted[z - 1]++;
-                d.sqrt_fit->Fill(charge[0] * charge[0]);
-                d.rank[0]->Fill(values[0]);
 
                 charge_events[z - 1]++; // increase a number of proccessed events for particular charge
                 events_processed++; // increase a number of all proccessed events
@@ -592,17 +596,17 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
                 d.z->Fill(wcharge);
 */
 
-//                ChannelsArray tmp = charge;
+                ChannelsArray tmp = charge;
 //                std::sort( tmp.begin(), tmp.end());
 //                d.z->Fill(tmp[1]); // rank 2
 //                ChannelsArray tmp = charge;
 //                std::for_each( tmp.begin(), tmp.end(),
 //                                [z](double ccharge) -> double { return fabs(ccharge - z); });
 //                std::copy( charge.begin(), charge.end(), tmp.begin());
-//                std::sort( tmp.begin(), tmp.end());
-//                d.z->Fill(tmp[1]); // rank 2
-                double charge_mean = std::accumulate( charge.begin(), charge.end(), 0.) / CHANNELS;
-                d.z->Fill(charge_mean);
+                std::sort( tmp.begin(), tmp.end());
+                d.z->Fill((tmp[1] + tmp[2]) / 2.); // rank 2
+//                double charge_mean = std::accumulate( charge.begin(), charge.end(), 0.) / CHANNELS;
+//                d.z->Fill(charge_mean);
 /*
                 int position_max = std::max_element( tmp.begin(), tmp.end()) - tmp.begin();
 
@@ -613,7 +617,6 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 */
             }
             else {
-                d.rank[1]->Fill(values[0]);
             }
         }
     }

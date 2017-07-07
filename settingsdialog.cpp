@@ -744,10 +744,10 @@ SettingsDialog::showGraphClicked()
 //    qDebug() << QString(tr("Fit line equation: %1*x+%2").arg(lfit[0]).arg(lfit[1]));
 
     TLegend* leg = new TLegend( 0.15, 0.5, 0.35, 0.85, "Channels");
-    leg->AddEntry( err[0], "Channel-1", "l");
-    leg->AddEntry( err[1], "Channel-2", "l");
-    leg->AddEntry( err[2], "Channel-3", "l");
-    leg->AddEntry( err[3], "Channel-4", "l");
+    leg->AddEntry( err[0], "Channel-1", "LP");
+    leg->AddEntry( err[1], "Channel-2", "LP");
+    leg->AddEntry( err[2], "Channel-3", "LP");
+    leg->AddEntry( err[3], "Channel-4", "LP");
 //    leg->AddEntry( fline, "Fit line", "l");
 
     // draw multigraph in the canvas pad

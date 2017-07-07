@@ -1810,13 +1810,13 @@ MainWindow::fitChargeDiagram(DiagramType)
         ft->SetFillColor(ccolors[i]);
         ft->SetFillStyle(3001);
         ft->SetLineWidth(1);
-        ft->SetNpx(200);
+        ft->SetNpx(400);
         ft->Draw("same");
 
-        double parint = ft->Integral( double(i) - 1.0, double(i) + 1.0);
-        double percent = floor(1000.0 * parint / dataint) / 10.0;
+        double parint = ft->Integral( double(i) - .5, double(i) + .5);
+        double percent = 100.0 * parint / dataint;//floor(10000.0 * parint / dataint) / 100.0;
 
-        legend->AddEntry( ft, TString::Format( "Z = %d : %2.1f %%", i, percent), "l");
+        legend->AddEntry( ft, TString::Format( "Z = %d : %2.2f %%", i, percent), "l");
     }
     fit->Draw("same");
     legend->Draw();

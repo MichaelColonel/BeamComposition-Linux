@@ -75,7 +75,7 @@ RootCanvasDialog::drawDiagram(T* diagram)
         diagram->Draw();
     }
     else if (typeid(T) == typeid(TH2)) {
-        diagram->Draw("colz");
+        diagram->Draw("COLZ");
     }
 /*
     if (type == HIST_FIT) {

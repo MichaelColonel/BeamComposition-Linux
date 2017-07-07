@@ -172,8 +172,8 @@ BeamCompositionFit::fit( BeamCompositionFit& fbeam, TH1* hist,
     fit->SetLineColor(kBlack);
     fit->SetLineStyle(1);
     for ( unsigned int i = zmin; i <= zmax; ++i) {
-        if (!(fit_it[i - 1]))
-            continue;
+//        if (!(fit_it[i - 1]))
+//            continue;
         size_t pos = gparams * (i - zmin);
         for ( int j = 0; j < gparams; ++j)
             fit->SetParName( pos + j, fit_parameters_names[gparams * (i - 1) + j]);
@@ -183,7 +183,7 @@ BeamCompositionFit::fit( BeamCompositionFit& fbeam, TH1* hist,
 //	ft->FixParameter(17);
     fit->SetParameters(par);
     fit->SetParErrors(epar);
-    fit->SetNpx(200);
+    fit->SetNpx(400);
 //    hist->Fit( "fit", "+rob=0.75", "ep");
     hist->Fit( "fit", "RB0", "ep");
 

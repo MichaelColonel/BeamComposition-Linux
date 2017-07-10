@@ -596,7 +596,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
                 d.z->Fill(wcharge);
 */
 
-                ChannelsArray tmp = charge;
+                ChannelsArray tmp(charge);
 //                std::sort( tmp.begin(), tmp.end());
 //                d.z->Fill(tmp[1]); // rank 2
 //                ChannelsArray tmp = charge;

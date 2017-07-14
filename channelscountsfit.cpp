@@ -753,7 +753,7 @@ Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charge
         if (values[i] > 0.) {
             charges[i] = pow( values[i] / (signal * beta * beta), power);
 //            charges[i] = pow( values[i] / (charge1.first * 0.5637), 1.0 / 2.33745);
-//            charges[i] = sqrt(values[i] / charge1.first);
+//            charges[i] = sqrt(values[i] / signal);
             charge_detect++;
         }
         else

@@ -162,7 +162,6 @@ splfit( double w, double *x, double *y, double *z, int m, double tn)
 {
     return (tn != 0.) ? tnsfit( w, x, y, z, m, tn) : csfit( w, x, y, z, m);
 }
-
 /*
 const double mc2e = 511000.; // eV
 const double Imean = 173.; // eV
@@ -176,6 +175,31 @@ correction(double beta)
     return res;
 }
 */
+
+const double mc2e = 510998.91844E-09; // GeV
+const double Imean = 173.0E-09; // GeV
+
+const double projmass[CARBON_Z] = { 0.93827231, 3.727, 6.534, 8.393, 10.25, 11.17 }; // GeV
+
+double tmax( double beta2, double gamma, double gamma2, double prom)
+{
+    double t = mc2e / prom;
+    double part2 = 1. + (2. * gamma * t) + t * t;
+    double part1 = 2. * mc2e * beta2 * gamma2;
+    return (part1 / part2);
+}
+
+double
+correction( double beta, double projm)
+{
+    double beta2 = beta * beta;
+    double gamma2 = 1. / (1. - beta2);
+    double gamma = sqrt(gamma2);
+    double tm = tmax( beta2, gamma, gamma2, projm);
+    double k = (2. * mc2e * beta2 * gamma2 * tm) / (Imean * Imean);
+    double res = (0.5 * ::log(k) - beta2) / (beta2);
+    return res;
+}
 
 const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.955349248, 1.025628856 };
 
@@ -192,6 +216,7 @@ SharedParameters Parameters::instance_;
 Parameters::Parameters(QSettings* settings)
     :
     k(0.5),
+    K(1.0),
     reference_charge(CARBON_Z)
 {
     std::fill( charge_radius, charge_radius + CARBON_Z, 1.0);
@@ -739,8 +764,13 @@ Parameters::recalculate_charge_fit(int charge)
 {
     const SignalPair& mip = charge_counts_signals[1];
     const SignalPair& charge_signal = charge_counts_signals[charge];
-    double beta = charge_beta[0];
-    k = log(charge_signal.first / (mip.first * beta * beta)) / log(charge);
+    double projm_mip = projmass[0];
+    double projm_charge = projmass[charge - 1];
+    double beta_mip = charge_beta[0];
+    double beta_charge = charge_beta[charge - 1];
+
+    K = correction( beta_charge, projm_charge) / correction( beta_mip, projm_mip);
+    k = log(charge_signal.first / (mip.first * beta_mip * beta_mip * K)) / log(charge);
 }
 
 int
@@ -751,7 +781,7 @@ Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charge
 
     for ( int i = 0; i < CHANNELS; ++i) {
         if (values[i] > 0.) {
-            charges[i] = pow( values[i] / (signal * beta * beta), power);
+            charges[i] = pow( values[i] / (signal * beta * beta * K), power);
 //            charges[i] = pow( values[i] / (charge1.first * 0.5637), 1.0 / 2.33745);
 //            charges[i] = sqrt(values[i] / signal);
             charge_detect++;
@@ -836,7 +866,7 @@ Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
         else
             rejected[2]++;
 */
-        r = sqrt(r / (CHANNELS - 1));
+        r = sqrt(r / double(CHANNELS));
 
         if (/*border && */r <= charge_radius[i - 1]) {
             pos_z = i;

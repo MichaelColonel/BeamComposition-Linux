@@ -75,6 +75,7 @@ protected:
 //    int reference_channel;
 //    int fit_points[2];
     double k;
+    double K;
     int reference_charge;
     double charge_radius[CARBON_Z];
     double charge_beta[CARBON_Z];

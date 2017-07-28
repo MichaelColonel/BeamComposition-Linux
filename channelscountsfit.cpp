@@ -556,6 +556,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 //                values[i] = linear_fit[0] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
 //                values[i] *= channel_amp[i];
                 values[i] = channel_amp[i] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
+//                values[i] = splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
                 if (values[i] <= 0.)
                     skip = true;
             }
@@ -572,11 +573,11 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
             ChannelsArray rank(values);
             std::sort( rank.begin(), rank.end());
-//            double mean = std::accumulate( values.begin(), values.end(), 0.) / CHANNELS;
-            double median = (rank[1] + rank[2]) / 2.;
-            d.fit->Fill(median);
-            if (median >= 0.)
-                d.sqrt_fit->Fill(sqrt(median));
+            double mean = std::accumulate( values.begin(), values.end(), 0.) / CHANNELS;
+//            double median = (rank[1] + rank[2]) / 2.;
+            d.fit->Fill(mean);
+            if (mean >= 0.)
+                d.sqrt_fit->Fill(sqrt(mean));
 
             for ( int i = 0; i < CHANNELS; ++i) {
                 d.rank[i]->Fill(values[i]);
@@ -771,6 +772,7 @@ Parameters::recalculate_charge_fit(int charge)
 
     K = correction( beta_charge, projm_charge) / correction( beta_mip, projm_mip);
     k = log(charge_signal.first / (mip.first * beta_mip * beta_mip * K)) / log(charge);
+//    qDebug() << "K: " << K << " k: " << k;
 }
 
 int
@@ -779,9 +781,12 @@ Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charge
 {
     int charge_detect = 0;
 
+    double beta_charge = charge_beta[5];
+
     for ( int i = 0; i < CHANNELS; ++i) {
         if (values[i] > 0.) {
-            charges[i] = pow( values[i] / (signal * beta * beta * K), power);
+//            charges[i] = pow( values[i] / (signal * beta * beta * K), power);
+            charges[i] = 1.0971428 * sqrt((values[i] * beta_charge * beta_charge) / (signal * beta * beta * K));
 //            charges[i] = pow( values[i] / (charge1.first * 0.5637), 1.0 / 2.33745);
 //            charges[i] = sqrt(values[i] / signal);
             charge_detect++;

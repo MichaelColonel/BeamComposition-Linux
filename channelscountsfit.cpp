@@ -175,7 +175,7 @@ correction(double beta)
     return res;
 }
 */
-
+/*
 const double mc2e = 510998.91844E-09; // GeV
 const double Imean = 173.0E-09; // GeV
 
@@ -198,6 +198,70 @@ correction( double beta, double projm)
     double tm = tmax( beta2, gamma, gamma2, projm);
     double k = (2. * mc2e * beta2 * gamma2 * tm) / (Imean * Imean);
     double res = (0.5 * ::log(k) - beta2) / (beta2);
+    return res;
+}
+*/
+
+const double mc2e = 510998.91844E-09; // GeV
+const double Imean = 173.0E-09; // GeV
+const double hwp = 31.05E-09; // GeV
+
+const double projmass[6] = { 0.93827231, 3.727, 6.534, 8.393, 10.25, 11.17 }; // GeV
+
+const double cmean = 2. * log(173. / 31.05) + 1.;
+const double k = 3.;
+const double x0 = 3.;
+
+double tmax( double beta2, double gamma_, double gamma2, double prom)
+{
+    double t = mc2e / prom;
+    double part2 = 1. + (2. * gamma_ * t) + t * t;
+    double part1 = 2. * mc2e * beta2 * gamma2;
+    return (part1 / part2);
+}
+
+double
+xparam( double beta, double gamma)
+{
+    return log10(beta * gamma);
+}
+
+double
+x1()
+{
+    return (cmean < 5.215) ? 0.2 : (0.325 * cmean) - 1.5;
+}
+
+double
+delta( double x_, double x0_, double x1_, double k_) {
+    double a = (cmean - 2. * log(10.) * x0_) / pow( (x1_ - x0_), 3.);
+
+    if (x_ >= x1_) {
+        return (2. * log(10.) * x_ - cmean);
+    }
+    else if ((x_ >= x0_) && (x_ < x1_)) {
+        return (2. * log(10.) * x_ - cmean + a * pow((x1_ - x_), k_));
+    }
+    else if (x_ < x0_) {
+        return 0.0;
+    }
+}
+
+double
+correction( double beta, double projm)
+{
+    double beta2 = beta * beta;
+    double gamma2 = 1. / (1. - beta2);
+    double gamma = sqrt(gamma2);
+
+    double tm = tmax( beta2, gamma, gamma2, projm);
+    double k = (2. * mc2e * beta2 * gamma2 * tm) / (Imean * Imean);
+//    double res = (0.5 * ::log(k) - beta2) / (beta2);
+    double x_ = xparam( beta, gamma);
+    double x1_ = x1();
+    double delta_ = delta( x_, x0, x1_, k);
+    double p = (tm * tm) / (gamma * projm * gamma * projm);
+    double res = (0.5 * ::log(k) - beta2 - delta_ / 2. + p / 8.) / (beta2);
     return res;
 }
 
@@ -765,7 +829,7 @@ Parameters::recalculate_charge_fit(int charge)
 {
     const SignalPair& mip = charge_counts_signals[1];
     const SignalPair& charge_signal = charge_counts_signals[charge];
-    double projm_mip = projmass[0];
+    double projm_mip = 0.13957018;//projmass[0];
     double projm_charge = projmass[charge - 1];
     double beta_mip = charge_beta[0];
     double beta_charge = charge_beta[charge - 1];
@@ -786,7 +850,8 @@ Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charge
     for ( int i = 0; i < CHANNELS; ++i) {
         if (values[i] > 0.) {
 //            charges[i] = pow( values[i] / (signal * beta * beta * K), power);
-            charges[i] = 1.0971428 * sqrt((values[i] * beta_charge * beta_charge) / (signal * beta * beta * K));
+            charges[i] = sqrt((values[i] * beta_charge * beta_charge) / (signal * beta * beta * K));
+//            charges[i] = 1.1771428 * sqrt((values[i] * beta_charge * beta_charge) / (signal * beta * beta * K));
 //            charges[i] = pow( values[i] / (charge1.first * 0.5637), 1.0 / 2.33745);
 //            charges[i] = sqrt(values[i] / signal);
             charge_detect++;

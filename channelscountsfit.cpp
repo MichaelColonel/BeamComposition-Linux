@@ -649,24 +649,25 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 //                    d.sqrt_fit->Fill(sqrt(values[i]));
             }
 
+            d.z12->Fill( charge[0], charge[1]);
+            d.z23->Fill( charge[1], charge[2]);
+            d.z34->Fill( charge[2], charge[3]);
+            d.z14->Fill( charge[0], charge[3]);
+            d.z13->Fill( charge[0], charge[2]);
+            d.z24->Fill( charge[1], charge[3]);
+
+            d.c12->Fill( values[0], values[1]);
+            d.c23->Fill( values[1], values[2]);
+            d.c34->Fill( values[2], values[3]);
+            d.c14->Fill( values[0], values[3]);
+            d.c13->Fill( values[0], values[2]);
+            d.c24->Fill( values[1], values[3]);
+
             if (z > 0) {
+//                std::transform( charge.begin(), charge.end(), charge.begin(), std::bind1st( std::multiplies<double>(), 1.1371428));
 //                accepted[z - 1]++;
 //                d.sqrt_fit->Fill(charge[0] * charge[0]);
 //                d.rank[0]->Fill(values[0]);
-
-                d.z12->Fill( charge[0], charge[1]);
-                d.z23->Fill( charge[1], charge[2]);
-                d.z34->Fill( charge[2], charge[3]);
-                d.z14->Fill( charge[0], charge[3]);
-                d.z13->Fill( charge[0], charge[2]);
-                d.z24->Fill( charge[1], charge[3]);
-
-                d.c12->Fill( values[0], values[1]);
-                d.c23->Fill( values[1], values[2]);
-                d.c34->Fill( values[2], values[3]);
-                d.c14->Fill( values[0], values[3]);
-                d.c13->Fill( values[0], values[2]);
-                d.c24->Fill( values[1], values[3]);
 
                 charge_events[z - 1]++; // increase a number of proccessed events for particular charge
                 events_processed++; // increase a number of all proccessed events
@@ -836,7 +837,7 @@ Parameters::recalculate_charge_fit(int charge)
 
     K = correction( beta_charge, projm_charge) / correction( beta_mip, projm_mip);
     k = log(charge_signal.first / (mip.first * beta_mip * beta_mip * K)) / log(charge);
-//    qDebug() << "K: " << K << " k: " << k;
+    qDebug() << "K: " << K << " k: " << k;
 }
 
 int
@@ -845,12 +846,12 @@ Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charge
 {
     int charge_detect = 0;
 
-    double beta_charge = charge_beta[5];
+//    double beta_charge = charge_beta[5];
 
     for ( int i = 0; i < CHANNELS; ++i) {
         if (values[i] > 0.) {
-//            charges[i] = pow( values[i] / (signal * beta * beta * K), power);
-            charges[i] = sqrt((values[i] * beta_charge * beta_charge) / (signal * beta * beta * K));
+            charges[i] = pow( values[i] / (signal * beta * beta * K), power);
+//            charges[i] = sqrt((values[i] * beta_charge * beta_charge) / (signal * beta * beta * K));
 //            charges[i] = 1.1771428 * sqrt((values[i] * beta_charge * beta_charge) / (signal * beta * beta * K));
 //            charges[i] = pow( values[i] / (charge1.first * 0.5637), 1.0 / 2.33745);
 //            charges[i] = sqrt(values[i] / signal);

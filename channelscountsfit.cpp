@@ -637,11 +637,11 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
             ChannelsArray rank(values);
             std::sort( rank.begin(), rank.end());
-            double mean = std::accumulate( values.begin(), values.end(), 0.) / CHANNELS;
-//            double median = (rank[1] + rank[2]) / 2.;
-            d.fit->Fill(mean);
-            if (mean >= 0.)
-                d.sqrt_fit->Fill(sqrt(mean));
+//            double mean = std::accumulate( values.begin(), values.end(), 0.) / CHANNELS;
+            double median = (rank[1] + rank[2]) / 2.;
+            d.fit->Fill(median);
+            if (median >= 0.)
+                d.sqrt_fit->Fill(9. * median / (11.73656 * 3.86 * 1.1771428));
 
             for ( int i = 0; i < CHANNELS; ++i) {
                 d.rank[i]->Fill(values[i]);
@@ -837,7 +837,7 @@ Parameters::recalculate_charge_fit(int charge)
 
     K = correction( beta_charge, projm_charge) / correction( beta_mip, projm_mip);
     k = log(charge_signal.first / (mip.first * beta_mip * beta_mip * K)) / log(charge);
-    qDebug() << "K: " << K << " k: " << k;
+//    qDebug() << "K: " << K << " k: " << k;
 }
 
 int

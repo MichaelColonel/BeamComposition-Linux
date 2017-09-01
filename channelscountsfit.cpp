@@ -270,6 +270,9 @@ const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.95534924
 //size_t accepted[6] = {};
 //size_t rejected[6] = {};
 
+const double aa = 6.240625;
+const double bb = -6.3625;
+
 } // namespace
 
 
@@ -638,16 +641,19 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
             ChannelsArray rank(values);
             std::sort( rank.begin(), rank.end());
 //            double mean = std::accumulate( values.begin(), values.end(), 0.) / CHANNELS;
-            double median = (rank[1] + rank[2]) / 2.;
-            d.fit->Fill(median);
-            if (median >= 0.)
-                d.sqrt_fit->Fill(9. * median / (11.73656 * 3.86 * 1.1771428));
+//            double median = (rank[1] + rank[2]) / 2.;
+//            d.fit->Fill(median);
+//            if (median >= 0.)
+//                d.sqrt_fit->Fill(9. * median / (11.73656 * 3.86 * 1.1771428));
 
             for ( int i = 0; i < CHANNELS; ++i) {
                 d.rank[i]->Fill(values[i]);
 //                if (values[i] > 0)
 //                    d.sqrt_fit->Fill(sqrt(values[i]));
             }
+
+            double median = (rank[1] + rank[2]) / 2.;
+            d.fit->Fill(median);
 
             d.z12->Fill( charge[0], charge[1]);
             d.z23->Fill( charge[1], charge[2]);
@@ -664,6 +670,8 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
             d.c24->Fill( values[1], values[3]);
 
             if (z > 0) {
+                if (median >= 0.)
+                    d.sqrt_fit->Fill((median - bb) / aa);// * 1.1771428));
 //                std::transform( charge.begin(), charge.end(), charge.begin(), std::bind1st( std::multiplies<double>(), 1.1371428));
 //                accepted[z - 1]++;
 //                d.sqrt_fit->Fill(charge[0] * charge[0]);
@@ -849,8 +857,11 @@ Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charge
 //    double beta_charge = charge_beta[5];
 
     for ( int i = 0; i < CHANNELS; ++i) {
-        if (values[i] > 0.) {
-            charges[i] = pow( values[i] / (signal * beta * beta * K), power);
+        double vv = (values[i] - bb) / aa;
+        if (vv > 0.0) {
+//        if (values[i] > 0.) {
+            charges[i] = sqrt((values[i] - bb) / aa);
+//            charges[i] = pow( values[i] / (signal * beta * beta * K), power);
 //            charges[i] = sqrt((values[i] * beta_charge * beta_charge) / (signal * beta * beta * K));
 //            charges[i] = 1.1771428 * sqrt((values[i] * beta_charge * beta_charge) / (signal * beta * beta * K));
 //            charges[i] = pow( values[i] / (charge1.first * 0.5637), 1.0 / 2.33745);

@@ -114,13 +114,13 @@ CommandThread::run()
                 }
             }
             else if (!FT_SUCCESS(status)) {
-                qDebug() << "fail device status";
+                qDebug() << "failed device status";
                 emit signalDeviceError();
                 break;
             }
         }
         else if (!FT_SUCCESS(status)) {
-            qDebug() << "fail device status";
+            qDebug() << "failed device status";
             emit signalDeviceError();
             break;
         }

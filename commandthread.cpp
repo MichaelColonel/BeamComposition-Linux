@@ -22,29 +22,28 @@
 #include "commandthread.h"
 
 #define COMMAND_RESPONSE_SIZE 6
+#define BUFFER_SIZE 0x100000
 
 namespace {
 
 QMutex* mutex = new QMutex;
 const char* const Carbon = "Carbon";
-//const char* const Signal = "Signal";
+const char* const Signal = "Signal";
 const char* const Finish = "Finish";
-const char* const Spill0 = "Spill0";
-const char* const Spill1 = "Spill1";
 
 } // namespace
 
 CommandThread::CommandThread(QObject *parent)
     :
-    AcquireThread(parent)
+    AcquireThread(parent),
+    buffer(new char[BUFFER_SIZE])
 {
-    std::vector<char> handshake({ 'I', '0', '0', '0' });
-    commands.push(handshake);
+    commands.push(std::string("I000"));
 }
 
 CommandThread::~CommandThread()
 {
-
+    delete [] buffer;
 }
 
 void
@@ -52,13 +51,14 @@ CommandThread::writeCommand( const char* cmd, size_t cmd_size)
 {
     QMutexLocker locker(mutex);
 
-    std::vector<char> command( cmd, cmd + cmd_size);
-    commands.push(command);
+    commands.push(std::string( cmd, cmd + cmd_size));
 }
 
 void
 CommandThread::run()
 {
+    std::list<char> charlist;
+
     while (true) {
         {
             QMutexLocker locker(mutex);
@@ -67,50 +67,59 @@ CommandThread::run()
 
             if (commands.size()) {
                 DWORD towrite, written;
-                std::vector<char> buffer = commands.front();
+                std::string command_str = commands.front();
                 commands.pop();
-                towrite = buffer.size();
-                LPVOID buf = static_cast<LPVOID>(buffer.data());
-                status = FT_Write( device, buf, towrite, &written);
+                towrite = command_str.size();
+                char* buff = const_cast< char* >(command_str.data());
+                status = FT_Write( device, buff, towrite, &written);
                 if (FT_SUCCESS(status) && written == towrite) {
                     qDebug() << "Data written to the FT2232H Channel-A";
-//                    msleep(100);
                 }
             }
         }
 
         DWORD rx_bytes, nread, toread;
         status = FT_GetQueueStatus( device, &rx_bytes);
-
-        if (FT_SUCCESS(status) && rx_bytes >= COMMAND_RESPONSE_SIZE) {
-            std::vector<char> buffer = std::vector<char>(rx_bytes);
-            LPVOID buf = static_cast<LPVOID>(buffer.data());
+        if (FT_SUCCESS(status) && rx_bytes) {
+            LPVOID buff = static_cast<LPVOID>(buffer);
             toread = rx_bytes;
-            status = FT_Read( device, buf, toread, &nread);
-            if (FT_SUCCESS(status) && nread == toread) {
-                std::string Message( buffer.data(), buffer.size());
+            status = FT_Read( device, buff, toread, &nread);
+            if (FT_SUCCESS(status) && nread) {
+                for ( unsigned int i = 0; i < nread; ++i)
+                    charlist.push_back(buffer[i]);
 
-                if (!Message.compare(std::string(Carbon))) { // Carbon test word
-                    qDebug() << "Carbon message: " << QString::fromStdString(Message);
-                }
-//                else if (!Message.compare(std::string(Signal))) { // if new batch signal -- send signal
-//                    emit signalNewBatch();
-//                    qDebug() << "Batch signal message: " << QString::fromStdString(Message);
-//                }
-                else if (!Message.compare(std::string(Finish))) { // if movement finished -- send signal
-                    emit signalMovementFinished();
-                    qDebug() << "Finish message: " << QString::fromStdString(Message);
-                }
-                else if (!Message.compare(std::string(Spill0))) { // if new batch state 0 signal -- send signal
-                    emit signalNewBatchState(false);
-                    qDebug() << "Batch signal state message: " << QString::fromStdString(Message);
-                }
-                else if (!Message.compare(std::string(Spill1))) { // if new batch state 1 signal -- send signal
-                    emit signalNewBatchState(true);
-                    qDebug() << "Batch signal state message: " << QString::fromStdString(Message);
-                }
-                else { // if command answer -- send msg to status bar
-                    qDebug() << "Command response: " << QString::fromStdString(Message);
+                size_t responses = charlist.size() / COMMAND_RESPONSE_SIZE;
+
+                if (responses) {
+                    std::vector<char> ldata;
+                    ldata.reserve(COMMAND_RESPONSE_SIZE * responses);
+                    for ( size_t i = COMMAND_RESPONSE_SIZE * responses; i != 0; --i) {
+                        ldata.push_back(charlist.front());
+                        charlist.pop_front();
+                    }
+
+                    for ( size_t i = 0; i < responses; ++i) {
+                        size_t pbegin = i * COMMAND_RESPONSE_SIZE;
+                        size_t pend = (i + 1) * COMMAND_RESPONSE_SIZE;
+
+                        std::string Message( ldata.data() + pbegin, ldata.data() + pend);
+
+                        if (!Message.compare(std::string(Carbon))) { // Slow extraction start -- send signal
+                            emit signalNewBatchState(false);
+                            qDebug() << "Batch start message: " << QString::fromStdString(Message);
+                        }
+                        else if (!Message.compare(std::string(Signal))) { // Slow extraction finished -- send signal
+                            emit signalNewBatchState(true);
+                            qDebug() << "Batch finish message: " << QString::fromStdString(Message);
+                        }
+                        else if (!Message.compare(std::string(Finish))) { // Movement finished -- send signal
+                            emit signalMovementFinished();
+                            qDebug() << "Movement finish message: " << QString::fromStdString(Message);
+                        }
+                        else { // if command answer -- send msg to status bar
+                            qDebug() << "Command response: " << QString::fromStdString(Message);
+                        }
+                    }
                 }
             }
             else if (!FT_SUCCESS(status)) {
@@ -124,10 +133,13 @@ CommandThread::run()
             emit signalDeviceError();
             break;
         }
+
     }
 
     // clear queue
     while (!commands.empty()) commands.pop();
+
+    charlist.clear();
 
     stopped = false;
 }

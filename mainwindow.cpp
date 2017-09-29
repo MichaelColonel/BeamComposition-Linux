@@ -562,7 +562,7 @@ void
 MainWindow::triggersItemChanged(int value)
 {
     char buf[5] = "T000";
-    buf[1] = value + '0';
+    buf[3] = value + '0';
     size_t towrite = 4;
     command_thread->writeCommand( buf, towrite);
     QString message = (value) ? tr("Triggers activated") : tr("Triggers diactivated");
@@ -570,7 +570,7 @@ MainWindow::triggersItemChanged(int value)
 /*
     DWORD towrite, written;
     char buf[5] = "T000";
-    buf[1] = value + '0';
+    buf[3] = value + '0';
     towrite = 4;
 
     FT_STATUS ftStatus = FT_Write( deva, buf, towrite, &written);
@@ -974,18 +974,18 @@ MainWindow::runTypeChanged(int id)
     else if (rbutton == ui->backgroundRunRadioButton) {
         flag_background = true;
         ui->triggersComboBox->setEnabled(false);
-        ui->triggersComboBox->setCurrentIndex(4); // "T400"
+        ui->triggersComboBox->setCurrentIndex(4); // "T004"
         process_thread->setBackground(true);
 /*
         DWORD towrite, written;
-        char buf[5] = "T400";
+        char buf[5] = "T004";
         towrite = 4;
         FT_STATUS ftStatus = FT_Write( deva, buf, towrite, &written);
         if (FT_SUCCESS(ftStatus) && written == towrite) {
             statusBar()->showMessage( tr("Triggers activated"), 1000);
         }
 
-        char buf[5] = "T400";
+        char buf[5] = "T004";
         size_t towrite = 4;
         command_thread->writeCommand( buf, towrite);
         statusBar()->showMessage( tr("Triggers diactivated"), 1000);
@@ -1334,14 +1334,17 @@ MainWindow::newBatchRecieved()
 void
 MainWindow::newBatchStateRecieved(bool state)
 {
+//    qDebug() << "GUI: Batch signal state -- " << state;
     // if rising edge (state is high), then process data
     // else ignore data
+
     if (process_thread->isRunning() && state) {
 //        statusBar()->showMessage( tr("New batch signal"), 1000);
         processData();
 //        QTimer::singleShot( 2000, this, SLOT(processData()));
     }
     else if (process_thread->isRunning() && !state) {
+        // get any processed data (just to delete any of them)
         CountsList countslist;
         DataList datalist;
         process_thread->getProcessedData( datalist, countslist);

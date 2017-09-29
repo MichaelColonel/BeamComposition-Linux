@@ -18,7 +18,7 @@
 #pragma once
 
 #include <queue>
-#include <vector>
+#include <string>
 #include "acquisitionthread.h"
 
 class CommandThread : public AcquireThread {
@@ -38,5 +38,7 @@ signals:
 
 protected:
     virtual void run();
-    std::queue< std::vector<char> > commands;
+
+    std::queue< std::string > commands;
+    char* buffer;
 };

@@ -59,7 +59,7 @@ const DataVector mask{ // first two low bits
 
 QWaitCondition cond_acquire;
 QMutex* mutex = new QMutex;
-quint8* buffer = new quint8[BUFFER_SIZE];
+quint8 buffer[BUFFER_SIZE] = {};
 DataQueue queue;
 
 } // namespace
@@ -120,13 +120,13 @@ AcquireThread::run()
                 }
             }
             else if (!FT_SUCCESS(status)) {
-                qDebug() << "fail device status";
+                qDebug() << "failed device status";
                 emit signalDeviceError();
                 break;
             }
         }
         else if (!FT_SUCCESS(status)) {
-            qDebug() << "fail device status";
+            qDebug() << "failed device status";
             emit signalDeviceError();
             break;
         }

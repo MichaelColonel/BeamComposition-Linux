@@ -655,23 +655,22 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
             double median = (rank[1] + rank[2]) / 2.;
             d.fit->Fill(median);
 
-            d.z12->Fill( charge[0], charge[1]);
-            d.z23->Fill( charge[1], charge[2]);
-            d.z34->Fill( charge[2], charge[3]);
-            d.z14->Fill( charge[0], charge[3]);
-            d.z13->Fill( charge[0], charge[2]);
-            d.z24->Fill( charge[1], charge[3]);
-
-            d.c12->Fill( values[0], values[1]);
-            d.c23->Fill( values[1], values[2]);
-            d.c34->Fill( values[2], values[3]);
-            d.c14->Fill( values[0], values[3]);
-            d.c13->Fill( values[0], values[2]);
-            d.c24->Fill( values[1], values[3]);
-
             if (z > 0) {
+                d.z12->Fill( charge[0], charge[1]);
+                d.z23->Fill( charge[1], charge[2]);
+                d.z34->Fill( charge[2], charge[3]);
+                d.z14->Fill( charge[0], charge[3]);
+                d.z13->Fill( charge[0], charge[2]);
+                d.z24->Fill( charge[1], charge[3]);
+
+                d.c12->Fill( values[0], values[1]);
+                d.c23->Fill( values[1], values[2]);
+                d.c34->Fill( values[2], values[3]);
+                d.c14->Fill( values[0], values[3]);
+                d.c13->Fill( values[0], values[2]);
+                d.c24->Fill( values[1], values[3]);
                 if (median >= 0.)
-                    d.sqrt_fit->Fill((median - bb) / aa);// * 1.1771428));
+                    d.sqrt_fit->Fill(sqrt(median));
 //                std::transform( charge.begin(), charge.end(), charge.begin(), std::bind1st( std::multiplies<double>(), 1.1371428));
 //                accepted[z - 1]++;
 //                d.sqrt_fit->Fill(charge[0] * charge[0]);

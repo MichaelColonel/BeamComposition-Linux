@@ -90,7 +90,7 @@ RootCanvasDialog::~RootCanvasDialog()
         delete pad[0];
     }
 
-    if (eaxis && (type == HIST_FIT)) {
+    if (eaxis && (type == HIST_FITALL)) {
         delete eaxis;
     }
 

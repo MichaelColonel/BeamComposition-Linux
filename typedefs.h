@@ -49,12 +49,17 @@ enum DiagramType {
     HIST_CHANNEL2,
     HIST_CHANNEL3,
     HIST_CHANNEL4,
-    HIST_FIT,
+    HIST_FITALL,
+    HIST_FIT_CHANNEL1,
+    HIST_FIT_CHANNEL2,
+    HIST_FIT_CHANNEL3,
+    HIST_FIT_CHANNEL4,
+    HIST_FIT_MEAN,
+    HIST_FIT_MEDIAN,
     HIST_RANK1,
     HIST_RANK2,
     HIST_RANK3,
     HIST_RANK4,
-    HIST_SQRT_FIT,
     HIST_Z,
     HIST_CHANNEL12,
     HIST_CHANNEL23,
@@ -86,8 +91,9 @@ typedef std::map< int, SignalPair > ChargeSignalMap;
 struct Diagrams {
     Diagrams()
         :
-        fit(nullptr),
-        sqrt_fit(nullptr),
+        fitall(nullptr),
+        fit_mean(nullptr),
+        fit_median(nullptr),
         z(nullptr),
         c12(nullptr),
         c23(nullptr),
@@ -104,12 +110,14 @@ struct Diagrams {
     {
         std::fill( channels, channels + CHANNELS, nullptr);
         std::fill( rank, rank + CHANNELS, nullptr);
+        std::fill( fit, fit + CHANNELS, nullptr);
     }
 
     Diagrams(const Diagrams& src)
         :
-        fit(src.fit),
-        sqrt_fit(src.sqrt_fit),
+        fitall(src.fitall),
+        fit_mean(src.fit_mean),
+        fit_median(src.fit_median),
         z(src.z),
         c12(src.c12),
         c23(src.c23),
@@ -126,13 +134,16 @@ struct Diagrams {
     {
         std::copy( src.channels, src.channels + CHANNELS, this->channels);
         std::copy( src.rank, src.rank + CHANNELS, this->rank);
+        std::copy( src.fit, src.fit + CHANNELS, this->fit);
     }
 
     Diagrams& operator=(const Diagrams& src) {
         std::copy( src.channels, src.channels + CHANNELS, this->channels);
         std::copy( src.rank, src.rank + CHANNELS, this->rank);
-        this->fit = src.fit;
-        this->sqrt_fit = src.sqrt_fit;
+        std::copy( src.fit, src.fit + CHANNELS, this->fit);
+        this->fitall = src.fitall;
+        this->fit_mean = src.fit_mean;
+        this->fit_median = src.fit_median;
         this->z = src.z;
         this->c12 = src.c12;
         this->c23 = src.c23;
@@ -150,9 +161,11 @@ struct Diagrams {
     }
 
     TH1* channels[CHANNELS];
-    TH1* fit;
     TH1* rank[CHANNELS];
-    TH1* sqrt_fit;
+    TH1* fit[CHANNELS];
+    TH1* fitall;
+    TH1* fit_mean;
+    TH1* fit_median;
     TH1* z;
     TH2* c12;
     TH2* c23;

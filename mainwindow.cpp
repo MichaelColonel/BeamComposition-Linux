@@ -68,17 +68,22 @@
 namespace {
 
 struct Hist1Parameters hist1params[] = {
-    { HIST_CHANNEL1, "C1", "Channel 1", 200, 0., 400. },
-    { HIST_CHANNEL2, "C2", "Channel 2", 200, 0., 400. },
-    { HIST_CHANNEL3, "C3", "Channel 3", 200, 0., 400. },
-    { HIST_CHANNEL4, "C4", "Channel 4", 200, 0., 400. },
-    { HIST_FIT, "F", "Fitted counts", 200, 0., 400. },
-    { HIST_SQRT_FIT, "SF", "#sqrt{Fitted counts}", 50, 0., 100. },
-    { HIST_Z, "Z", "Charge destribution", 200, 0.5, 10.5 },
+    { HIST_CHANNEL1, "C1", "Channel 1", 400, 0., 4095. },
+    { HIST_CHANNEL2, "C2", "Channel 2", 400, 0., 4095. },
+    { HIST_CHANNEL3, "C3", "Channel 3", 400, 0., 4095. },
+    { HIST_CHANNEL4, "C4", "Channel 4", 400, 0., 4095. },
+    { HIST_FITALL, "F", "Fitted counts", 200, 0., 400. },
+    { HIST_FIT_CHANNEL1, "FC1", "Fitted channel 1", 200, 0., 400. },
+    { HIST_FIT_CHANNEL2, "FC2", "Fitted channel 2", 200, 0., 400. },
+    { HIST_FIT_CHANNEL3, "FC3", "Fitted channel 3", 200, 0., 400. },
+    { HIST_FIT_CHANNEL4, "FC4", "Fitted channel 4", 200, 0., 400. },
+    { HIST_FIT_MEAN, "FMEAN", "Fitted mean", 200, 0., 400. },
+    { HIST_FIT_MEDIAN, "FMED", "Fitted median", 200, 0., 400. },
     { HIST_RANK1, "FR1", "Fitted rank 1", 200, 0., 400. },
     { HIST_RANK2, "FR2", "Fitted rank 2", 200, 0., 400. },
     { HIST_RANK3, "FR3", "Fitted rank 3", 200, 0., 400. },
     { HIST_RANK4, "FR4", "Fitted rank 4", 200, 0., 400. },
+    { HIST_Z, "Z", "Charge destribution", 200, 0.5, 10.5 },
     { NONE, nullptr, nullptr, 0, 0.0, 0.0 }
 };
 
@@ -87,12 +92,7 @@ struct Hist1Parameters& c2hp = hist1params[1];
 struct Hist1Parameters& c3hp = hist1params[2];
 struct Hist1Parameters& c4hp = hist1params[3];
 struct Hist1Parameters& fhp = hist1params[4];
-struct Hist1Parameters& sfhp = hist1params[5];
-struct Hist1Parameters& zhp = hist1params[6];
-struct Hist1Parameters& r1hp = hist1params[7];
-struct Hist1Parameters& r2hp = hist1params[8];
-struct Hist1Parameters& r3hp = hist1params[9];
-struct Hist1Parameters& r4hp = hist1params[10];
+struct Hist1Parameters& zhp = hist1params[15];
 
 struct Hist2Parameters hist2params[] = {
     { HIST_CHANNEL12, "C12", "Channel correlation 1-2", 200, 0., 400., 200, 0., 400. },
@@ -283,11 +283,6 @@ MainWindow::MainWindow(QWidget *parent)
     timerdata->setInterval(update_period);
 
     ui->treeWidget->expandAll();
-/*
-    ui->dataUpdateAutoRadioButton->setChecked(true);
-    int button_id = ui->updateDataButtonGroup->id(ui->dataUpdateAutoRadioButton);
-    dataUpdateChanged(button_id);
-*/
 }
 
 MainWindow::~MainWindow()
@@ -455,8 +450,26 @@ MainWindow::createTreeWidgetItems()
     QTreeWidgetItem* itemC4 = new DiagramTreeWidgetItem(HIST_CHANNEL4);
     itemC4->setText( 0, tr("Channel-4"));
 
-    QTreeWidgetItem* itemFitted = new DiagramTreeWidgetItem(HIST_FIT);
-    itemFitted->setText( 0, tr("Fitted"));
+    QTreeWidgetItem* itemFitted = new DiagramTreeWidgetItem(HIST_FITALL);
+    itemFitted->setText( 0, tr("Fitted channels"));
+
+    QTreeWidgetItem* itemF1 = new DiagramTreeWidgetItem(HIST_FIT_CHANNEL1);
+    itemF1->setText( 0, tr("Fitted channel-1"));
+
+    QTreeWidgetItem* itemF2 = new DiagramTreeWidgetItem(HIST_FIT_CHANNEL2);
+    itemF2->setText( 0, tr("Fitted channel-2"));
+
+    QTreeWidgetItem* itemF3 = new DiagramTreeWidgetItem(HIST_FIT_CHANNEL3);
+    itemF3->setText( 0, tr("Fitted channel-3"));
+
+    QTreeWidgetItem* itemF4 = new DiagramTreeWidgetItem(HIST_FIT_CHANNEL4);
+    itemF4->setText( 0, tr("Fitted channel-4"));
+
+    QTreeWidgetItem* itemFmean = new DiagramTreeWidgetItem(HIST_FIT_MEAN);
+    itemFmean->setText( 0, tr("Fitted mean"));
+
+    QTreeWidgetItem* itemFmed = new DiagramTreeWidgetItem(HIST_FIT_MEDIAN);
+    itemFmed->setText( 0, tr("Fitted median"));
 
     QTreeWidgetItem* itemR1 = new DiagramTreeWidgetItem(HIST_RANK1);
     itemR1->setText( 0, tr("Rank-1"));
@@ -467,9 +480,6 @@ MainWindow::createTreeWidgetItems()
     QTreeWidgetItem* itemR4 = new DiagramTreeWidgetItem(HIST_RANK4);
     itemR4->setText( 0, tr("Rank-4"));
 
-    QTreeWidgetItem* itemSQRT = new DiagramTreeWidgetItem(HIST_SQRT_FIT);
-    itemSQRT->setText( 0, tr("%1 fitted").arg(QChar(0x221A)));
-
     QTreeWidgetItem* itemZ = new DiagramTreeWidgetItem(HIST_Z);
     itemZ->setText( 0, tr("Z"));
 
@@ -479,11 +489,16 @@ MainWindow::createTreeWidgetItems()
     item1D->addChild(itemC3);
     item1D->addChild(itemC4);
     item1D->addChild(itemFitted);
+    item1D->addChild(itemF1);
+    item1D->addChild(itemF2);
+    item1D->addChild(itemF3);
+    item1D->addChild(itemF4);
+    item1D->addChild(itemFmean);
+    item1D->addChild(itemFmed);
     item1D->addChild(itemR1);
     item1D->addChild(itemR2);
     item1D->addChild(itemR3);
     item1D->addChild(itemR4);
-    item1D->addChild(itemSQRT);
     item1D->addChild(itemZ);
 
     items.append(itemCh);
@@ -492,11 +507,16 @@ MainWindow::createTreeWidgetItems()
     items.append(itemC3);
     items.append(itemC4);
     items.append(itemFitted);
+    items.append(itemF1);
+    items.append(itemF2);
+    items.append(itemF3);
+    items.append(itemF4);
+    items.append(itemFmean);
+    items.append(itemFmed);
     items.append(itemR1);
     items.append(itemR2);
     items.append(itemR3);
     items.append(itemR4);
-    items.append(itemSQRT);
     items.append(itemZ);
 
     QTreeWidgetItem* item2D = new QTreeWidgetItem();
@@ -562,30 +582,18 @@ void
 MainWindow::triggersItemChanged(int value)
 {
     char buf[5] = "T000";
-    buf[3] = value + '0';
+    buf[3] += value;
     size_t towrite = 4;
     command_thread->writeCommand( buf, towrite);
     QString message = (value) ? tr("Triggers activated") : tr("Triggers diactivated");
     statusBar()->showMessage( message, 1000);
-/*
-    DWORD towrite, written;
-    char buf[5] = "T000";
-    buf[3] = value + '0';
-    towrite = 4;
-
-    FT_STATUS ftStatus = FT_Write( deva, buf, towrite, &written);
-    QString message = (value) ? tr("Triggers activated") : tr("Triggers diactivated");
-
-    if (FT_SUCCESS(ftStatus) && written == towrite)
-            statusBar()->showMessage( message, 1000);
-*/
 }
 
 void
 MainWindow::motorItemChanged(int value)
 {
     char buf[5] = "M000";
-    buf[1] = value + '0';
+    buf[1] += value;
     int steps = ui->scanningStepSpinBox->value();
     local_itoa( steps, buf + 2, 2);
 
@@ -605,30 +613,6 @@ MainWindow::motorItemChanged(int value)
         break;
     }
     statusBar()->showMessage( message, 1000);
-/*
-    DWORD towrite, written;
-    char buf[5] = "M000";
-    buf[1] = value + '0';
-    towrite = 4;
-
-    FT_STATUS ftStatus = FT_Write( deva, buf, towrite, &written);
-    QString message;
-    switch (value) {
-    case 0:
-        message = QString(tr("Motor diactivated"));
-        break;
-    case 1:
-        message = QString(tr("Motor forward"));
-        break;
-    case 2:
-    default:
-        message = QString(tr("Motor reverse"));
-        break;
-    }
-
-    if (FT_SUCCESS(ftStatus) && written == towrite)
-            statusBar()->showMessage( message, 1000);
-*/
 }
 
 void
@@ -639,7 +623,7 @@ MainWindow::createRootHistograms()
     int i = 0;
     while (hist1params[i].type != NONE) {
         TH1* h = nullptr;
-        if (hist1params[i].type == HIST_FIT) {
+        if (hist1params[i].type == HIST_FITALL) {
             h = new TH1F( hist1params[i].name, hist1params[i].title,
                 hist1params[i].bins, hist1params[i].min, hist1params[i].max);
         }
@@ -652,6 +636,7 @@ MainWindow::createRootHistograms()
         root_diagrams.insert( hist1params[i].type, std::make_tuple( h, nullptr));
         ++i;
     }
+
     i = 0;
     while (hist2params[i].type != NONE) {
         TH2I* h = new TH2I( hist2params[i].name, hist2params[i].title,
@@ -726,20 +711,7 @@ MainWindow::processThreadStarted()
     }
 
     // clear diagrams and update canvas
-/*
-    QTreeWidgetItemIterator iter(ui->treeWidget);
-    while (*iter) {
-        DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(*iter);
-        if (ditem) {
-            TH1* h1 = ditem->getTH1();
-            TH2* h2 = ditem->getTH2();
-            if (h1) h1->Reset();
-            if (h2) h2->Reset();
-        }
-        ++iter;
-    }
-    emit updateDiagram();
-*/
+
     runinfo.clear();
     updateRunInfo();
 
@@ -842,14 +814,7 @@ MainWindow::processFileFinished()
         // recalculate channels calibration with new background
         params->recalculate();
     }
-/*
-    // show detail information about the run
-    ui->runDetailsListWidget->clear();
-    QList<QListWidgetItem*> items = profile_thread->processedBatches();
-    for ( QListWidgetItem* item : items) {
-        ui->runDetailsListWidget->addItem(item);
-    }
-*/
+
     runinfo = profile_thread->runInfo();
     updateRunInfo();
 
@@ -956,40 +921,12 @@ MainWindow::runTypeChanged(int id)
         ui->triggersComboBox->setEnabled(true);
         ui->triggersComboBox->setCurrentIndex(0);
         process_thread->setBackground(false);
-/*
-        DWORD towrite, written;
-        char buf[5] = "T000";
-        towrite = 4;
-        FT_STATUS ftStatus = FT_Write( deva, buf, towrite, &written);
-        if (FT_SUCCESS(ftStatus) && written == towrite) {
-            statusBar()->showMessage( tr("Triggers diactivated"), 1000);
-        }
-
-        char buf[5] = "T000";
-        size_t towrite = 4;
-        command_thread->writeCommand( buf, towrite);
-        statusBar()->showMessage( tr("Triggers diactivated"), 1000);
-*/
     }
     else if (rbutton == ui->backgroundRunRadioButton) {
         flag_background = true;
         ui->triggersComboBox->setEnabled(false);
         ui->triggersComboBox->setCurrentIndex(4); // "T004"
         process_thread->setBackground(true);
-/*
-        DWORD towrite, written;
-        char buf[5] = "T004";
-        towrite = 4;
-        FT_STATUS ftStatus = FT_Write( deva, buf, towrite, &written);
-        if (FT_SUCCESS(ftStatus) && written == towrite) {
-            statusBar()->showMessage( tr("Triggers activated"), 1000);
-        }
-
-        char buf[5] = "T004";
-        size_t towrite = 4;
-        command_thread->writeCommand( buf, towrite);
-        statusBar()->showMessage( tr("Triggers diactivated"), 1000);
-*/
     }
 }
 
@@ -1629,14 +1566,6 @@ MainWindow::alteraResetClicked()
     size_t towrite = 4;
     command_thread->writeCommand( buf, towrite);
     statusBar()->showMessage( tr("Altera reset"), 1000);
-/*
-    DWORD towrite, written;
-    char buf[5] = "R000";
-    towrite = 4;
-    FT_STATUS ftStatus = FT_Write( deva, buf, towrite, &written);
-    if (FT_SUCCESS(ftStatus) && written == towrite)
-        statusBar()->showMessage( tr("Altera reset"), 1000);
-*/
 }
 
 void
@@ -1647,17 +1576,6 @@ MainWindow::setDelayChanged(int delay)
     size_t towrite = 4;
     command_thread->writeCommand( buf, towrite);
     statusBar()->showMessage( tr("Delay %1").arg(delay), 1000);
-/*
-    DWORD towrite, written;
-
-    char buf[5] = "DXXX";
-    local_itoa( delay, buf + 1);
-
-    towrite = 4;
-    FT_STATUS ftStatus = FT_Write( deva, buf, towrite, &written);
-    if (FT_SUCCESS(ftStatus) && written == towrite)
-        statusBar()->showMessage( tr("Delay %1").arg(delay), 1000);
-*/
 }
 
 void
@@ -1684,14 +1602,16 @@ MainWindow::updateDiagrams(bool background_data)
         TH1* h4 = d.channels[3];
         h4->SetBins( c4hp.bins, c4hp.min, c4hp.max);
 
-        d.fit->SetBins( fhp.bins, fhp.min, fhp.max);
+        d.fitall->SetBins( fhp.bins, fhp.min, fhp.max);
+        d.fit_mean->SetBins( fhp.bins, fhp.min, fhp.max);
+        d.fit_median->SetBins( fhp.bins, fhp.min, fhp.max);
 
         for ( int i = 0; i < CHANNELS; ++i) {
             TH1* rank = d.rank[i];
+            TH1* fit = d.fit[i];
             rank->SetBins( fhp.bins, fhp.min, fhp.max);
+            fit->SetBins( fhp.bins, fhp.min, fhp.max);
         }
-
-        d.sqrt_fit->SetBins( sfhp.bins, sfhp.min, sfhp.max);
 
         // set energy range for linear fit
         DiagramTreeWidgetAction action(ui->treeWidget);
@@ -1710,6 +1630,7 @@ MainWindow::updateDiagrams(bool background_data)
         d.z13->SetBins( zhp.bins, zhp.min, zhp.max, zhp.bins, zhp.min, zhp.max);
         d.z14->SetBins( zhp.bins, zhp.min, zhp.max, zhp.bins, zhp.min, zhp.max);
         d.z24->SetBins( zhp.bins, zhp.min, zhp.max, zhp.bins, zhp.min, zhp.max);
+
     }
 
     emit updateDiagram();

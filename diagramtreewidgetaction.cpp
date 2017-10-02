@@ -35,8 +35,10 @@ DiagramTreeWidgetAction::DiagramTreeWidgetAction(QTreeWidget* widget)
             ++iter;
             continue;
         }
+
         TH1* h1 = ditem->getTH1();
         TH2* h2 = ditem->getTH2();
+
         switch (ditem->diagramType()) {
         case HIST_CHANNEL1:
             d.channels[0] = h1;
@@ -50,8 +52,26 @@ DiagramTreeWidgetAction::DiagramTreeWidgetAction(QTreeWidget* widget)
         case HIST_CHANNEL4:
             d.channels[3] = h1;
             break;
-        case HIST_FIT:
-            d.fit = h1;
+        case HIST_FITALL:
+            d.fitall = h1;
+            break;
+        case HIST_FIT_CHANNEL1:
+            d.fit[0] = h1;
+            break;
+        case HIST_FIT_CHANNEL2:
+            d.fit[1] = h1;
+            break;
+        case HIST_FIT_CHANNEL3:
+            d.fit[2] = h1;
+            break;
+        case HIST_FIT_CHANNEL4:
+            d.fit[3] = h1;
+            break;
+        case HIST_FIT_MEAN:
+            d.fit_mean = h1;
+            break;
+        case HIST_FIT_MEDIAN:
+            d.fit_median = h1;
             break;
         case HIST_RANK1:
             d.rank[0] = h1;
@@ -64,9 +84,6 @@ DiagramTreeWidgetAction::DiagramTreeWidgetAction(QTreeWidget* widget)
             break;
         case HIST_RANK4:
             d.rank[3] = h1;
-            break;
-        case HIST_SQRT_FIT:
-            d.sqrt_fit = h1;
             break;
         case HIST_Z:
             d.z = h1;
@@ -157,7 +174,7 @@ DiagramTreeWidgetAction::setEnergyRange()
     while (*iter) {
         DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(*iter);
 
-        if (ditem && (ditem->diagramType() == HIST_FIT)) {
+        if (ditem && (ditem->diagramType() == HIST_FITALL)) {
             TH1* h1 = ditem->getTH1();
             double min = h1->GetXaxis()->GetXmin();
             double max = h1->GetXaxis()->GetXmax();

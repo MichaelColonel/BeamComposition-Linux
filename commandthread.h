@@ -30,7 +30,7 @@ public:
     void writeCommand( const char* cmd, size_t cmd_size);
 
 signals:
-    void signalNewBatch();
+    void signalExternalSignal();
     void signalMovementFinished();
     void signalNewBatchState(bool);
     void signalStatusBarMessage(QString);

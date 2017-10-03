@@ -236,15 +236,17 @@ double
 delta( double x_, double x0_, double x1_, double k_) {
     double a = (cmean - 2. * log(10.) * x0_) / pow( (x1_ - x0_), 3.);
 
+    double res = 0.;
     if (x_ >= x1_) {
-        return (2. * log(10.) * x_ - cmean);
+        res = (2. * log(10.) * x_ - cmean);
     }
     else if ((x_ >= x0_) && (x_ < x1_)) {
-        return (2. * log(10.) * x_ - cmean + a * pow((x1_ - x_), k_));
+        res = (2. * log(10.) * x_ - cmean + a * pow((x1_ - x_), k_));
     }
     else if (x_ < x0_) {
-        return 0.0;
+        res = 0.0;
     }
+    return res;
 }
 
 double

@@ -938,11 +938,11 @@ MainWindow::dataUpdateChanged(int id)
     bool state = 0;
     int delay_time = 0;
     int acquisition_time = 0;
-    if (rbutton == ui->dataUpdateSpillRadioButton) {
+    if (rbutton == ui->dataUpdateStartRadioButton) {
         qDebug() << "Extraction signal update";
 //        flag_batch_state = false;
         disconnect( timerdata, SIGNAL(timeout()), this, SLOT(processData()));
-//        connect( command_thread, SIGNAL(signalNewBatch()), this, SLOT(newBatchRecieved()));
+        connect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalRecieved()));
         connect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateRecieved(bool)));
         delay_time = ui->delayTimeComboBox->currentIndex();
         acquisition_time = ui->acquisitionTimeComboBox->currentIndex();
@@ -952,7 +952,7 @@ MainWindow::dataUpdateChanged(int id)
         qDebug() << "Automatic timeout update";
 //        flag_batch_state = true;
         connect( timerdata, SIGNAL(timeout()), this, SLOT(processData()));
-//        disconnect( command_thread, SIGNAL(signalNewBatch()), this, SLOT(newBatchRecieved()));
+        disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalRecieved()));
         disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateRecieved(bool)));
     }
 
@@ -1258,23 +1258,19 @@ MainWindow::acquireDeviceError()
 
     stopRun();
 }
-/*
+
 void
-MainWindow::newBatchRecieved()
+MainWindow::externalSignalRecieved()
 {
-    if (process_thread->isRunning()) {
-        statusBar()->showMessage( tr("New batch signal"), 1000);
-        QTimer::singleShot( 2000, this, SLOT(processData()));
-    }
+    qDebug() << "GUI: External signal recieved";
 }
-*/
+
+/// if rising edge (state is high), then process data
+/// else ignore data
 void
 MainWindow::newBatchStateRecieved(bool state)
 {
-//    qDebug() << "GUI: Batch signal state -- " << state;
-    // if rising edge (state is high), then process data
-    // else ignore data
-
+    qDebug() << "GUI: Batch signal state -- " << state;
     if (process_thread->isRunning() && state) {
 //        statusBar()->showMessage( tr("New batch signal"), 1000);
         processData();

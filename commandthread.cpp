@@ -27,8 +27,9 @@
 namespace {
 
 QMutex* mutex = new QMutex;
-const char* const Carbon = "Carbon";
 const char* const Signal = "Signal";
+const char* const GoBeam = "GoBeam";
+const char* const NoBeam = "NoBeam";
 const char* const Finish = "Finish";
 
 } // namespace
@@ -103,12 +104,15 @@ CommandThread::run()
                         size_t pend = (i + 1) * COMMAND_RESPONSE_SIZE;
 
                         std::string Message( ldata.data() + pbegin, ldata.data() + pend);
-
-                        if (!Message.compare(std::string(Carbon))) { // Slow extraction start -- send signal
+                        if (!Message.compare(std::string(Signal))) { // External signal
+                            emit signalExternalSignal();
+                            qDebug() << "External signal message: " << QString::fromStdString(Message);
+                        }
+                        else if (!Message.compare(std::string(GoBeam))) { // Slow extraction start -- send signal
                             emit signalNewBatchState(false);
                             qDebug() << "Batch start message: " << QString::fromStdString(Message);
                         }
-                        else if (!Message.compare(std::string(Signal))) { // Slow extraction finished -- send signal
+                        else if (!Message.compare(std::string(NoBeam))) { // Slow extraction finished -- send signal
                             emit signalNewBatchState(true);
                             qDebug() << "Batch finish message: " << QString::fromStdString(Message);
                         }

@@ -143,52 +143,45 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="128"/>
-        <source>20 ms</source>
-        <translation>20 мс</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="133"/>
         <source>40 ms</source>
+        <oldsource>20 ms</oldsource>
         <translation>40 мс</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="138"/>
-        <source>60 ms</source>
-        <translation>60 мс</translation>
+        <source>120 ms</source>
+        <oldsource>60 ms</oldsource>
+        <translation>120 мс</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="143"/>
+        <location filename="mainwindow.ui" line="133"/>
         <source>80 ms</source>
         <translation>80 мс</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="148"/>
         <location filename="mainwindow.ui" line="216"/>
         <source>100 ms</source>
         <translation>100 мс</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="153"/>
-        <source>120 ms</source>
-        <translation>120 мс</translation>
-    </message>
-    <message>
         <location filename="mainwindow.ui" line="158"/>
-        <source>140 ms</source>
-        <translation>140 мс</translation>
+        <source>280 ms</source>
+        <oldsource>140 ms</oldsource>
+        <translation>280 мс</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="163"/>
+        <location filename="mainwindow.ui" line="143"/>
         <source>160 ms</source>
         <translation>160 мс</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="168"/>
-        <source>180 ms</source>
-        <translation>180 мс</translation>
+        <source>360 ms</source>
+        <oldsource>180 ms</oldsource>
+        <translation>360 мс</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="173"/>
+        <location filename="mainwindow.ui" line="148"/>
         <location filename="mainwindow.ui" line="221"/>
         <source>200 ms</source>
         <translation>200 мс</translation>
@@ -204,9 +197,15 @@
         <translation>300 мс</translation>
     </message>
     <message>
+        <location filename="mainwindow.ui" line="173"/>
         <location filename="mainwindow.ui" line="231"/>
         <source>400 ms</source>
         <translation>400 мс</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="193"/>
+        <source>External Start Signal</source>
+        <translation>Внешний сигнал запуска</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="236"/>
@@ -540,13 +539,13 @@
         <translation>Обновление данных</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="193"/>
         <source>Per spill</source>
-        <translation>По сбросу</translation>
+        <translation type="obsolete">По сбросу</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="183"/>
-        <source>Per constant timeout</source>
+        <source>Constant Timeout</source>
+        <oldsource>Per constant timeout</oldsource>
         <translation>Автоматически</translation>
     </message>
     <message>
@@ -645,6 +644,11 @@
         <location filename="mainwindow.cpp" line="451"/>
         <source>Channel-4</source>
         <translation>Канал-4</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="454"/>
+        <source>Fitted channels</source>
+        <translation>Выравненные каналы</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="457"/>
@@ -1263,7 +1267,7 @@ Events: %5</source>
         <translation type="obsolete">Параметры заряда частицы</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="390"/>
+        <location filename="settingsdialog.ui" line="347"/>
         <source>Charge</source>
         <translation>Заряд</translation>
     </message>
@@ -1272,12 +1276,12 @@ Events: %5</source>
         <translation type="obsolete">Счет АЦП</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="400"/>
+        <location filename="settingsdialog.ui" line="357"/>
         <source>Delta</source>
         <translation>Δ Заряда</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="405"/>
+        <location filename="settingsdialog.ui" line="362"/>
         <source>Beta</source>
         <translation>β</translation>
     </message>
@@ -1334,14 +1338,14 @@ Events: %5</source>
     </message>
     <message>
         <location filename="settingsdialog.ui" line="218"/>
-        <location filename="settingsdialog.ui" line="456"/>
+        <location filename="settingsdialog.ui" line="413"/>
         <source>Restore initial values</source>
         <oldsource>Restore matrix</oldsource>
         <translation>Восстановить исходные значения</translation>
     </message>
     <message>
         <location filename="settingsdialog.ui" line="177"/>
-        <location filename="settingsdialog.ui" line="395"/>
+        <location filename="settingsdialog.ui" line="352"/>
         <source>Reference</source>
         <translation>Опорный сигнал</translation>
     </message>
@@ -1370,27 +1374,27 @@ Events: %5</source>
         <translation type="obsolete">Z = 1</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="415"/>
+        <location filename="settingsdialog.ui" line="372"/>
         <source>Z = 2</source>
         <translation>Z = 2</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="420"/>
+        <location filename="settingsdialog.ui" line="377"/>
         <source>Z = 3</source>
         <translation>Z = 3</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="425"/>
+        <location filename="settingsdialog.ui" line="382"/>
         <source>Z = 4</source>
         <translation>Z = 4</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="430"/>
+        <location filename="settingsdialog.ui" line="387"/>
         <source>Z = 5</source>
         <translation>Z = 5</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="435"/>
+        <location filename="settingsdialog.ui" line="392"/>
         <source>Z = 6</source>
         <translation>Z = 6</translation>
     </message>
@@ -1400,7 +1404,7 @@ Events: %5</source>
         <translation>Параметры фита зарядов</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="466"/>
+        <location filename="settingsdialog.ui" line="483"/>
         <source>Minimum Charge:</source>
         <translation>Минимальный заряд:</translation>
     </message>
@@ -1414,27 +1418,27 @@ Events: %5</source>
         <translation type="obsolete">Использовать в фите</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="627"/>
+        <location filename="settingsdialog.ui" line="644"/>
         <source>Add row below</source>
         <translation>Добавить ряд снизу</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="630"/>
+        <location filename="settingsdialog.ui" line="647"/>
         <source>Add row below selected one</source>
         <translation>Добавить ряд снизу выбранного</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="635"/>
+        <location filename="settingsdialog.ui" line="652"/>
         <source>Delete row</source>
         <translation>Удалить ряд</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="644"/>
+        <location filename="settingsdialog.ui" line="661"/>
         <source>Add row above</source>
         <translation>Добавить ряд сверху</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="647"/>
+        <location filename="settingsdialog.ui" line="664"/>
         <source>Add row above selected one</source>
         <translation>Добавить ряд сверху выбранного</translation>
     </message>
@@ -1448,46 +1452,46 @@ Events: %5</source>
         <translation>Каталог файлов измерений:</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="477"/>
+        <location filename="settingsdialog.ui" line="494"/>
         <source>Histogram Properties</source>
         <translation>Параметры гистограмм</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="491"/>
+        <location filename="settingsdialog.ui" line="508"/>
         <source>Bins:</source>
         <translation>Число Каналов:</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="504"/>
+        <location filename="settingsdialog.ui" line="521"/>
         <source>Max:</source>
         <translation>Максимум:</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="517"/>
+        <location filename="settingsdialog.ui" line="534"/>
         <source>Min:</source>
         <translation>Минимум:</translation>
     </message>
     <message>
         <location filename="settingsdialog.ui" line="182"/>
-        <location filename="settingsdialog.ui" line="531"/>
+        <location filename="settingsdialog.ui" line="548"/>
         <source>Channel 1</source>
         <translation>Канал-1</translation>
     </message>
     <message>
         <location filename="settingsdialog.ui" line="187"/>
-        <location filename="settingsdialog.ui" line="536"/>
+        <location filename="settingsdialog.ui" line="553"/>
         <source>Channel 2</source>
         <translation>Канал-2</translation>
     </message>
     <message>
         <location filename="settingsdialog.ui" line="192"/>
-        <location filename="settingsdialog.ui" line="541"/>
+        <location filename="settingsdialog.ui" line="558"/>
         <source>Channel 3</source>
         <translation>Канал-3</translation>
     </message>
     <message>
         <location filename="settingsdialog.ui" line="197"/>
-        <location filename="settingsdialog.ui" line="546"/>
+        <location filename="settingsdialog.ui" line="563"/>
         <source>Channel 4</source>
         <translation>Канал-4</translation>
     </message>
@@ -1497,27 +1501,27 @@ Events: %5</source>
         <translation>Таблица опорный сигналов и зарядов</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="333"/>
+        <location filename="settingsdialog.ui" line="428"/>
         <source>Reference Charge:</source>
         <translation>Опорный заряд:</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="356"/>
+        <location filename="settingsdialog.ui" line="458"/>
         <source>Projectile Charge:</source>
         <translation>Заряд налетающей частицы:</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="410"/>
+        <location filename="settingsdialog.ui" line="367"/>
         <source>Z = 1 (M.I.P.)</source>
         <translation>Z = 1 (М.И.П.)</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="551"/>
+        <location filename="settingsdialog.ui" line="568"/>
         <source>Fitted</source>
         <translation>Выравненный</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="556"/>
+        <location filename="settingsdialog.ui" line="573"/>
         <source>Z</source>
         <translation>Заряд</translation>
     </message>

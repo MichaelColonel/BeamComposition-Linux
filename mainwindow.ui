@@ -62,7 +62,7 @@
          <x>0</x>
          <y>0</y>
          <width>262</width>
-         <height>748</height>
+         <height>760</height>
         </rect>
        </property>
        <attribute name="label">
@@ -125,17 +125,7 @@
                </property>
                <item>
                 <property name="text">
-                 <string>20 ms</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
                  <string>40 ms</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>60 ms</string>
                 </property>
                </item>
                <item>
@@ -145,17 +135,7 @@
                </item>
                <item>
                 <property name="text">
-                 <string>100 ms</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
                  <string>120 ms</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>140 ms</string>
                 </property>
                </item>
                <item>
@@ -165,12 +145,32 @@
                </item>
                <item>
                 <property name="text">
-                 <string>180 ms</string>
+                 <string>200 ms</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>200 ms</string>
+                 <string>240 ms</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>280 ms</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>320 ms</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>360 ms</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>400 ms</string>
                 </property>
                </item>
               </widget>
@@ -180,7 +180,7 @@
                <item>
                 <widget class="QRadioButton" name="dataUpdateAutoRadioButton">
                  <property name="text">
-                  <string>Per constant timeout</string>
+                  <string>Constant Timeout</string>
                  </property>
                  <attribute name="buttonGroup">
                   <string notr="true">updateDataButtonGroup</string>
@@ -188,9 +188,9 @@
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="dataUpdateSpillRadioButton">
+                <widget class="QRadioButton" name="dataUpdateStartRadioButton">
                  <property name="text">
-                  <string>Per spill</string>
+                  <string>External Start Signal</string>
                  </property>
                  <attribute name="buttonGroup">
                   <string notr="true">updateDataButtonGroup</string>
@@ -568,7 +568,7 @@
          <x>0</x>
          <y>0</y>
          <width>275</width>
-         <height>579</height>
+         <height>575</height>
         </rect>
        </property>
        <attribute name="label">
@@ -615,7 +615,7 @@
          <x>0</x>
          <y>0</y>
          <width>275</width>
-         <height>579</height>
+         <height>575</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -829,7 +829,7 @@
      <x>0</x>
      <y>0</y>
      <width>293</width>
-     <height>25</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

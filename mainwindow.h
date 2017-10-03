@@ -68,7 +68,7 @@ private slots:
     void handle_root_events();
     void treeWidgetItemDoubleClicked( QTreeWidgetItem*, int);
     void treeWidgetItemClicked( QTreeWidgetItem*, int);
-//    void newBatchRecieved();
+    void externalSignalRecieved();
     void newBatchStateRecieved(bool);
     void movementFinished();
     void commandThreadStarted();

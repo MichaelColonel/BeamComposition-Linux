@@ -81,7 +81,6 @@ private slots:
     void processThreadFinished();
     void acquireDeviceError();
     void commandDeviceError();
-    void processData();
     void connectDevices();
     void disconnectDevices();
     void startRun();
@@ -116,6 +115,7 @@ private:
     void saveSettings(QSettings* set);
     void loadSettings(QSettings* set);
     void deviceError( FT_HANDLE, FT_STATUS);
+    void processData();
 
     void createTreeWidgetItems();
     void createRootHistograms();

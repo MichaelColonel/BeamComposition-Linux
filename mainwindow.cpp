@@ -1005,8 +1005,8 @@ MainWindow::openFile(bool background_data)
     flag_background = background_data;
 
     if (process_thread->isRunning()) {
-        QMessageBox::warning( this, tr("Error"),
-            tr("Processing thread is still running."),
+        QMessageBox::warning( this, tr("Error"), \
+            tr("Processing thread is still running."), \
             QMessageBox::Ok | QMessageBox::Default);
         return;
     }
@@ -1364,8 +1364,8 @@ MainWindow::processData()
 
     if (filetxt) {
         QDateTime datetime = QDateTime::currentDateTime();
-        RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( datetime,
-            (batch_counts + 1), datalist.size(), countslist.size(),
+        RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( datetime, \
+            (batch_counts + 1), datalist.size(), countslist.size(), \
             batch_data_offset, ui->runDetailsListWidget);
 
 //        qDebug() << item->batch_offset() << " " << item->batch_bytes() << " " << item->batch_events();

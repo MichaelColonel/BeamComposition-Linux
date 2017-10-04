@@ -68,8 +68,7 @@ private:
     QString rundir;
     QSettings* settings;
     int selected_row;
-//    int lfit_ch;
-//    int lfit_pos1;
-//    int lfit_pos2;
+    int reference_charge;
+    int projectile_charge;
     SharedFitParameters params;
 };

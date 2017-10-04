@@ -109,7 +109,7 @@ struct Hist2Parameters hist2params[] = {
     { HIST_Z24, "Z24", "Charge correlation 2-4", 200, 0.5, 10.5, 200, 0.5, 10.5 },
     { NONE, nullptr, nullptr, 0, 0.0, 0.0, 0, 0.0, 0.0 }
 };
-
+/*
 struct Hist2Parameters& c12hp = hist2params[0];
 struct Hist2Parameters& c23hp = hist2params[1];
 struct Hist2Parameters& c34hp = hist2params[2];
@@ -122,7 +122,7 @@ struct Hist2Parameters& z34hp = hist2params[8];
 struct Hist2Parameters& z14hp = hist2params[9];
 struct Hist2Parameters& z13hp = hist2params[10];
 struct Hist2Parameters& z24hp = hist2params[11];
-
+*/
 void
 local_reverse(char* s)
 {
@@ -1491,7 +1491,6 @@ MainWindow::saveSettings(QSettings* set)
 
     set->setValue( "run-directory", rundir);
     set->setValue( "delay", ui->delaySpinBox->value());
-    set->setValue( "energy-per-count", Hist1Parameters::energy_per_count);
 
     params->save(set);
 
@@ -1531,7 +1530,6 @@ MainWindow::loadSettings(QSettings* set)
     ui->delaySpinBox->setValue(delay);
 
     flag_write_run = settings->value( "write-run", true).toBool();
-    Hist1Parameters::energy_per_count = settings->value( "energy-per-count", 2.0).toDouble();
 
     QSize wsize = set->value( "main-window-size", QSize( 500, 600)).toSize();
     resize(wsize);
@@ -1542,8 +1540,8 @@ MainWindow::closeEvent(QCloseEvent* event)
 {
     int res = QMessageBox::Yes;
     if (acquire_thread->isRunning()) {
-        res = QMessageBox::warning( this, tr("Close program"),
-            tr("Acquisition is still active.\nDo you want to quit program?"),
+        res = QMessageBox::warning( this, tr("Close program"), \
+            tr("Acquisition is still active.\nDo you want to quit program?"), \
             QMessageBox::Yes, QMessageBox::No | QMessageBox::Default);
     }
 
@@ -1608,10 +1606,6 @@ MainWindow::updateDiagrams(bool background_data)
             rank->SetBins( fhp.bins, fhp.min, fhp.max);
             fit->SetBins( fhp.bins, fhp.min, fhp.max);
         }
-
-        // set energy range for linear fit
-        DiagramTreeWidgetAction action(ui->treeWidget);
-        action.setEnergyRange();
 
         d.z->SetBins( zhp.bins, zhp.min, zhp.max);
         d.c12->SetBins( fhp.bins, fhp.min, fhp.max, fhp.bins, fhp.min, fhp.max);

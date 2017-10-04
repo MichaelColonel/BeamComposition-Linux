@@ -52,8 +52,6 @@ struct Hist1Parameters histograms[HISTOGRAMS] = {
 
 } // namespace
 
-double Hist1Parameters::energy_per_count = 2.0;
-
 SettingsDialog::SettingsDialog(QWidget* parent)
     :
     QDialog(parent),
@@ -61,7 +59,9 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     hist1(nullptr),
     hist2(nullptr),
     settings(nullptr),
-    selected_row(-1)
+    selected_row(-1),
+    reference_charge(1),
+    projectile_charge(CARBON_Z)
   {
     ui->setupUi(this);
 
@@ -198,7 +198,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     connect( hview1, SIGNAL(sectionClicked(int)), this, SLOT(chargeSignalRowSelected(int)));
 
     ui->tensionSpinBox->setValue(params->tension());
-//    ui->energyCountSpinBox->setValue(Hist1Parameters::energy_per_count);
 //    const int* lfit = params->reference_channel_parameters(lfit_ch);
 //    lfit_pos1 = lfit[0];
 //    lfit_pos2 = lfit[1];
@@ -282,9 +281,6 @@ SettingsDialog::setSettingsParameters( QSettings* set,
     int charge_max = settings->value( "max-fit-charge", 6).toInt();
     ui->minChargeSpinBox->setValue(charge_min);
     ui->maxChargeSpinBox->setValue(charge_max);
-
-//    double ecount = settings->value( "energy-per-count", 2.0).toDouble();
-//    ui->energyCountSpinBox->setValue(ecount);
 }
 
 void
@@ -319,8 +315,8 @@ SettingsDialog::binsChanged(int value)
 void
 SettingsDialog::restoreReferenceMatrixClicked()
 {
-    int res = QMessageBox::warning( this, tr("Restore"),
-        tr("Would you like to restore predefine matrix?"),
+    int res = QMessageBox::warning( this, tr("Restore"), \
+        tr("Would you like to restore predefine matrix?"), \
         QMessageBox::Yes, QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
         params->restore_reference_signals();
@@ -344,9 +340,6 @@ SettingsDialog::restoreReferenceMatrixClicked()
             }
             pos++;
         }
-//        lfit_ch = 0;
-//        lfit_pos1 = -1;
-//        lfit_pos2 = -1;
     }
     else if (res == QMessageBox::No) {
 
@@ -408,8 +401,6 @@ SettingsDialog::applyChanges()
     settings->setValue( "max-fit-charge", ui->maxChargeSpinBox->value());
 
     settings->setValue( "run-directory", ui->runDirectoryLineEdit->text());
-//    settings->setValue( "energy-per-count", ui->energyCountSpinBox->value());
-//    Hist1Parameters::energy_per_count = ui->energyCountSpinBox->value();
 
     // set parameters for channels
     for ( int i = 0; i < CHANNELS; ++i) {

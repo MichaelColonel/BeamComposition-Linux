@@ -28,7 +28,6 @@ struct Hist1Parameters {
     int bins;
     double min;
     double max;
-    static double energy_per_count;
 };
 
 struct Hist2Parameters {

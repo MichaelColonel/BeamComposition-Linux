@@ -166,23 +166,3 @@ DiagramTreeWidgetAction::resetDiagram(DiagramType type)
         ++iter;
     }
 }
-
-void
-DiagramTreeWidgetAction::setEnergyRange()
-{
-    QTreeWidgetItemIterator iter(treewidget);
-    while (*iter) {
-        DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(*iter);
-
-        if (ditem && (ditem->diagramType() == HIST_FITALL)) {
-            TH1* h1 = ditem->getTH1();
-            double min = h1->GetXaxis()->GetXmin();
-            double max = h1->GetXaxis()->GetXmax();
-
-            RootCanvasDialog* dialog = ditem->canvasDialog();
-            if (dialog)
-                dialog->setEnergyRange( min, max, Hist1Parameters::energy_per_count);
-        }
-        ++iter;
-    }
-}

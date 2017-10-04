@@ -22,7 +22,6 @@
 #include <TPad.h>
 #include <TH1.h>
 #include <TH2.h>
-#include <TGaxis.h>
 
 #include "typedefs.h"
 #include "diagramparameters.h"
@@ -43,7 +42,6 @@ public:
 //    void clearCanvas();
     TPad* getPad() { return pad[0]; }
     TPad** getPads() { return pad; }
-    void setEnergyRange( double min, double max, double energy_per_count);
     template<class T> void drawDiagram(T*);
     template<class T> void drawChannels(T** ch);
 
@@ -62,7 +60,6 @@ private slots:
 private:
     Ui::RootCanvasDialog* ui;
     TPad* pad[CHANNELS];
-    TGaxis* eaxis;
     DiagramType type;
 };
 
@@ -77,21 +74,6 @@ RootCanvasDialog::drawDiagram(T* diagram)
     else if (typeid(T) == typeid(TH2)) {
         diagram->Draw("COLZ");
     }
-/*
-    if (type == HIST_FIT) {
-        double min = diagram->GetXaxis()->GetXmin();
-        double max = diagram->GetXaxis()->GetXmax();
-        double emin = min * Hist1Parameters::energy_per_count * 1.E-03;
-        double emax = max * Hist1Parameters::energy_per_count * 1.E-03;
-        diagram->Draw("X+");
-        eaxis = new TGaxis( min, 0.0, max, 0.0, emin, emax, 50510, "+L");
-        eaxis->SetName("energy_axis");
-        eaxis->SetTitle("Energy (MeV)");
-        eaxis->Draw();
-    }
-    else
-        diagram->Draw("colz");
-*/
 }
 
 template<class T>

@@ -26,7 +26,6 @@ public:
     DiagramTreeWidgetAction(QTreeWidget* widget);
     virtual ~DiagramTreeWidgetAction();
     void resetDiagram(DiagramType type);
-    void setEnergyRange();
     void getDiagrams(Diagrams& d) const { d = diagrams; }
 
 private:

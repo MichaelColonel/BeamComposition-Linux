@@ -31,7 +31,6 @@ RootCanvasDialog::RootCanvasDialog( QWidget* parent, DiagramType dtype)
     :
     QDialog(parent),
     ui(new Ui::RootCanvasDialog),
-    eaxis(nullptr),
     type(dtype)
 {
     ui->setupUi(this);
@@ -90,10 +89,6 @@ RootCanvasDialog::~RootCanvasDialog()
         delete pad[0];
     }
 
-    if (eaxis && (type == HIST_FITALL)) {
-        delete eaxis;
-    }
-
     delete ui;
 }
 /*
@@ -121,17 +116,6 @@ RootCanvasDialog::updateCanvas()
 }
 
 void
-RootCanvasDialog::setEnergyRange(double min, double max, double energy_per_count)
-{
-    if (eaxis) {
-        eaxis->SetX1(min);
-        eaxis->SetX2(max);
-        eaxis->SetWmin( min * energy_per_count * 1.E-03);
-        eaxis->SetWmax( max * energy_per_count * 1.E-03);
-    }
-}
-
-void
 RootCanvasDialog::updateDiagram()
 {
     if (!isHidden()) {
@@ -142,8 +126,8 @@ RootCanvasDialog::updateDiagram()
 void
 RootCanvasDialog::resetClicked()
 {
-    int res = QMessageBox::warning( this, tr("Reset diagram"),
-        tr("Diagram data will be lost. Do you want to proceed?"),
+    int res = QMessageBox::warning( this, tr("Reset diagram"), \
+        tr("Diagram data will be lost. Do you want to proceed?"), \
         QMessageBox::Ok, QMessageBox::Cancel | QMessageBox::Default);
 
     if (res == QMessageBox::Ok)
@@ -161,9 +145,9 @@ RootCanvasDialog::changeEvent(QEvent* e)
 {
     if (e->type() == QEvent::WindowStateChange) {
         QWindowStateChangeEvent* event = static_cast<QWindowStateChangeEvent*>(e);
-        if ((event->oldState() & Qt::WindowMaximized) ||
-          (event->oldState() & Qt::WindowMinimized) ||
-          (event->oldState() == Qt::WindowNoState &&
+        if ((event->oldState() & Qt::WindowMaximized) || \
+          (event->oldState() & Qt::WindowMinimized) || \
+          (event->oldState() == Qt::WindowNoState && \
             this->windowState() == Qt::WindowMaximized)) {
             TCanvas* canvas = ui->widget->getCanvas();
             if (canvas) {

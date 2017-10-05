@@ -39,10 +39,12 @@
 
 #include <typeinfo>
 
+/*
 #ifdef Q_OS_WIN32 // for MinGW
 #include <windef.h>
 #include <winbase.h>
 #endif
+*/
 
 #include <ftd2xx.h>
 
@@ -229,7 +231,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( ui->stopRunButton, SIGNAL(clicked()), this, SLOT(stopRun()));
     connect( ui->connectButton, SIGNAL(clicked()), this, SLOT(connectDevices()));
     connect( ui->disconnectButton, SIGNAL(clicked()), this, SLOT(disconnectDevices()));
-    connect( ui->alteraResetPushButton, SIGNAL(clicked()), this, SLOT(alteraResetClicked()));
+    connect( ui->resetAlteraPushButton, SIGNAL(clicked()), this, SLOT(resetAlteraClicked()));
     connect( ui->delaySpinBox, SIGNAL(valueChanged(int)), this, SLOT(setDelayChanged(int)));
     connect( ui->triggersComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggersItemChanged(int)));
     connect( ui->motorComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(motorItemChanged(int)));
@@ -1195,8 +1197,8 @@ MainWindow::connectDevices()
     int cindex = ui->triggersComboBox->currentIndex();
     triggersItemChanged(cindex);
 
-    // reset altera
-    alteraResetClicked();
+    // reset ALTERA
+    resetAlteraClicked();
 
     // set delay
     int delay = ui->delaySpinBox->value();
@@ -1554,12 +1556,12 @@ MainWindow::closeEvent(QCloseEvent* event)
 }
 
 void
-MainWindow::alteraResetClicked()
+MainWindow::resetAlteraClicked()
 {
     char buf[5] = "R000";
     size_t towrite = 4;
     command_thread->writeCommand( buf, towrite);
-    statusBar()->showMessage( tr("Altera reset"), 1000);
+    statusBar()->showMessage( tr("reset ALTERA"), 1000);
 }
 
 void

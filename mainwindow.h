@@ -90,7 +90,7 @@ private slots:
     void openFile(bool background_data);
     void openBackRun();
     void setRunSettings();
-    void alteraResetClicked();
+    void resetAlteraClicked();
     void setDelayChanged(int);
     void updateDiagrams(bool background_data = false);
     void resetDiagram(DiagramType type);

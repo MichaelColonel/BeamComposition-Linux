@@ -106,19 +106,19 @@ CommandThread::run()
                         std::string Message( ldata.data() + pbegin, ldata.data() + pend);
                         if (!Message.compare(std::string(Signal))) { // External signal
                             emit signalExternalSignal();
-                            qDebug() << "External signal message: " << QString::fromStdString(Message);
+//                            qDebug() << "External signal message: " << QString::fromStdString(Message);
                         }
                         else if (!Message.compare(std::string(BeamOK))) { // Slow extraction start -- send signal
                             emit signalNewBatchState(false);
-                            qDebug() << "Batch start message: " << QString::fromStdString(Message);
+//                            qDebug() << "Batch start message: " << QString::fromStdString(Message);
                         }
                         else if (!Message.compare(std::string(BeamNO))) { // Slow extraction finished -- send signal
                             emit signalNewBatchState(true);
-                            qDebug() << "Batch finish message: " << QString::fromStdString(Message);
+//                            qDebug() << "Batch finish message: " << QString::fromStdString(Message);
                         }
                         else if (!Message.compare(std::string(Finish))) { // Movement finished -- send signal
                             emit signalMovementFinished();
-                            qDebug() << "Movement finish message: " << QString::fromStdString(Message);
+//                            qDebug() << "Movement finish message: " << QString::fromStdString(Message);
                         }
                         else { // if command answer -- send msg to status bar
                             qDebug() << "Command response: " << QString::fromStdString(Message);

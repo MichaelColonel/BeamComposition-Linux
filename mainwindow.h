@@ -53,7 +53,7 @@ class RootCanvasDialog;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    
+
 public:
     explicit MainWindow(QWidget* parent = 0);
     virtual ~MainWindow();
@@ -107,6 +107,7 @@ private slots:
     void detailsSelectAll();
     void detailsItemSelectionChanged();
     void processBatchesClicked();
+    void processData();
 
 private:
     QString processTextFile( QFile* runfile, QList<QListWidgetItem*>& items);
@@ -115,7 +116,7 @@ private:
     void saveSettings(QSettings* set);
     void loadSettings(QSettings* set);
     void deviceError( FT_HANDLE, FT_STATUS);
-    void processData();
+
 
     void createTreeWidgetItems();
     void createRootHistograms();

@@ -286,7 +286,8 @@ Parameters::Parameters(QSettings* settings)
     :
     k(0.5),
     K(1.0),
-    reference_charge(CARBON_Z)
+    reference_charge(1),
+    projectile_charge(CARBON_Z)
 {
     std::fill( charge_radius, charge_radius + CARBON_Z, 1.0);
     std::fill( charge_beta, charge_beta + CARBON_Z, 0.739);
@@ -450,10 +451,12 @@ Parameters::initiate(QSettings *set)
     tension_parameter = set->value( "tension-parameter", 0.0).toDouble();
 
     // reference charge
-    reference_charge = set->value( "reference-charge", CARBON_Z).toInt();
+    reference_charge = set->value( "reference-charge", 1).toInt();
+    projectile_charge = set->value( "projectile-charge", CARBON_Z).toInt();
+
 
     recalculate();
-    recalculate_charge_fit(reference_charge);
+    recalculate_charge_fit(projectile_charge);
 }
 
 /*
@@ -781,6 +784,7 @@ Parameters::save(QSettings *set)
 */
     // tension and power
     set->setValue( "reference-charge", reference_charge);
+    set->setValue( "projectile-charge", projectile_charge);
     set->setValue( "tension-parameter", tension_parameter);
 }
 

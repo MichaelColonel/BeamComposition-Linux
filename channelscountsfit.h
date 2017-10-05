@@ -52,6 +52,7 @@ public:
 //    double* refit_channel( int i, int bins, double min, double max) const;
 //    const double* fit_parameters() const { return linear_fit; }
     int& reference_charge_parameter() { return reference_charge; }
+    int& projectile_charge_parameter() { return projectile_charge; }
     double* charge_radius_parameter() { return charge_radius; }
     double* charge_beta_parameter() { return charge_beta; }
 //    void set_linear_fit_parameters( double a, double b) {
@@ -77,6 +78,7 @@ protected:
     double k;
     double K;
     int reference_charge;
+    int projectile_charge;
     double charge_radius[CARBON_Z];
     double charge_beta[CARBON_Z];
 

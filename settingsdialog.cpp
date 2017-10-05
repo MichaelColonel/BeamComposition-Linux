@@ -278,9 +278,14 @@ SettingsDialog::setSettingsParameters( QSettings* set,
     ui->timeoutPeriodSpinBox->setValue(timeout_peroid);
 
     int charge_min = settings->value( "min-fit-charge", 1).toInt();
-    int charge_max = settings->value( "max-fit-charge", 6).toInt();
+    int charge_max = settings->value( "max-fit-charge", CARBON_Z).toInt();
     ui->minChargeSpinBox->setValue(charge_min);
     ui->maxChargeSpinBox->setValue(charge_max);
+
+    reference_charge = settings->value( "reference-charge", 1).toInt();
+    projectile_charge = settings->value( "projectile-charge", CARBON_Z).toInt();
+    ui->referenceChargeSpinBox->setValue(reference_charge);
+    ui->projectileChargeSpinBox->setValue(projectile_charge);
 }
 
 void
@@ -395,6 +400,8 @@ void
 SettingsDialog::applyChanges()
 {
     params->tension() = ui->tensionSpinBox->value();
+    params->projectile_charge_parameter() = ui->projectileChargeSpinBox->value();
+    params->reference_charge_parameter() = ui->referenceChargeSpinBox->value();
 
     settings->setValue( "update-timeout", ui->timeoutPeriodSpinBox->value());
     settings->setValue( "min-fit-charge", ui->minChargeSpinBox->value());

@@ -171,7 +171,7 @@ MainWindow::MainWindow(QWidget *parent)
     acquire_thread(new AcquireThread(this)),
     process_thread(new ProcessThread(this)),
     profile_thread(new ProcessFileThread(this)),
-    progress_dialog(new QProgressDialog( tr("Processing file..."),
+    progress_dialog(new QProgressDialog( tr("Processing file..."), \
         tr("Abort Process"), 0, 0, this)),
     settings(new QSettings( "BeamComposition", "configure")),
     flag_background(false),
@@ -1147,9 +1147,9 @@ MainWindow::connectDevices()
 
     FT_STATUS ftStatus = FT_Open( port0, &deva);
     if (!FT_SUCCESS(ftStatus)) {
-        QMessageBox::warning( this, tr("Unable to open the FT2232H device"),
-            tr("Error during connection of FT2232H Channel A. This can fail if the ftdi_sio\n"
-               "driver is loaded, use lsmod to check this and rmmod ftdi_sio\n"
+        QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
+            tr("Error during connection of FT2232H Channel A. This can fail if the ftdi_sio\n" \
+               "driver is loaded, use lsmod to check this and rmmod ftdi_sio\n" \
                "to remove also rmmod usbserial."));
         statusBar()->showMessage( tr("Channel A connection canceled"), 2000);
         return;
@@ -1162,9 +1162,9 @@ MainWindow::connectDevices()
 
     ftStatus = FT_Open( port1, &devb);
     if (!FT_SUCCESS(ftStatus)) {
-        QMessageBox::warning( this, tr("Unable to open the FT2232H device"),
-            tr("Error during connection of FT2232H Channel B. This can fail if the ftdi_sio\n"
-               "driver is loaded, use lsmod to check this and rmmod ftdi_sio\n"
+        QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
+            tr("Error during connection of FT2232H Channel B. This can fail if the ftdi_sio\n" \
+               "driver is loaded, use lsmod to check this and rmmod ftdi_sio\n" \
                "to remove also rmmod usbserial."));
         statusBar()->showMessage( tr("Channel B connection canceled"), 2000);
         return;

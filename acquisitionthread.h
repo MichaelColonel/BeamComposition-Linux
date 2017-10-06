@@ -19,10 +19,12 @@
 
 #include <QThread>
 
+/*
 #ifdef Q_OS_WIN32
 #include <windef.h>
 #include <winbase.h>
 #endif
+*/
 
 #include <ftd2xx.h>
 #include "runinfo.h"
@@ -88,7 +90,7 @@ private:
     // ADC count from high and low data bytes
     class Count {
     public:
-        explicit Count( quint8 h, quint8 l) : high(h), low(l) {}
+        explicit Count( quint8 hi, quint8 lo) : high(hi), low(lo) {}
 #define BO 6 // high byte bits offset
 #define MO 2 // mask bits offset
         quint16 value() const { return (high >> MO) << BO | low >> MO; }

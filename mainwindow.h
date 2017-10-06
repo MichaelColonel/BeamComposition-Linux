@@ -19,10 +19,12 @@
 
 #include <QMainWindow>
 
+/*
 #ifdef Q_OS_WIN32
 #include <windef.h>
 #include <winbase.h>
 #endif
+*/
 
 #include <ftd2xx.h>
 

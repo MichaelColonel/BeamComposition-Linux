@@ -32,7 +32,7 @@
 
 #include "acquisitionthread.h"
 
-#define MASK_BITS 0x03
+#define MASK_BITS 0x03 // mask
 #define BUFFER_SIZE 0x100000 // 1 Megabyte
 
 namespace {

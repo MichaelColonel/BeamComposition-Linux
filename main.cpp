@@ -19,31 +19,21 @@
 #include <QTranslator>
 #include <QLocale>
 
-//#include <TROOT.h>
-//#include <TStyle.h>
 #include <TApplication.h>
 
 #include "mainwindow.h"
 
-namespace {
-
-//Int_t colors[] = { 0, 1, 2, 3, 4, 5, 6}; // #colors >= #levels - 1
-
-} // namespace
-
 int
 main( int argc, char** argv)
 {
-//    gStyle->SetPalette( (sizeof(colors) / sizeof(Int_t)), colors);
-
     TApplication rootapp( "Qt ROOT Application", &argc, argv);
     QApplication app( argc, argv);
 
-    QTranslator* translator = new QTranslator;
+    QTranslator* translator = new QTranslator();
     translator->load( "BeamComposition_" + QLocale::system().name());
     app.installTranslator(translator);
 
-    MainWindow* window = new MainWindow;
+    MainWindow* window = new MainWindow();
     window->show();
 
     int res = app.exec();

@@ -28,8 +28,8 @@ namespace {
 
 QMutex* mutex = new QMutex;
 const char* const Signal = "Signal";
-const char* const BeamOK = "BeamOK";
-const char* const BeamNO = "BeamNO";
+const char* const Accept = "Accept";
+const char* const Reject = "Reject";
 const char* const Finish = "Finish";
 
 } // namespace
@@ -104,19 +104,19 @@ CommandThread::run()
                         size_t pend = (i + 1) * COMMAND_RESPONSE_SIZE;
 
                         std::string Message( ldata.data() + pbegin, ldata.data() + pend);
-                        if (!Message.compare(std::string(Signal))) { // External signal
+                        if (!Message.compare(Signal)) { // External signal
                             emit signalExternalSignal();
 //                            qDebug() << "External signal message: " << QString::fromStdString(Message);
                         }
-                        else if (!Message.compare(std::string(BeamOK))) { // Slow extraction start -- send signal
+                        else if (!Message.compare(Accept)) { // Slow extraction start -- send signal
                             emit signalNewBatchState(false);
 //                            qDebug() << "Batch start message: " << QString::fromStdString(Message);
                         }
-                        else if (!Message.compare(std::string(BeamNO))) { // Slow extraction finished -- send signal
+                        else if (!Message.compare(Reject)) { // Slow extraction finished -- send signal
                             emit signalNewBatchState(true);
 //                            qDebug() << "Batch finish message: " << QString::fromStdString(Message);
                         }
-                        else if (!Message.compare(std::string(Finish))) { // Movement finished -- send signal
+                        else if (!Message.compare(Finish)) { // Movement finished -- send signal
                             emit signalMovementFinished();
 //                            qDebug() << "Movement finish message: " << QString::fromStdString(Message);
                         }

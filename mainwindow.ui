@@ -60,9 +60,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
+         <y>-185</y>
          <width>262</width>
-         <height>784</height>
+         <height>760</height>
         </rect>
        </property>
        <attribute name="label">
@@ -121,11 +121,11 @@
              <item row="2" column="1">
               <widget class="QComboBox" name="delayTimeComboBox">
                <property name="currentIndex">
-                <number>4</number>
+                <number>0</number>
                </property>
                <item>
                 <property name="text">
-                 <string>40 ms</string>
+                 <string>Off</string>
                 </property>
                </item>
                <item>
@@ -463,47 +463,47 @@
                </item>
                <item>
                 <property name="text">
-                 <string>2500</string>
+                 <string>5000 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1667</string>
+                 <string>3334 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1250</string>
+                 <string>2500 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1000</string>
+                 <string>2000 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>833</string>
+                 <string>1666 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>714</string>
+                 <string>1428 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>625</string>
+                 <string>1250 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>555</string>
+                 <string>1110 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>500</string>
+                 <string>1000 Hz</string>
                 </property>
                </item>
               </widget>
@@ -575,8 +575,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>275</width>
-         <height>566</height>
+         <width>141</width>
+         <height>133</height>
         </rect>
        </property>
        <attribute name="label">
@@ -622,8 +622,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>275</width>
-         <height>566</height>
+         <width>229</width>
+         <height>291</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -837,7 +837,7 @@
      <x>0</x>
      <y>0</y>
      <width>293</width>
-     <height>28</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

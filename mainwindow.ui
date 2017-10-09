@@ -62,7 +62,7 @@
          <x>0</x>
          <y>0</y>
          <width>262</width>
-         <height>760</height>
+         <height>784</height>
         </rect>
        </property>
        <attribute name="label">
@@ -453,6 +453,9 @@
                <property name="toolTip">
                 <string>Internal triggers generator (pulses per second).</string>
                </property>
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
                <item>
                 <property name="text">
                  <string>Off</string>
@@ -460,42 +463,47 @@
                </item>
                <item>
                 <property name="text">
-                 <string>122</string>
+                 <string>2500</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>244</string>
+                 <string>1667</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>488</string>
+                 <string>1250</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>976</string>
+                 <string>1000</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1952</string>
+                 <string>833</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>3904</string>
+                 <string>714</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>7808</string>
+                 <string>625</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>15616</string>
+                 <string>555</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>500</string>
                 </property>
                </item>
               </widget>
@@ -568,7 +576,7 @@
          <x>0</x>
          <y>0</y>
          <width>275</width>
-         <height>575</height>
+         <height>566</height>
         </rect>
        </property>
        <attribute name="label">
@@ -615,7 +623,7 @@
          <x>0</x>
          <y>0</y>
          <width>275</width>
-         <height>575</height>
+         <height>566</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -829,7 +837,7 @@
      <x>0</x>
      <y>0</y>
      <width>293</width>
-     <height>26</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

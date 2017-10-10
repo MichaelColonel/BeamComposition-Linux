@@ -60,7 +60,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-185</y>
+         <y>0</y>
          <width>262</width>
          <height>760</height>
         </rect>
@@ -121,7 +121,7 @@
              <item row="2" column="1">
               <widget class="QComboBox" name="delayTimeComboBox">
                <property name="currentIndex">
-                <number>0</number>
+                <number>4</number>
                </property>
                <item>
                 <property name="text">
@@ -463,47 +463,47 @@
                </item>
                <item>
                 <property name="text">
-                 <string>5000 Hz</string>
+                 <string>3906 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>3334 Hz</string>
+                 <string>1953 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>2500 Hz</string>
+                 <string>1302 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>2000 Hz</string>
+                 <string>976 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1666 Hz</string>
+                 <string>781 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1428 Hz</string>
+                 <string>651 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1250 Hz</string>
+                 <string>558 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1110 Hz</string>
+                 <string>488 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1000 Hz</string>
+                 <string>434 Hz</string>
                 </property>
                </item>
               </widget>

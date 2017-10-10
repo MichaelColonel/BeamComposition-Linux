@@ -263,38 +263,45 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="471"/>
-        <source>3334 Hz</source>
-        <translation>3334 Гц</translation>
+        <source>1953 Hz</source>
+        <oldsource>3334 Hz</oldsource>
+        <translation>1953 Гц</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="481"/>
-        <source>2000 Hz</source>
-        <translation>2000 Гц</translation>
+        <source>976 Hz</source>
+        <oldsource>2000 Hz</oldsource>
+        <translation>976 Гц</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="486"/>
-        <source>1666 Hz</source>
-        <translation>1666 Гц</translation>
+        <source>781 Hz</source>
+        <oldsource>1666 Hz</oldsource>
+        <translation>781 Гц</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="491"/>
-        <source>1428 Hz</source>
-        <translation>1428 Гц</translation>
+        <source>651 Hz</source>
+        <oldsource>1428 Hz</oldsource>
+        <translation>651 Гц</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="496"/>
-        <source>1250 Hz</source>
-        <translation>1250 Гц</translation>
+        <source>558 Hz</source>
+        <oldsource>1250 Hz</oldsource>
+        <translation>558 Гц</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="501"/>
-        <source>1110 Hz</source>
-        <translation>1110 Гц</translation>
+        <source>488 Hz</source>
+        <oldsource>1110 Hz</oldsource>
+        <translation>488 Гц</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="506"/>
-        <source>1000 Hz</source>
-        <translation>1000 Гц</translation>
+        <source>434 Hz</source>
+        <oldsource>1000 Hz</oldsource>
+        <translation>434 Гц</translation>
     </message>
     <message>
         <source>Movement Time</source>
@@ -511,9 +518,9 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="466"/>
-        <source>5000 Hz</source>
-        <oldsource>2500</oldsource>
-        <translation>5000 Гц</translation>
+        <source>3906 Hz</source>
+        <oldsource>5000 Hz</oldsource>
+        <translation>3906 Гц</translation>
     </message>
     <message>
         <source>1667</source>
@@ -521,9 +528,9 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="476"/>
-        <source>2500 Hz</source>
-        <oldsource>1250</oldsource>
-        <translation>2500 Гц</translation>
+        <source>1302 Hz</source>
+        <oldsource>2500 Hz</oldsource>
+        <translation>1302 Гц</translation>
     </message>
     <message>
         <source>1000</source>

@@ -893,7 +893,7 @@ MainWindow::acquisitionTimingChanged(int value)
     QComboBox* combobox = qobject_cast<QComboBox*>(sender());
 
     int acquisition_time = 5; // 600 ms
-    int delay_time = 4; // 100 ms
+    int delay_time = 4; // 200 ms
 
     if (combobox == ui->acquisitionTimeComboBox) {
         acquisition_time = value;
@@ -1334,10 +1334,10 @@ MainWindow::processTextFile( QFile* runfile, QList<QListWidgetItem *>& items)
 void
 MainWindow::processData()
 {
-//    if (ui->dataUpdateAutoRadioButton->isChecked()) {
-//        qDebug() << "timerdata stopped";
-//        timerdata->stop();
-//    }
+    if (ui->dataUpdateAutoRadioButton->isChecked()) {
+        qDebug() << "GUI: timerdata stopped";
+        timerdata->stop();
+    }
 
     CountsList countslist;
     DataList datalist;
@@ -1379,10 +1379,10 @@ MainWindow::processData()
     }
     updateRunInfo();
 
-//    if (ui->dataUpdateAutoRadioButton->isChecked()) {
-//        qDebug() << "timerdata started";
-//        timerdata->start();
-//    }
+    if (ui->dataUpdateAutoRadioButton->isChecked()) {
+        qDebug() << "GUI: timerdata started";
+        timerdata->start();
+    }
 }
 
 void

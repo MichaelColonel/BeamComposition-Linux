@@ -479,8 +479,9 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="362"/>
-        <source>Reset Altera</source>
-        <translation>Сброс ПЛИС Altera</translation>
+        <source>Reset ALTERA</source>
+        <oldsource>Reset Altera</oldsource>
+        <translation>Сброс ПЛИС ALTERA</translation>
     </message>
     <message>
         <source>Calibration</source>

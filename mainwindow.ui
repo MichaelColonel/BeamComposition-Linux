@@ -60,9 +60,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
-         <width>262</width>
-         <height>760</height>
+         <y>-218</y>
+         <width>273</width>
+         <height>784</height>
         </rect>
        </property>
        <attribute name="label">
@@ -359,7 +359,7 @@
                 <string>Altera Reset</string>
                </property>
                <property name="text">
-                <string>Reset Altera</string>
+                <string>Reset ALTERA</string>
                </property>
               </widget>
              </item>
@@ -575,7 +575,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>141</width>
+         <width>155</width>
          <height>133</height>
         </rect>
        </property>
@@ -622,7 +622,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>229</width>
+         <width>248</width>
          <height>291</height>
         </rect>
        </property>
@@ -837,7 +837,7 @@
      <x>0</x>
      <y>0</y>
      <width>293</width>
-     <height>26</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

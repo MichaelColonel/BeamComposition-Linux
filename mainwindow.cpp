@@ -86,6 +86,7 @@ struct Hist1Parameters hist1params[] = {
     { HIST_RANK3, "FR3", "Fitted rank 3", 200, 0., 400. },
     { HIST_RANK4, "FR4", "Fitted rank 4", 200, 0., 400. },
     { HIST_Z, "Z", "Charge destribution", 200, 0.5, 10.5 },
+    { HIST_Z2, "Z2", "Charge^{2} destribution", 200, 0.5, 100.5 },
     { NONE, nullptr, nullptr, 0, 0.0, 0.0 }
 };
 
@@ -95,6 +96,7 @@ struct Hist1Parameters& c3hp = hist1params[2];
 struct Hist1Parameters& c4hp = hist1params[3];
 struct Hist1Parameters& fhp = hist1params[4];
 struct Hist1Parameters& zhp = hist1params[15];
+struct Hist1Parameters& z2hp = hist1params[16];
 
 struct Hist2Parameters hist2params[] = {
     { HIST_CHANNEL12, "C12", "Channel correlation 1-2", 200, 0., 400., 200, 0., 400. },
@@ -485,6 +487,9 @@ MainWindow::createTreeWidgetItems()
     QTreeWidgetItem* itemZ = new DiagramTreeWidgetItem(HIST_Z);
     itemZ->setText( 0, tr("Z"));
 
+    QTreeWidgetItem* itemZ2 = new DiagramTreeWidgetItem(HIST_Z2);
+    itemZ2->setText( 0, tr("Z^2"));
+
     item1D->addChild(itemCh);
     item1D->addChild(itemC1);
     item1D->addChild(itemC2);
@@ -502,6 +507,7 @@ MainWindow::createTreeWidgetItems()
     item1D->addChild(itemR3);
     item1D->addChild(itemR4);
     item1D->addChild(itemZ);
+    item1D->addChild(itemZ2);
 
     items.append(itemCh);
     items.append(itemC1);
@@ -520,6 +526,7 @@ MainWindow::createTreeWidgetItems()
     items.append(itemR3);
     items.append(itemR4);
     items.append(itemZ);
+    items.append(itemZ2);
 
     QTreeWidgetItem* item2D = new QTreeWidgetItem();
     item2D->setText( 0, tr("2-D"));
@@ -967,7 +974,10 @@ MainWindow::dataUpdateChanged(int id)
     buf[3] = acquisition_time + '0';
     size_t towrite = 4;
     command_thread->writeCommand( buf, towrite);
-    statusBar()->showMessage( tr("Extraction signal update"), 1000);
+    if (state)
+        statusBar()->showMessage( tr("Extraction signal update"), 1000);
+    else
+        statusBar()->showMessage( tr("Automatic timeout update"), 1000);
 }
 
 void
@@ -1610,6 +1620,8 @@ MainWindow::updateDiagrams(bool background_data)
         }
 
         d.z->SetBins( zhp.bins, zhp.min, zhp.max);
+        d.z2->SetBins( z2hp.bins, z2hp.min, z2hp.max);
+
         d.c12->SetBins( fhp.bins, fhp.min, fhp.max, fhp.bins, fhp.min, fhp.max);
         d.c23->SetBins( fhp.bins, fhp.min, fhp.max, fhp.bins, fhp.min, fhp.max);
         d.c34->SetBins( fhp.bins, fhp.min, fhp.max, fhp.bins, fhp.min, fhp.max);

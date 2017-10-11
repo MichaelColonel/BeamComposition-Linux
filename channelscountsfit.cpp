@@ -677,7 +677,10 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
                 ChannelsArray tmp(charge);
                 std::sort( tmp.begin(), tmp.end());
-                d.z->Fill((tmp[1] + tmp[2]) / 2.); // rank 2
+
+                double charge_rank2 = (tmp[1] + tmp[2]) / 2.;
+                d.z->Fill(charge_rank2); // rank 2
+                d.z2->Fill(charge_rank2 * charge_rank2);
             }
             else {
             }

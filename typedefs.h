@@ -61,6 +61,7 @@ enum DiagramType {
     HIST_RANK3,
     HIST_RANK4,
     HIST_Z,
+    HIST_Z2,
     HIST_CHANNEL12,
     HIST_CHANNEL23,
     HIST_CHANNEL34,
@@ -95,6 +96,7 @@ struct Diagrams {
         fit_mean(nullptr),
         fit_median(nullptr),
         z(nullptr),
+        z2(nullptr),
         c12(nullptr),
         c23(nullptr),
         c34(nullptr),
@@ -119,6 +121,7 @@ struct Diagrams {
         fit_mean(src.fit_mean),
         fit_median(src.fit_median),
         z(src.z),
+        z2(src.z2),
         c12(src.c12),
         c23(src.c23),
         c34(src.c34),
@@ -145,6 +148,7 @@ struct Diagrams {
         this->fit_mean = src.fit_mean;
         this->fit_median = src.fit_median;
         this->z = src.z;
+        this->z2 = src.z2;
         this->c12 = src.c12;
         this->c23 = src.c23;
         this->c34 = src.c34;
@@ -167,6 +171,7 @@ struct Diagrams {
     TH1* fit_mean;
     TH1* fit_median;
     TH1* z;
+    TH1* z2;
     TH2* c12;
     TH2* c23;
     TH2* c34;

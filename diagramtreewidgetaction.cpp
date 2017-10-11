@@ -88,6 +88,9 @@ DiagramTreeWidgetAction::DiagramTreeWidgetAction(QTreeWidget* widget)
         case HIST_Z:
             d.z = h1;
             break;
+        case HIST_Z2:
+            d.z2 = h1;
+            break;
         case HIST_CHANNEL12:
             d.c12 = h2;
             break;

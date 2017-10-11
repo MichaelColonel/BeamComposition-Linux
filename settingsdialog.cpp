@@ -40,7 +40,7 @@
 
 namespace {
 
-#define HISTOGRAMS 6
+#define HISTOGRAMS 7
 struct Hist1Parameters histograms[HISTOGRAMS] = {
     { HIST_CHANNEL1, nullptr, nullptr, 200, 0., 400. },
     { HIST_CHANNEL2, nullptr, nullptr, 200, 0., 400. },
@@ -48,6 +48,7 @@ struct Hist1Parameters histograms[HISTOGRAMS] = {
     { HIST_CHANNEL4, nullptr, nullptr, 200, 0., 400. },
     { HIST_FITALL, nullptr, nullptr, 200, 0., 400. },
     { HIST_Z, nullptr, nullptr, 200, 0.5, 7.5 },
+    { HIST_Z2, nullptr, nullptr, 200, 0.5, 100.5 },
 };
 
 } // namespace
@@ -262,6 +263,10 @@ SettingsDialog::setSettingsParameters( QSettings* set,
     histograms[5].min = hist1[15].min;
     histograms[5].max = hist1[15].max;
 
+    histograms[6].bins = hist1[16].bins;
+    histograms[6].min = hist1[16].min;
+    histograms[6].max = hist1[16].max;
+
     ui->channelComboBox->setCurrentIndex(0);
 
     ui->binSpinBox->setValue(histograms[0].bins);
@@ -424,6 +429,10 @@ SettingsDialog::applyChanges()
     // set parameters for charge
     Hist1Parameters& charge = histograms[5];
     hist1[15].setBins( charge.bins, charge.min, charge.max);
+
+    // set parameters for charge^2
+    Hist1Parameters& charge2 = histograms[6];
+    hist1[16].setBins( charge2.bins, charge2.min, charge2.max);
 
     // parameters for channel correlation
     for ( int i = 0; i < 6; ++i) {

@@ -75,6 +75,7 @@ CommandThread::run()
                 status = FT_Write( device, buff, towrite, &written);
                 if (FT_SUCCESS(status) && written == towrite) {
                     qDebug() << "Data written to the FT2232H Channel-A";
+                    QThread::msleep(100);
                 }
             }
         }

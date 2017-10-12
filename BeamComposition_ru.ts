@@ -701,83 +701,83 @@
         <translation>Параметры...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="441"/>
+        <location filename="mainwindow.cpp" line="443"/>
         <source>1-D</source>
         <translation>1-D</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="444"/>
+        <location filename="mainwindow.cpp" line="446"/>
         <source>Channels</source>
         <translation>Каналы</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="447"/>
+        <location filename="mainwindow.cpp" line="449"/>
         <source>Channel-1</source>
         <translation>Канал-1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="449"/>
+        <location filename="mainwindow.cpp" line="451"/>
         <source>Channel-2</source>
         <translation>Канал-2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="451"/>
+        <location filename="mainwindow.cpp" line="453"/>
         <source>Channel-3</source>
         <translation>Канал-3</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="453"/>
+        <location filename="mainwindow.cpp" line="455"/>
         <source>Channel-4</source>
         <translation>Канал-4</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="456"/>
+        <location filename="mainwindow.cpp" line="458"/>
         <source>Fitted channels</source>
         <translation>Выравненные каналы</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="459"/>
+        <location filename="mainwindow.cpp" line="461"/>
         <source>Fitted channel-1</source>
         <oldsource>Fitted</oldsource>
         <translation>Выравненный канал-1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="462"/>
+        <location filename="mainwindow.cpp" line="464"/>
         <source>Fitted channel-2</source>
         <translation>Выравненный канал-2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="465"/>
+        <location filename="mainwindow.cpp" line="467"/>
         <source>Fitted channel-3</source>
         <translation>Выравненный канал-3</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="468"/>
+        <location filename="mainwindow.cpp" line="470"/>
         <source>Fitted channel-4</source>
         <translation>Выравненный канал-4</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="474"/>
+        <location filename="mainwindow.cpp" line="476"/>
         <source>Fitted median</source>
         <translation>Выравненный (медиана)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="477"/>
+        <location filename="mainwindow.cpp" line="479"/>
         <source>Rank-1</source>
         <translation>Ранг-1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="479"/>
+        <location filename="mainwindow.cpp" line="481"/>
         <source>Rank-2</source>
         <translation>Ранг-2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="481"/>
+        <location filename="mainwindow.cpp" line="483"/>
         <source>Rank-3</source>
         <translation>Ранг-3</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="483"/>
+        <location filename="mainwindow.cpp" line="485"/>
         <source>Rank-4</source>
         <translation>Ранг-4</translation>
     </message>
@@ -786,42 +786,47 @@
         <translation type="obsolete">Лин. выравненный</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="486"/>
+        <location filename="mainwindow.cpp" line="488"/>
         <source>Z</source>
         <translation>Заряд</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="525"/>
+        <location filename="mainwindow.cpp" line="491"/>
+        <source>Z^2</source>
+        <translation>Квадрат заряда</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="532"/>
         <source>2-D</source>
         <translation>2-D</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="528"/>
+        <location filename="mainwindow.cpp" line="535"/>
         <source>Channel-1-2</source>
         <translation>Корреляция каналов 1-2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="530"/>
+        <location filename="mainwindow.cpp" line="537"/>
         <source>Channel-2-3</source>
         <translation>Корреляция каналов 2-3</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="532"/>
+        <location filename="mainwindow.cpp" line="539"/>
         <source>Channel-3-4</source>
         <translation>Корреляция каналов 3-4</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="534"/>
+        <location filename="mainwindow.cpp" line="541"/>
         <source>Channel-1-4</source>
         <translation>Корреляция каналов 1-4</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="536"/>
+        <location filename="mainwindow.cpp" line="543"/>
         <source>Channel-1-3</source>
         <translation>Корреляция каналов 1-3</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="538"/>
+        <location filename="mainwindow.cpp" line="545"/>
         <source>Channel-2-4</source>
         <translation>Корреляция каналов 2-4</translation>
     </message>
@@ -830,12 +835,12 @@
         <translation type="obsolete">Выключить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="590"/>
+        <location filename="mainwindow.cpp" line="597"/>
         <source>Triggers activated</source>
         <translation>Генератор триггеров включен</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="590"/>
+        <location filename="mainwindow.cpp" line="597"/>
         <source>Triggers diactivated</source>
         <translation>Генератор триггеров выключен</translation>
     </message>
@@ -856,42 +861,42 @@
         <translation type="obsolete">Run%1.dat</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="769"/>
+        <location filename="mainwindow.cpp" line="776"/>
         <source>Background data saved</source>
         <translation>Данные фона (пьедесталов) сохранены</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="814"/>
+        <location filename="mainwindow.cpp" line="821"/>
         <source>Background data loaded</source>
         <translation>Данные фона (пьедесталов) загружены</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="832"/>
-        <location filename="mainwindow.cpp" line="838"/>
-        <location filename="mainwindow.cpp" line="1010"/>
-        <location filename="mainwindow.cpp" line="1126"/>
-        <location filename="mainwindow.cpp" line="1133"/>
+        <location filename="mainwindow.cpp" line="839"/>
+        <location filename="mainwindow.cpp" line="845"/>
+        <location filename="mainwindow.cpp" line="1020"/>
+        <location filename="mainwindow.cpp" line="1136"/>
+        <location filename="mainwindow.cpp" line="1143"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="833"/>
+        <location filename="mainwindow.cpp" line="840"/>
         <source>Acquisition thread is still running.</source>
         <translation>Сбор данных все еще активен.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="839"/>
-        <location filename="mainwindow.cpp" line="1011"/>
+        <location filename="mainwindow.cpp" line="846"/>
+        <location filename="mainwindow.cpp" line="1021"/>
         <source>Processing thread is still running.</source>
         <translation>Обработка данных все еще активна.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="865"/>
+        <location filename="mainwindow.cpp" line="872"/>
         <source>Save ROOT file</source>
         <translation>Сохранить файл в формате  ROOT</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="865"/>
+        <location filename="mainwindow.cpp" line="872"/>
         <source>ROOT Files (*.root)</source>
         <translation>ROOT файлы (*.root)</translation>
     </message>
@@ -904,7 +909,7 @@
         <translation type="obsolete">Генератор триггеров включен</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1023"/>
+        <location filename="mainwindow.cpp" line="1033"/>
         <source>Open File</source>
         <translation>Открыть файл</translation>
     </message>
@@ -913,12 +918,12 @@
         <translation type="obsolete">Файлы измерений (*.dat)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="174"/>
+        <location filename="mainwindow.cpp" line="176"/>
         <source>Processing file...</source>
         <translation>Чтение и обработка данных файла...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="175"/>
+        <location filename="mainwindow.cpp" line="177"/>
         <source>Abort Process</source>
         <translation>Прервать Процесс</translation>
     </message>
@@ -928,79 +933,84 @@
         <translation type="obsolete">√ выравненный</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="541"/>
+        <location filename="mainwindow.cpp" line="548"/>
         <source>Charge-1-2</source>
         <translation>Корреляция заряда 1-2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="543"/>
+        <location filename="mainwindow.cpp" line="550"/>
         <source>Charge-2-3</source>
         <translation>Корреляция заряда 2-3</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="545"/>
+        <location filename="mainwindow.cpp" line="552"/>
         <source>Charge-3-4</source>
         <translation>Корреляция заряда 3-4</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="547"/>
+        <location filename="mainwindow.cpp" line="554"/>
         <source>Charge-1-4</source>
         <translation>Корреляция заряда 1-4</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="549"/>
+        <location filename="mainwindow.cpp" line="556"/>
         <source>Charge-1-3</source>
         <translation>Корреляция заряда 1-3</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="551"/>
+        <location filename="mainwindow.cpp" line="558"/>
         <source>Charge-2-4</source>
         <translation>Корреляция заряда 2-4</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="607"/>
+        <location filename="mainwindow.cpp" line="614"/>
         <source>Motor stopped</source>
         <translation>Мотор остановлен</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="610"/>
+        <location filename="mainwindow.cpp" line="617"/>
         <source>Hide away</source>
         <translation>Убрать детекторы</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="614"/>
+        <location filename="mainwindow.cpp" line="621"/>
         <source>Move out</source>
         <translation>Выдвинуть детекторы</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="912"/>
-        <location filename="mainwindow.cpp" line="970"/>
+        <location filename="mainwindow.cpp" line="919"/>
+        <location filename="mainwindow.cpp" line="978"/>
         <source>Extraction signal update</source>
         <translation>Обновление данных по сбросу</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1030"/>
+        <location filename="mainwindow.cpp" line="980"/>
+        <source>Automatic timeout update</source>
+        <translation>Автоматическое обновление данных</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1040"/>
         <source>Run Files *.txt (*.txt);;Run Files *.dat (*.dat)</source>
         <translation>Файлы измерения *.txt (*.txt);;Файлы измерения *.dat (*.dat)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1127"/>
+        <location filename="mainwindow.cpp" line="1137"/>
         <source>Data file is absent!</source>
         <translation>Файл данных отсутствует!</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1134"/>
+        <location filename="mainwindow.cpp" line="1144"/>
         <source>Wrong file filter!</source>
         <translation>Неправильный фильтр файлов!</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1150"/>
-        <location filename="mainwindow.cpp" line="1165"/>
+        <location filename="mainwindow.cpp" line="1160"/>
+        <location filename="mainwindow.cpp" line="1175"/>
         <source>Unable to open the FT2232H device</source>
         <translation>Невозможно открыть уст-во FT2232H</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1151"/>
+        <location filename="mainwindow.cpp" line="1161"/>
         <source>Error during connection of FT2232H Channel A. This can fail if the ftdi_sio
 driver is loaded, use lsmod to check this and rmmod ftdi_sio
 to remove also rmmod usbserial.</source>
@@ -1013,7 +1023,7 @@ to remove also rmmod usbserial.</source>
 ftdi_sio и usbserial коммандой rmmod.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1166"/>
+        <location filename="mainwindow.cpp" line="1176"/>
         <source>Error during connection of FT2232H Channel B. This can fail if the ftdi_sio
 driver is loaded, use lsmod to check this and rmmod ftdi_sio
 to remove also rmmod usbserial.</source>
@@ -1060,7 +1070,7 @@ also rmmod usbserial</source>
 отключите модули ftdi_sio и usbserial коммандой rmmod</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1154"/>
+        <location filename="mainwindow.cpp" line="1164"/>
         <source>Channel A connection canceled</source>
         <translation>Подключение канала А отменено</translation>
     </message>
@@ -1077,7 +1087,7 @@ also rmmod usbserial</source>
 отключите модули ftdi_sio и usbserial коммандой rmmod</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="471"/>
+        <location filename="mainwindow.cpp" line="473"/>
         <source>Fitted mean</source>
         <oldsource>%1 fitted</oldsource>
         <translation>Выравненный (среднее)</translation>
@@ -1087,27 +1097,27 @@ also rmmod usbserial</source>
         <translation type="obsolete">Файлы измерения *.dat (*.dat);;Файлы измерения *.txt (*.txt)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1054"/>
+        <location filename="mainwindow.cpp" line="1064"/>
         <source>Run Files *.dat (*.dat)</source>
         <translation>Файлы измерения *.dat (*.dat)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1086"/>
+        <location filename="mainwindow.cpp" line="1096"/>
         <source>Run Files *.txt (*.txt)</source>
         <translation>Файлы измерения *.txt (*.txt)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1169"/>
+        <location filename="mainwindow.cpp" line="1179"/>
         <source>Channel B connection canceled</source>
         <translation>Подключение канала B отменено</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1251"/>
+        <location filename="mainwindow.cpp" line="1261"/>
         <source>FT2232H Channel A error</source>
         <translation>Ошибка канала A уст-ва FT2232H</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1259"/>
+        <location filename="mainwindow.cpp" line="1269"/>
         <source>FT2232H Channel B error</source>
         <translation>Ошибка канала B уст-ва FT2232H</translation>
     </message>
@@ -1120,7 +1130,7 @@ also rmmod usbserial</source>
         <translation type="obsolete">Сигнал новых данных</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1292"/>
+        <location filename="mainwindow.cpp" line="1302"/>
         <source>Movement finished</source>
         <translation>Перемещение окончено</translation>
     </message>
@@ -1129,102 +1139,102 @@ also rmmod usbserial</source>
         <translation type="obsolete">Движение окончено.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1296"/>
+        <location filename="mainwindow.cpp" line="1306"/>
         <source>Movement has been finished</source>
         <translation>Движение окончено</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1347"/>
+        <location filename="mainwindow.cpp" line="1357"/>
         <source>Events received: %1</source>
         <translation>Получено событий: %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1396"/>
+        <location filename="mainwindow.cpp" line="1406"/>
         <source>Invalid handle</source>
         <translation>Неправильный идентификатор (Invalid handle)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1399"/>
+        <location filename="mainwindow.cpp" line="1409"/>
         <source>Device not found</source>
         <translation>Устройство не найдено</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1402"/>
+        <location filename="mainwindow.cpp" line="1412"/>
         <source>Device not opened</source>
         <translation>Устройство не открыто</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1405"/>
+        <location filename="mainwindow.cpp" line="1415"/>
         <source>IO error</source>
         <translation>Ошибка Ввода/Вывода</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1408"/>
+        <location filename="mainwindow.cpp" line="1418"/>
         <source>Insufficient resources</source>
         <translation>Недостаточно ресурсов</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1411"/>
+        <location filename="mainwindow.cpp" line="1421"/>
         <source>Invalid parameter</source>
         <translation>Неправильный параметр</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1414"/>
+        <location filename="mainwindow.cpp" line="1424"/>
         <source>Invalid baud rate</source>
         <translation>Неправильная скорость соединения</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1417"/>
+        <location filename="mainwindow.cpp" line="1427"/>
         <source>Device not opened for erase</source>
         <translation>Устройство не открыто для аппаратного стирания</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1420"/>
+        <location filename="mainwindow.cpp" line="1430"/>
         <source>Device not opened for write</source>
         <translation>Устройство не открыто для аппаратной запись</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1423"/>
+        <location filename="mainwindow.cpp" line="1433"/>
         <source>Failed to write device</source>
         <translation>Невозможно записать в устройство</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1426"/>
+        <location filename="mainwindow.cpp" line="1436"/>
         <source>Invalid arguments</source>
         <translation>Неправильные аргументы</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1429"/>
+        <location filename="mainwindow.cpp" line="1439"/>
         <source>Device not supported</source>
         <translation>Устройство не поддерживается</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1433"/>
+        <location filename="mainwindow.cpp" line="1443"/>
         <source>Other error</source>
         <translation>Неизвестная (другая) ошибка</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1439"/>
+        <location filename="mainwindow.cpp" line="1449"/>
         <source>FT2232H Channel A error.</source>
         <translation>Ошибка канала A уст-ва FT2232H.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1441"/>
+        <location filename="mainwindow.cpp" line="1451"/>
         <source>FT2232H Channel B error.</source>
         <translation>Ошибка канала B уст-ва FT2232H.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1443"/>
+        <location filename="mainwindow.cpp" line="1453"/>
         <source>Unknown device error.</source>
         <translation>Неизвестная ошибка устройства.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1445"/>
+        <location filename="mainwindow.cpp" line="1455"/>
         <source>Error message</source>
         <translation>Сообщение об ошибке</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1446"/>
+        <location filename="mainwindow.cpp" line="1456"/>
         <source>%1
 
 %2</source>
@@ -1233,19 +1243,19 @@ also rmmod usbserial</source>
 %2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1545"/>
+        <location filename="mainwindow.cpp" line="1555"/>
         <source>Close program</source>
         <translation>Закрыть программу</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1546"/>
+        <location filename="mainwindow.cpp" line="1556"/>
         <source>Acquisition is still active.
 Do you want to quit program?</source>
         <translation>Сбор данных продолжается.
 Вы хотите выйти из программы?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1564"/>
+        <location filename="mainwindow.cpp" line="1574"/>
         <source>reset ALTERA</source>
         <translation>Сброс ПЛИС ALTERA</translation>
     </message>
@@ -1254,7 +1264,7 @@ Do you want to quit program?</source>
         <translation type="obsolete">Сброс ПЛИС Altera</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1574"/>
+        <location filename="mainwindow.cpp" line="1584"/>
         <source>Delay %1</source>
         <translation>Задержка %1</translation>
     </message>
@@ -1267,13 +1277,13 @@ Do you want to quit program?</source>
         <translation type="obsolete">%1 (%2 %)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1757"/>
+        <location filename="mainwindow.cpp" line="1769"/>
         <source>Reset diagrams</source>
         <oldsource>Reset diagram</oldsource>
         <translation>Сброс диаграмм</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1758"/>
+        <location filename="mainwindow.cpp" line="1770"/>
         <source>Diagrams data will be lost. Do you want to proceed?</source>
         <oldsource>Diagram data will be lost. Do you want to proceed?</oldsource>
         <translation>Данные диаграмм будут потеряны. Хотите продолжить?</translation>
@@ -1507,27 +1517,27 @@ Events: %5</source>
         <translation type="obsolete">Использовать в фите</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="644"/>
+        <location filename="settingsdialog.ui" line="649"/>
         <source>Add row below</source>
         <translation>Добавить ряд снизу</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="647"/>
+        <location filename="settingsdialog.ui" line="652"/>
         <source>Add row below selected one</source>
         <translation>Добавить ряд снизу выбранного</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="652"/>
+        <location filename="settingsdialog.ui" line="657"/>
         <source>Delete row</source>
         <translation>Удалить ряд</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="661"/>
+        <location filename="settingsdialog.ui" line="666"/>
         <source>Add row above</source>
         <translation>Добавить ряд сверху</translation>
     </message>
     <message>
-        <location filename="settingsdialog.ui" line="664"/>
+        <location filename="settingsdialog.ui" line="669"/>
         <source>Add row above selected one</source>
         <translation>Добавить ряд сверху выбранного</translation>
     </message>
@@ -1600,6 +1610,11 @@ Events: %5</source>
         <translation>Заряд налетающей частицы:</translation>
     </message>
     <message>
+        <location filename="settingsdialog.ui" line="578"/>
+        <source>Z^2</source>
+        <translation>Квадрат заряда</translation>
+    </message>
+    <message>
         <location filename="settingsdialog.ui" line="367"/>
         <source>Z = 1 (M.I.P.)</source>
         <translation>Z = 1 (М.И.П.)</translation>
@@ -1615,7 +1630,7 @@ Events: %5</source>
         <translation>Заряд</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="87"/>
+        <location filename="settingsdialog.cpp" line="88"/>
         <source>%1</source>
         <translation>%1</translation>
     </message>
@@ -1628,7 +1643,7 @@ Events: %5</source>
         <translation type="obsolete">нет</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="229"/>
+        <location filename="settingsdialog.cpp" line="230"/>
         <source>Select Directory</source>
         <translation>Выбрать каталог</translation>
     </message>
@@ -1637,14 +1652,14 @@ Events: %5</source>
         <translation type="obsolete">Уравнение прямой: %1*x+%2</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="323"/>
-        <location filename="settingsdialog.cpp" line="357"/>
+        <location filename="settingsdialog.cpp" line="328"/>
+        <location filename="settingsdialog.cpp" line="362"/>
         <source>Restore</source>
         <translation>Восстановить матрицу</translation>
     </message>
     <message>
-        <location filename="settingsdialog.cpp" line="324"/>
-        <location filename="settingsdialog.cpp" line="358"/>
+        <location filename="settingsdialog.cpp" line="329"/>
+        <location filename="settingsdialog.cpp" line="363"/>
         <source>Would you like to restore predefine matrix?</source>
         <translation>Желаете восстановить исходную матрицу?</translation>
     </message>

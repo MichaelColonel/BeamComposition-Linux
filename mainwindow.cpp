@@ -703,7 +703,7 @@ MainWindow::processThreadStarted()
     QString filenametxt = dir->filePath(nametxt);
     delete dir;
 
-    // clear list of recieved data
+    // clear list of received data
     ui->runDetailsListWidget->clear();
 
     if (flag_write_run) {
@@ -951,8 +951,8 @@ MainWindow::dataUpdateChanged(int id)
         qDebug() << "Extraction signal update";
 //        flag_batch_state = false;
         disconnect( timerdata, SIGNAL(timeout()), this, SLOT(processData()));
-        connect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalRecieved()));
-        connect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateRecieved(bool)));
+        connect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalReceived()));
+        connect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
         delay_time = ui->delayTimeComboBox->currentIndex();
         acquisition_time = ui->acquisitionTimeComboBox->currentIndex();
         state = 1;
@@ -961,8 +961,8 @@ MainWindow::dataUpdateChanged(int id)
         qDebug() << "Automatic timeout update";
 //        flag_batch_state = true;
         connect( timerdata, SIGNAL(timeout()), this, SLOT(processData()));
-        disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalRecieved()));
-        disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateRecieved(bool)));
+        disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalReceived()));
+        disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
     }
 
     ui->acquisitionTimeComboBox->setEnabled(state);
@@ -1272,15 +1272,15 @@ MainWindow::acquireDeviceError()
 }
 
 void
-MainWindow::externalSignalRecieved()
+MainWindow::externalSignalReceived()
 {
-    qDebug() << "GUI: External signal recieved";
+    qDebug() << "GUI: External signal received";
 }
 
 /// if rising edge (state is high), then process data
 /// else ignore data
 void
-MainWindow::newBatchStateRecieved(bool state)
+MainWindow::newBatchStateReceived(bool state)
 {
     qDebug() << "GUI: Batch signal state -- " << state;
     if (process_thread->isRunning() && state) {

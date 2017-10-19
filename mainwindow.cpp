@@ -130,8 +130,8 @@ struct Hist2Parameters& z24hp = hist2params[11];
 void
 local_reverse(char* s)
 {
-    for ( int i = 0, j = strlen(s) - 1; i < j; i++, j--) {
-        int c = s[i];
+    for ( size_t i = 0, j = strlen(s) - 1; i < j; i++, j--) {
+        char c = s[i];
         s[i] = s[j];
         s[j] = c;
     }
@@ -139,9 +139,9 @@ local_reverse(char* s)
 
 /// transform value "n" to string "s"
 void
-local_itoa( int n, char* s, int digits = 3)
+local_itoa( int n, char* s, size_t digits = 3)
 {
-    int i = 0;
+    size_t i = 0;
     for ( ; i < digits; ) { // generate digits in reverse order
         s[i++] = n % 10 + '0'; // get next digit
         n /= 10; // delete it

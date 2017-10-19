@@ -142,36 +142,36 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="138"/>
-        <source>120 ms</source>
-        <oldsource>60 ms</oldsource>
-        <translation>120 мс</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="133"/>
-        <source>80 ms</source>
-        <translation>80 мс</translation>
-    </message>
-    <message>
         <location filename="mainwindow.ui" line="216"/>
         <source>100 ms</source>
+        <oldsource>120 ms</oldsource>
         <translation>100 мс</translation>
     </message>
     <message>
+        <location filename="mainwindow.ui" line="133"/>
+        <source>50 ms</source>
+        <oldsource>80 ms</oldsource>
+        <translation>50 мс</translation>
+    </message>
+    <message>
         <location filename="mainwindow.ui" line="158"/>
-        <source>280 ms</source>
-        <oldsource>140 ms</oldsource>
-        <translation>280 мс</translation>
+        <location filename="mainwindow.ui" line="226"/>
+        <source>300 ms</source>
+        <oldsource>280 ms</oldsource>
+        <translation>300 мс</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="143"/>
-        <source>160 ms</source>
-        <translation>160 мс</translation>
+        <source>150 ms</source>
+        <oldsource>160 ms</oldsource>
+        <translation>150 мс</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="168"/>
-        <source>360 ms</source>
-        <oldsource>180 ms</oldsource>
-        <translation>360 мс</translation>
+        <location filename="mainwindow.ui" line="231"/>
+        <source>400 ms</source>
+        <oldsource>360 ms</oldsource>
+        <translation>400 мс</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="148"/>
@@ -185,25 +185,16 @@
         <translation>Сбор данных</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="226"/>
-        <source>300 ms</source>
-        <translation>300 мс</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="173"/>
-        <location filename="mainwindow.ui" line="231"/>
-        <source>400 ms</source>
-        <translation>400 мс</translation>
-    </message>
-    <message>
         <location filename="mainwindow.ui" line="153"/>
-        <source>240 ms</source>
-        <translation>240 мс</translation>
+        <source>250 ms</source>
+        <oldsource>240 ms</oldsource>
+        <translation>250 мс</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="163"/>
-        <source>320 ms</source>
-        <translation>320 мс</translation>
+        <source>350 ms</source>
+        <oldsource>320 ms</oldsource>
+        <translation>350 мс</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="193"/>

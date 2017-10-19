@@ -60,9 +60,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-218</y>
-         <width>273</width>
-         <height>784</height>
+         <y>0</y>
+         <width>262</width>
+         <height>760</height>
         </rect>
        </property>
        <attribute name="label">
@@ -121,7 +121,7 @@
              <item row="2" column="1">
               <widget class="QComboBox" name="delayTimeComboBox">
                <property name="currentIndex">
-                <number>4</number>
+                <number>2</number>
                </property>
                <item>
                 <property name="text">
@@ -130,17 +130,17 @@
                </item>
                <item>
                 <property name="text">
-                 <string>80 ms</string>
+                 <string>50 ms</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>120 ms</string>
+                 <string>100 ms</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>160 ms</string>
+                 <string>150 ms</string>
                 </property>
                </item>
                <item>
@@ -150,27 +150,27 @@
                </item>
                <item>
                 <property name="text">
-                 <string>240 ms</string>
+                 <string>250 ms</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>280 ms</string>
+                 <string>300 ms</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>320 ms</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>360 ms</string>
+                 <string>350 ms</string>
                 </property>
                </item>
                <item>
                 <property name="text">
                  <string>400 ms</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>450 ms</string>
                 </property>
                </item>
               </widget>
@@ -575,8 +575,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>155</width>
-         <height>133</height>
+         <width>275</width>
+         <height>575</height>
         </rect>
        </property>
        <attribute name="label">
@@ -622,8 +622,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>248</width>
-         <height>291</height>
+         <width>275</width>
+         <height>575</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -837,7 +837,7 @@
      <x>0</x>
      <y>0</y>
      <width>293</width>
-     <height>28</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

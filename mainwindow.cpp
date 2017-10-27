@@ -157,8 +157,8 @@ const Color_t ccolors[] = { kBlack, kRed, kBlue, kCyan, kOrange, kMagenta + 10, 
 // number of Gaus parameters
 const int gparams = 3;
 
-const char* namea = "FT2232H_MM A";
-const char* nameb = "FT2232H_MM B";
+const char* description_channel_a = "FT2232H_MM A";
+const char* description_channel_b = "FT2232H_MM B";
 
 } // namespace
 
@@ -1152,16 +1152,13 @@ MainWindow::openFile(bool background_data)
 void
 MainWindow::connectDevices()
 {
-//    int port0 = 0, port1 = 1;
-
 #ifdef Q_OS_LINUX
     FT_SetVIDPID( 0x0403, 0x6010);
 #endif
 
-    char* name1 = const_cast< char* >(namea);
-    char* name2 = const_cast< char* >(nameb);
-//    FT_STATUS ftStatus = FT_Open( port0, &deva);
-    FT_STATUS ftStatus = FT_OpenEx( name1, FT_OPEN_BY_DESCRIPTION, &deva);
+    char* name = const_cast<char*>(description_channel_a);
+
+    FT_STATUS ftStatus = FT_OpenEx( name, FT_OPEN_BY_DESCRIPTION, &deva);
     if (!FT_SUCCESS(ftStatus)) {
         QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
             tr("Error during connection of FT2232H Channel A. This can fail if the ftdi_sio\n" \
@@ -1176,8 +1173,9 @@ MainWindow::connectDevices()
         return;
     }
 
-//    ftStatus = FT_Open( port1, &devb);
-    ftStatus = FT_OpenEx( name2, FT_OPEN_BY_DESCRIPTION, &devb);
+    name = const_cast<char*>(description_channel_b);
+
+    ftStatus = FT_OpenEx( name, FT_OPEN_BY_DESCRIPTION, &devb);
     if (!FT_SUCCESS(ftStatus)) {
         QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
             tr("Error during connection of FT2232H Channel B. This can fail if the ftdi_sio\n" \

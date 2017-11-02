@@ -363,20 +363,23 @@ SettingsDialog::restoreReferenceChargeClicked()
         tr("Would you like to restore predefine matrix?"),
         QMessageBox::Yes, QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
+        ui->referenceChargeSpinBox->setValue(1);
+        ui->projectileChargeSpinBox->setValue(CARBON_Z);
+
         params->restore_charge_signals();
         ChargeSignalMap& ref_charge = params->charge_signals();
 
 //        size_t elems = ref_signals.size();
 
 //        ui->chargeCountsTableWidget->setRowCount(elems);
-/*
-        for ( int i = 0; i < CARBON_Z; ++i) {
+
+        for ( int i = 1; i < CARBON_Z; ++i) {
             const SignalPair& p = ref_charge[i + 1];
             QString str = SignalValueDelegate::form_text(p);
             QTableWidgetItem* item = new QTableWidgetItem(str);
             ui->chargeCountsTableWidget->setItem( i, 1, item);
         }
-*/
+
         const SignalPair& p = ref_charge[1];
         QString str = SignalValueDelegate::form_text(p);
         QTableWidgetItem* item = ui->chargeCountsTableWidget->item( 0, 1);

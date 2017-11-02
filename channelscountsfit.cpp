@@ -141,7 +141,7 @@ const ReferenceCountsSignals reference_signal_counts_data[N] = {
     { 400.0, 2690.0, 16.7, 2022.0,  11.6, 2608.0, 24.4, 2695.0, 17.4 },
     { 450.0, 2804.0, 16.8, 2084.0,  11.0, 2689.0, 27.3, 2791.0, 16.9 }
 };
-
+/*
 const struct ChargeCountsSignals {
     int z;
     double mean;
@@ -153,6 +153,20 @@ const struct ChargeCountsSignals {
     {  4,  800.0,   100.9 },
     {  5, 1300.0,   120.9 },
     {  6, 2000.0,   200.4 }
+};
+*/
+
+const struct ChargeCountsSignals {
+    int z;
+    double mean;
+    double sigma;
+} charge_counts_data[CARBON_Z] = {
+    {  1,   3.59,   0.27 },
+    {  2,     0.,   0. },
+    {  3,     0.,   0. },
+    {  4,     0.,   0. },
+    {  5,     0.,   0. },
+    {  6,  216.4,  18.42 }
 };
 
 double* fit_data[SIZE] = {};
@@ -268,12 +282,6 @@ correction( double beta, double projm)
 }
 
 const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.955349248, 1.025628856 };
-
-//size_t accepted[6] = {};
-//size_t rejected[6] = {};
-
-const double aa = 6.240625;
-const double bb = -6.3625;
 
 } // namespace
 
@@ -595,11 +603,13 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
     double* pp[CHANNELS] = { p1, p2, p3, p4 };
     double* yy[CHANNELS] = { y1, y2, y3, y4 };
 
-    ChargeSignalMap::const_iterator iter = charge_counts_signals.begin();
-    const SignalPair& mip_charge = iter->second;
+    const SignalPair& ref_charge = charge_counts_signals[reference_charge];
 
-    double signal = mip_charge.first;
-    double beta = charge_beta[0];
+//    ChargeSignalMap::const_iterator iter = charge_counts_signals.begin();
+//    const SignalPair& mip_charge = iter->second;
+
+    double signal = ref_charge.first;
+    double beta = charge_beta[reference_charge - 1];
     double kpower = 1 / k;
 
     for ( const CountsArray& array : list) {
@@ -815,9 +825,7 @@ Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charge
 //    double beta_charge = charge_beta[5];
 
     for ( int i = 0; i < CHANNELS; ++i) {
-        double vv = (values[i] - bb) / aa;
-        if (vv > 0.0) {
-//        if (values[i] > 0.) {
+        if (values[i] > 0.) {
 //            charges[i] = sqrt((values[i] - bb) / aa);
             charges[i] = pow( values[i] / (signal * beta * beta * K), power);
 //            charges[i] = sqrt((values[i] * beta_charge * beta_charge) / (signal * beta * beta * K));

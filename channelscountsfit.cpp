@@ -283,6 +283,12 @@ correction( double beta, double projm)
 
 const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.955349248, 1.025628856 };
 
+//size_t accepted[6] = {};
+//size_t rejected[6] = {};
+
+const double aa = 6.240625;
+const double bb = -6.3625;
+
 } // namespace
 
 
@@ -825,6 +831,8 @@ Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charge
 //    double beta_charge = charge_beta[5];
 
     for ( int i = 0; i < CHANNELS; ++i) {
+//        double vv = (values[i] - bb) / aa;
+//        if (vv > 0.0) {
         if (values[i] > 0.) {
 //            charges[i] = sqrt((values[i] - bb) / aa);
             charges[i] = pow( values[i] / (signal * beta * beta * K), power);

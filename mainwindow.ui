@@ -62,7 +62,7 @@
          <x>0</x>
          <y>0</y>
          <width>277</width>
-         <height>784</height>
+         <height>760</height>
         </rect>
        </property>
        <attribute name="label">
@@ -575,8 +575,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>290</width>
-         <height>571</height>
+         <width>141</width>
+         <height>133</height>
         </rect>
        </property>
        <attribute name="label">
@@ -622,8 +622,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>290</width>
-         <height>571</height>
+         <width>229</width>
+         <height>291</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -837,7 +837,7 @@
      <x>0</x>
      <y>0</y>
      <width>308</width>
-     <height>28</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -871,6 +871,8 @@
    <addaction name="actionSaveRun"/>
    <addaction name="separator"/>
    <addaction name="actionSettings"/>
+   <addaction name="separator"/>
+   <addaction name="actionQuit"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpenRun">

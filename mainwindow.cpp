@@ -168,8 +168,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui(new Ui::MainWindow),
     timer(new QTimer(this)),
     timerdata(new QTimer(this)),
-    deva(nullptr),
-    devb(nullptr),
+    channel_a(nullptr),
+    channel_b(nullptr),
     filerun(nullptr),
     filetxt(nullptr),
     command_thread(new CommandThread(this)),
@@ -654,6 +654,7 @@ MainWindow::createRootHistograms()
         TH2I* h = new TH2I( hist2params[i].name, hist2params[i].title,
             hist2params[i].xbins, hist2params[i].xmin, hist2params[i].xmax,
             hist2params[i].ybins, hist2params[i].ymin, hist2params[i].ymax);
+        h->SetStats(kFALSE);
         root_diagrams.insert( hist2params[i].type, std::make_tuple( nullptr, h));
         ++i;
     }
@@ -1177,7 +1178,7 @@ MainWindow::connectDevices()
 
     char* name = const_cast<char*>(description_channel_a);
 
-    FT_STATUS ftStatus = FT_OpenEx( name, FT_OPEN_BY_DESCRIPTION, &deva);
+    FT_STATUS ftStatus = FT_OpenEx( name, FT_OPEN_BY_DESCRIPTION, &channel_a);
     if (!FT_SUCCESS(ftStatus)) {
         QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
             tr("Error during connection of FT2232H Channel A. This can fail if the ftdi_sio\n" \
@@ -1186,15 +1187,15 @@ MainWindow::connectDevices()
         statusBar()->showMessage( tr("Channel A connection canceled"), 2000);
         return;
     }
-    ftStatus = FT_SetTimeouts( deva, 8000, 8000);
+    ftStatus = FT_SetTimeouts( channel_a, 8000, 8000);
     if (!FT_SUCCESS(ftStatus)) {
-        deviceError( deva, ftStatus);
+        deviceError( channel_a, ftStatus);
         return;
     }
 
     name = const_cast<char*>(description_channel_b);
 
-    ftStatus = FT_OpenEx( name, FT_OPEN_BY_DESCRIPTION, &devb);
+    ftStatus = FT_OpenEx( name, FT_OPEN_BY_DESCRIPTION, &channel_b);
     if (!FT_SUCCESS(ftStatus)) {
         QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
             tr("Error during connection of FT2232H Channel B. This can fail if the ftdi_sio\n" \
@@ -1203,13 +1204,13 @@ MainWindow::connectDevices()
         statusBar()->showMessage( tr("Channel B connection canceled"), 2000);
         return;
     }
-    ftStatus = FT_SetTimeouts( devb, 8000, 8000);
+    ftStatus = FT_SetTimeouts( channel_b, 8000, 8000);
     if (!FT_SUCCESS(ftStatus)) {
-        deviceError( devb, ftStatus);
+        deviceError( channel_b, ftStatus);
         return;
     }
-    command_thread->setDeviceHandle(deva);
-    acquire_thread->setDeviceHandle(devb);
+    command_thread->setDeviceHandle(channel_a);
+    acquire_thread->setDeviceHandle(channel_b);
 
     command_thread->start();
 
@@ -1255,11 +1256,11 @@ MainWindow::disconnectDevices()
     if (command_thread->isRunning())
         command_thread->stop();
 
-    FT_STATUS ftStatus = FT_Close(deva);
+    FT_STATUS ftStatus = FT_Close(channel_a);
     if (!FT_SUCCESS(ftStatus)) {
         std::cerr << "FT2232H Channel A close error." << std::endl;
     }
-    ftStatus = FT_Close(devb);
+    ftStatus = FT_Close(channel_b);
     if (!FT_SUCCESS(ftStatus)) {
         std::cerr << "FT2232H Channel B close error." << std::endl;
     }
@@ -1281,7 +1282,7 @@ void
 MainWindow::commandDeviceError()
 {
     FT_STATUS ftState = command_thread->deviceStatus();
-    deviceError( deva, ftState);
+    deviceError( channel_a, ftState);
     statusBar()->showMessage(tr("FT2232H Channel A error"));
 }
 
@@ -1289,7 +1290,7 @@ void
 MainWindow::acquireDeviceError()
 {
     FT_STATUS ftState = acquire_thread->deviceStatus();
-    deviceError( devb, ftState);
+    deviceError( channel_b, ftState);
     statusBar()->showMessage(tr("FT2232H Channel B error"));
 
     stopRun();
@@ -1469,9 +1470,9 @@ MainWindow::deviceError( FT_HANDLE dev, FT_STATUS ftStatus)
     }
 
     QString channel;
-    if (dev == deva)
+    if (dev == channel_a)
         channel = tr("FT2232H Channel A error.");
-    else if (dev == devb)
+    else if (dev == channel_b)
         channel = tr("FT2232H Channel B error.");
     else
         channel = tr("Unknown device error.");

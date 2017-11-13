@@ -129,8 +129,8 @@ private:
     QTimer* timer; // ROOT GUI update timer
     QTimer* timerdata; // data update timer
 
-    FT_HANDLE deva;
-    FT_HANDLE devb;
+    FT_HANDLE channel_a;
+    FT_HANDLE channel_b;
     QFile* filerun;
     QFile* filetxt;
 

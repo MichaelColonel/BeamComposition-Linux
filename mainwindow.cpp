@@ -877,7 +877,12 @@ MainWindow::saveRun()
     if (fileName.isEmpty())
         return;
 
+#if QT_VERSION >= 0x050000
+    std::string std_fileName = fileName.toStdString();
+    TFile* rootfile = new TFile( std_fileName.c_str(), "CREATE");
+#elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
     TFile* rootfile = new TFile( fileName.toAscii(), "CREATE");
+#endif
 
     if (rootfile->IsOpen()) {
         QTreeWidgetItemIterator iter(ui->treeWidget);
@@ -1040,7 +1045,17 @@ MainWindow::openFile(bool background_data)
 
     dialog->setAcceptMode(QFileDialog::AcceptOpen);
     dialog->setFileMode(QFileDialog::ExistingFile);
+
+#if QT_VERSION >= 0x050000
+    QStringList filters;
+    filters << tr("Run Files *.txt (*.txt)")
+            << tr("Run Files *.dat (*.dat)");
+
+    dialog->setNameFilters(filters);
+#elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
     dialog->setFilter(tr("Run Files *.txt (*.txt);;Run Files *.dat (*.dat)"));
+#endif
+
     dialog->setDirectory(rundir);
 
     if(dialog->exec()) {
@@ -1048,7 +1063,11 @@ MainWindow::openFile(bool background_data)
 
         if(!fileNames.isEmpty()) {
             fileName = fileNames[0];
+#if QT_VERSION >= 0x050000
+            filter = dialog->selectedNameFilter();
+#elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
             filter = dialog->selectedFilter();
+#endif
         }
     }
     delete dialog;

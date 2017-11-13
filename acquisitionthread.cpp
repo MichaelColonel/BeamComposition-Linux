@@ -29,7 +29,6 @@
 #include "channelscountsfit.h"
 #include "diagramtreewidgetaction.h"
 #include "rundetailslistwidgetitem.h"
-
 #include "acquisitionthread.h"
 
 #define MASK_BITS 0x03 // mask
@@ -299,7 +298,12 @@ ProcessFileThread::run()
 void
 ProcessFileThread::processFileBatches()
 {
+#if QT_VERSION >= 0x050000
+    std::string std_filename = filename.toStdString();
+    std::ifstream file( std_filename.c_str(), std::ifstream::binary);
+#else
     std::ifstream file( filename.toAscii(), std::ifstream::binary);
+#endif
     runinfo.clear();
 
     if (file.is_open()) {
@@ -370,7 +374,12 @@ ProcessFileThread::processFileBatches()
 void
 ProcessFileThread::processFileData()
 {
+#if QT_VERSION >= 0x050000
+    std::string std_filename = filename.toStdString();
+    std::ifstream file( std_filename.c_str(), std::ifstream::binary);
+#else
     std::ifstream file( filename.toAscii(), std::ifstream::binary);
+#endif
     runinfo.clear();
 
     if (file.is_open()) {

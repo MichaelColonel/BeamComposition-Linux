@@ -67,7 +67,13 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     ui->setupUi(this);
 
     QHeaderView* hview = new QHeaderView( Qt::Orientation::Vertical, ui->signalCountsTableWidget);
+
+#if QT_VERSION >= 0x050000
+    hview->setSectionsClickable(true);
+#elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
     hview->setClickable(true);
+#endif
+
     ui->signalCountsTableWidget->setVerticalHeader(hview);
 
     // Reference signal to Channel Counts Values
@@ -141,7 +147,13 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 */
 
     QHeaderView* hview1 = new QHeaderView( Qt::Orientation::Vertical, ui->chargeCountsTableWidget);
+
+#if QT_VERSION >= 0x050000
+    hview1->setSectionsClickable(true);
+#elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
     hview1->setClickable(true);
+#endif
+
     ui->chargeCountsTableWidget->setVerticalHeader(hview1);
 
     for ( int i = 0; i < CARBON_Z; ++i) {

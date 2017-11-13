@@ -17,7 +17,16 @@
  *
  */
 
+#include <QtCore>
+
+#if QT_VERSION >= 0x050000
 #include <QtGui>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QCheckBox>
+#elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
+#include <QtGui>
+#endif
+
 
 #include "backgroundvaluedelegate.h"
 #include "signalvaluedialog.h"

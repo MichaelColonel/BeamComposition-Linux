@@ -172,6 +172,7 @@ MainWindow::MainWindow(QWidget *parent)
     channel_b(nullptr),
     filerun(nullptr),
     filetxt(nullptr),
+    filedat(nullptr),
     command_thread(new CommandThread(this)),
     acquire_thread(new AcquireThread(this)),
     process_thread(new ProcessThread(this)),
@@ -699,12 +700,14 @@ MainWindow::processThreadStarted()
 
     int n = ui->runNumberSpinBox->value();
 
-    QString namedat = QString("Run%1.dat").arg( int(n), int(4), int(10), QLatin1Char('0'));
+    QString namerun = QString("Run%1.dat").arg( int(n), int(4), int(10), QLatin1Char('0'));
     QString nametxt = QString("Run%1.txt").arg( int(n), int(4), int(10), QLatin1Char('0'));
+    QString nameraw = QString("Run%1.raw").arg( int(n), int(4), int(10), QLatin1Char('0'));
 
     QDir* dir = new QDir(rundir);
-    QString filenamedat = dir->filePath(namedat);
+    QString filenamedat = dir->filePath(namerun);
     QString filenametxt = dir->filePath(nametxt);
+    QString filenameraw = dir->filePath(nameraw);
     delete dir;
 
     // clear list of received data
@@ -713,11 +716,18 @@ MainWindow::processThreadStarted()
     if (flag_write_run) {
         filerun = new QFile(filenamedat);
         filetxt = new QFile(filenametxt);
+        filedat = new QFile(filenameraw);
         filerun->open(QFile::WriteOnly);
         filetxt->open(QFile::WriteOnly);
+        filedat->open(QFile::WriteOnly);
+
+        // write pedestals flag
+        QDataStream out(filedat);
+        out << flag_background;
     }
 
     if (filetxt && filetxt->isOpen()) {
+        // write data file name and pedestals flag
         QTextStream out(filetxt);
         QString text = QString("Run%1").arg( int(n), int(4), int(10), QLatin1Char('0'));
         out << text << " " << int(flag_background) << endl;
@@ -759,6 +769,11 @@ MainWindow::processThreadFinished()
         filetxt->close();
         delete filetxt;
         filetxt = nullptr;
+
+        filedat->flush();
+        filedat->close();
+        delete filedat;
+        filedat = nullptr;
     }
 
     // if it was a background run, then save background results
@@ -1381,12 +1396,14 @@ MainWindow::processData()
     int listsize = countslist.size();
     statusBar()->showMessage( tr("Events received: %1").arg(listsize), 1000);
 
+    QDateTime datetime = QDateTime::currentDateTime();
+
     // process data
     if (listsize > 0)
         batchCountsReceived(countslist);
 
-    if (filerun)
-        batchDataReceived(datalist);
+    if (filerun && filedat)
+        batchDataReceived( datalist, datetime);
 
     int batch_counts = ui->runDetailsListWidget->count();
 
@@ -1400,7 +1417,6 @@ MainWindow::processData()
     }
 
     if (filetxt) {
-        QDateTime datetime = QDateTime::currentDateTime();
         RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( datetime, \
             (batch_counts + 1), datalist.size(), countslist.size(), \
             batch_data_offset, ui->runDetailsListWidget);
@@ -1492,7 +1508,7 @@ MainWindow::batchCountsReceived(const CountsList &list)
 }
 
 void
-MainWindow::batchDataReceived(const DataList& datalist)
+MainWindow::batchDataReceived( const DataList& datalist, const QDateTime&)
 {
     WriteDataProcess* writedata = new WriteDataProcess( filerun, datalist);
     writedata->setAutoDelete(true);

@@ -43,7 +43,7 @@ WriteDataProcess::run()
         filerun->flush();
     }
 }
-
+/*
 WriteCountsProcess::WriteCountsProcess( QFile* file, const CountsList& c)
     :
     WriteDataProcess(file),
@@ -64,5 +64,30 @@ WriteCountsProcess::run()
             out << array[0] << " " << array[1] << " ";
             out << array[2] << " " << array[3] << endl;
         }
+    }
+}
+*/
+WriteDataTimeProcess::WriteDataTimeProcess( QFile* file, time_t tm, const DataList& d)
+    :
+    WriteDataProcess( file, d),
+    datetime(tm)
+{
+}
+
+WriteDataTimeProcess::~WriteDataTimeProcess()
+{
+}
+
+void
+WriteDataTimeProcess::run()
+{
+    if (filerun && filerun->isOpen()) {
+        QDataStream out(filerun);
+        out << quint32(datetime);
+        out << quint32(data.size());
+        for ( quint8 value : data) {
+            out << value;
+        }
+        filerun->flush();
     }
 }

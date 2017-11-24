@@ -44,6 +44,7 @@ class QListWidgetItem;
 class QCloseEvent;
 class QProgressDialog;
 class QSettings;
+class QDateTime;
 
 class CommandThread;
 class AcquireThread;
@@ -113,7 +114,7 @@ private slots:
 
 private:
     QString processTextFile( QFile* runfile, QList<QListWidgetItem*>& items);
-    void batchDataReceived(const DataList& list);
+    void batchDataReceived( const DataList& list, const QDateTime&);
     void batchCountsReceived(const CountsList& list);
     void saveSettings(QSettings* set);
     void loadSettings(QSettings* set);
@@ -133,6 +134,7 @@ private:
     FT_HANDLE channel_b;
     QFile* filerun;
     QFile* filetxt;
+    QFile* filedat;
 
     CommandThread* command_thread;
     AcquireThread* acquire_thread;

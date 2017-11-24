@@ -31,17 +31,27 @@ public:
 
 protected:
     QFile* filerun;
-
-private:
     DataList data;
 };
 
+/*
 class WriteCountsProcess : public WriteDataProcess {
 public:
     explicit WriteCountsProcess( QFile* file, const CountsList& c = CountsList());
     virtual ~WriteCountsProcess();
     virtual void run();
 
-private:
+protected:
     CountsList counts;
+};
+*/
+
+class WriteDataTimeProcess : public WriteDataProcess {
+public:
+    explicit WriteDataTimeProcess( QFile* file, time_t datetime, const DataList& d = DataList());
+    virtual ~WriteDataTimeProcess();
+    virtual void run();
+
+protected:
+    time_t datetime;
 };

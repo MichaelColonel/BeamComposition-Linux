@@ -58,7 +58,7 @@ const DataVector mask{ // first two low bits
 
 QWaitCondition cond_acquire;
 QMutex* mutex = new QMutex;
-quint8 buffer[BUFFER_SIZE];
+quint8* buffer = new quint8[BUFFER_SIZE];
 DataQueue queue;
 
 } // namespace

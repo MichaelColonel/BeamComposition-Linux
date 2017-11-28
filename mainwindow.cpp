@@ -924,7 +924,7 @@ MainWindow::acquisitionTimingChanged(int value)
     QComboBox* combobox = qobject_cast<QComboBox*>(sender());
 
     int acquisition_time = 5; // 600 ms
-    int delay_time = 4; // 200 ms
+    int delay_time = 2; // 100 ms
 
     if (combobox == ui->acquisitionTimeComboBox) {
         acquisition_time = value;
@@ -1064,12 +1064,13 @@ MainWindow::openFile(bool background_data)
 
 #if QT_VERSION >= 0x050000
     QStringList filters;
-    filters << tr("Run Files *.txt (*.txt)")
-            << tr("Run Files *.dat (*.dat)");
+    filters << tr("Run Files *.txt (*.txt)") \
+            << tr("Run Files *.dat (*.dat)") \
+            << tr("Run Files *.raw (*.raw)");
 
     dialog->setNameFilters(filters);
 #elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
-    dialog->setFilter(tr("Run Files *.txt (*.txt);;Run Files *.dat (*.dat)"));
+    dialog->setFilter(tr("Run Files *.txt (*.txt);;Run Files *.dat (*.dat);;Run Files *.raw (*.raw)"));
 #endif
 
     dialog->setDirectory(rundir);
@@ -1176,6 +1177,9 @@ MainWindow::openFile(bool background_data)
                 QMessageBox::Ok | QMessageBox::Default);
         }
         delete runfile;
+    }
+    else if (filter == tr("Run Files *.raw (*.raw)")) {
+
     }
     else {
         QMessageBox::warning( this, tr("Error"),

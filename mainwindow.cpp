@@ -723,7 +723,7 @@ MainWindow::processThreadStarted()
 
         // write pedestals flag
         QDataStream out(filedat);
-        out << flag_background;
+        out << quint8(flag_background);
     }
 
     if (filetxt && filetxt->isOpen()) {
@@ -1400,14 +1400,14 @@ MainWindow::processData()
     int listsize = countslist.size();
     statusBar()->showMessage( tr("Events received: %1").arg(listsize), 1000);
 
-    QDateTime datetime = QDateTime::currentDateTime();
+    QDateTime dtime = QDateTime::currentDateTime();
 
     // process data
     if (listsize > 0)
         batchCountsReceived(countslist);
 
     if (filerun && filedat)
-        batchDataReceived( datalist, datetime);
+        batchDataReceived( datalist, dtime);
 
     int batch_counts = ui->runDetailsListWidget->count();
 
@@ -1420,17 +1420,14 @@ MainWindow::processData()
            batch_data_offset = ritem->batch_offset() + ritem->batch_bytes();
     }
 
-    if (filetxt) {
-        RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( datetime, \
-            (batch_counts + 1), datalist.size(), countslist.size(), \
-            batch_data_offset, ui->runDetailsListWidget);
+    RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( dtime, \
+        (batch_counts + 1), datalist.size(), countslist.size(), \
+        batch_data_offset, ui->runDetailsListWidget);
 
+    if (filetxt && filetxt->isOpen()) {
 //        qDebug() << item->batch_offset() << " " << item->batch_bytes() << " " << item->batch_events();
-
-        if (filetxt->isOpen()) {
-            QTextStream out(filetxt);
-            out << item->file_string() << endl;
-        }
+        QTextStream out(filetxt);
+        out << item->file_string() << endl;
     }
     updateRunInfo();
 
@@ -1512,12 +1509,18 @@ MainWindow::batchCountsReceived(const CountsList &list)
 }
 
 void
-MainWindow::batchDataReceived( const DataList& datalist, const QDateTime&)
+MainWindow::batchDataReceived( const DataList& datalist, const QDateTime& dt)
 {
+    time_t dtime = dt.toTime_t();
+
     WriteDataProcess* writedata = new WriteDataProcess( filerun, datalist);
     writedata->setAutoDelete(true);
+    WriteDataTimeProcess* writedatatime = new WriteDataTimeProcess( filedat, dtime, datalist);
+    writedatatime->setAutoDelete(true);
+
     QThreadPool* threadPool = QThreadPool::globalInstance();
     threadPool->start(writedata);
+    threadPool->start(writedatatime);
 }
 
 void

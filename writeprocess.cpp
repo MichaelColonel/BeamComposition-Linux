@@ -83,7 +83,7 @@ WriteDataTimeProcess::run()
 {
     if (filerun && filerun->isOpen()) {
         QDataStream out(filerun);
-        out << quint32(datetime);
+        out << quint64(datetime);
         out << quint32(data.size());
         for ( quint8 value : data) {
             out << value;

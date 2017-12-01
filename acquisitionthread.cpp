@@ -139,8 +139,8 @@ ProcessThread::ProcessThread(QObject* parent)
     stopped(false),
     flag_background(false)
 {
-    counts.reserve(BUFFER_SIZE);
-    bufferdata.reserve(BUFFER_SIZE * mask.size());
+//    counts.reserve(BUFFER_SIZE);
+//    bufferdata.reserve(BUFFER_SIZE * mask.size());
 }
 
 ProcessThread::~ProcessThread()
@@ -183,7 +183,7 @@ ProcessThread::run()
             localdata = std::move(queue.front());
             queue.pop();
             for ( quint8 v : localdata)
-                bufferdata.append(v);
+                bufferdata.push_back(v);
         }
 
         // process the raw data to obtain ADC counts
@@ -192,7 +192,8 @@ ProcessThread::run()
         size_t res = process_data( localcounts, localdata, proc);
         if (res) {
             QMutexLocker locker(mutex);
-            counts << localcounts;
+            for ( const CountsArray& event_counts: localcounts)
+                counts.push_back(event_counts);
         }
 
         if (res && flag_background)
@@ -339,7 +340,7 @@ ProcessFileThread::processFileBatches()
                 size_t nread = (file) ? read_size : file.gcount();
 
                 CountsList list;
-                list.reserve(BUFFER_SIZE / mask.size());
+//                list.reserve(BUFFER_SIZE / mask.size());
                 DataVector data( buffer, buffer + nread);
 
                 size_t proc = 0;
@@ -408,7 +409,7 @@ ProcessFileThread::processFileData()
             size_t nread = (file) ? BUFFER_SIZE : file.gcount();
 
             CountsList list;
-            list.reserve(BUFFER_SIZE / mask.size());
+//            list.reserve(BUFFER_SIZE / mask.size());
             DataVector data( buffer, buffer + nread);
 
             size_t pos = this->process_data( list, data, proc);

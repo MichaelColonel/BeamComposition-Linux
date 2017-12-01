@@ -84,7 +84,7 @@ protected:
 private:
     void batch_to_counts( CountsList& list, const DataVector& batch) const {
         CountsArray counts = BufferData(batch).array();
-        list.append(counts);
+        list.push_back(counts);
     }
 
     // ADC count from high and low data bytes

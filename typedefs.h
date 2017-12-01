@@ -17,13 +17,14 @@
 
 #pragma once
 
-#include <QList>
-
+#include <list>
 #include <tuple>
 #include <array>
 #include <vector>
 #include <queue>
 #include <map>
+
+#include <qglobal.h>
 
 #define CHANNELS 4
 #define CARBON_Z 6
@@ -34,6 +35,19 @@ class TH2;
 typedef std::tuple< TH1*, TH2* > DiagramTuple;
 typedef std::tuple< TH1**, TH2** > DiagramsTuple;
 typedef std::array< quint16, CHANNELS > CountsArray;
+
+typedef std::list< CountsArray > CountsList;
+typedef std::list< quint8 > DataList;
+
+typedef std::vector< quint8 > DataVector;
+typedef std::queue< DataVector > DataQueue;
+
+// pair.first: mu -- mean, average value
+// pair.second: sigma -- RMS, sqrt(variance)
+typedef std::pair< double, double > SignalPair;
+typedef std::array< SignalPair, CHANNELS > SignalArray;
+typedef std::map< double, SignalArray > ReferenceSignalMap;
+typedef std::map< int, SignalPair > ChargeSignalMap;
 
 // Acquisition run type
 enum RunType {
@@ -75,19 +89,6 @@ enum DiagramType {
     HIST_Z13,
     HIST_Z24
 };
-
-typedef QList< CountsArray > CountsList;
-typedef QList<quint8> DataList;
-
-typedef std::vector<quint8> DataVector;
-typedef std::queue< DataVector > DataQueue;
-
-// pair.first: mu -- mean, average value
-// pair.second: sigma -- RMS, sqrt(variance)
-typedef std::pair< double, double > SignalPair;
-typedef std::array< SignalPair, CHANNELS > SignalArray;
-typedef std::map< double, SignalArray > ReferenceSignalMap;
-typedef std::map< int, SignalPair > ChargeSignalMap;
 
 struct Diagrams {
     Diagrams()

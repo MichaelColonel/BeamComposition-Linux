@@ -108,6 +108,7 @@ private slots:
     void dataUpdateChanged(int);
     void detailsClear();
     void detailsSelectAll();
+    void detailsSelectNone();
     void detailsItemSelectionChanged();
     void processBatchesClicked();
     void processData();

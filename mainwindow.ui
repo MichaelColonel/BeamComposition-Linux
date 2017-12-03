@@ -62,7 +62,7 @@
          <x>0</x>
          <y>0</y>
          <width>277</width>
-         <height>760</height>
+         <height>784</height>
         </rect>
        </property>
        <attribute name="label">
@@ -575,8 +575,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>141</width>
-         <height>133</height>
+         <width>290</width>
+         <height>571</height>
         </rect>
        </property>
        <attribute name="label">
@@ -622,8 +622,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>229</width>
-         <height>291</height>
+         <width>290</width>
+         <height>571</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -837,7 +837,7 @@
      <x>0</x>
      <y>0</y>
      <width>308</width>
-     <height>26</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -976,6 +976,14 @@
    </property>
    <property name="toolTip">
     <string>Select all batches</string>
+   </property>
+  </action>
+  <action name="actionDetailsSelectNone">
+   <property name="text">
+    <string>Select None</string>
+   </property>
+   <property name="toolTip">
+    <string>Select none batches</string>
    </property>
   </action>
  </widget>

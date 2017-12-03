@@ -232,6 +232,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( ui->actionSettings, SIGNAL(triggered()), this, SLOT(setRunSettings()));
     connect( ui->actionDetailsClearAll, SIGNAL(triggered()), this, SLOT(detailsClear()));
     connect( ui->actionDetailsSelectAll, SIGNAL(triggered()), this, SLOT(detailsSelectAll()));
+    connect( ui->actionDetailsSelectNone, SIGNAL(triggered()), this, SLOT(detailsSelectNone()));
 
     connect( ui->startRunButton, SIGNAL(clicked()), this, SLOT(startRun()));
     connect( ui->stopRunButton, SIGNAL(clicked()), this, SLOT(stopRun()));
@@ -277,9 +278,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect( progress_dialog, SIGNAL(canceled()), profile_thread, SLOT(stop()));
 
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectAll);
-//    QAction* act = new QAction(this);
-//    act->setSeparator(true);
-//    ui->runDetailsListWidget->addAction(act);
+    ui->runDetailsListWidget->addAction(ui->actionDetailsSelectNone);
+
+    QAction* act = new QAction(this);
+    act->setSeparator(true);
+    ui->runDetailsListWidget->addAction(act);
     ui->runDetailsListWidget->addAction(ui->actionDetailsClearAll);
     ui->runDetailsListWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -328,6 +331,12 @@ MainWindow::~MainWindow()
         filetxt->flush();
         filetxt->close();
         delete filetxt;
+    }
+
+    if (filedat) {
+        filedat->flush();
+        filedat->close();
+        delete filedat;
     }
 
     delete progress_dialog;
@@ -1844,6 +1853,14 @@ void
 MainWindow::detailsSelectAll()
 {
     ui->runDetailsListWidget->selectAll();
+}
+
+void
+MainWindow::detailsSelectNone()
+{
+    ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->runDetailsListWidget->setCurrentRow(-1);
+    ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::MultiSelection);
 }
 
 void

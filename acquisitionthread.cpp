@@ -39,16 +39,16 @@ namespace {
 /*
 // lambda to check mask within the sequence of raw buffer data
 std::function<bool( quint8, quint8)>
-check_mask = [] ( quint8 v, quint8 m) {
-    return !((v & MASK_BITS) ^ m);
+check_mask = [] ( quint8 value, quint8 mask) {
+    return !((value & MASK_BITS) ^ mask);
 };
 */
 
 // function to check mask within the sequence of raw buffer data
 bool
-check_mask( quint8 v, quint8 m)
+check_mask( unsigned char value, unsigned char mask)
 {
-    return !((v & MASK_BITS) ^ m);
+    return !((value & MASK_BITS) ^ mask);
 }
 
 // mask buffer of the batch (high byte, low byte)
@@ -58,7 +58,7 @@ const DataVector mask{ // first two low bits
 
 QWaitCondition cond_acquire;
 QMutex* mutex = new QMutex;
-quint8* buffer = new quint8[BUFFER_SIZE];
+unsigned char* buffer = new unsigned char[BUFFER_SIZE];
 DataQueue queue;
 
 } // namespace
@@ -182,7 +182,7 @@ ProcessThread::run()
 
             localdata = std::move(queue.front());
             queue.pop();
-            for ( quint8 v : localdata)
+            for ( unsigned char v : localdata)
                 bufferdata.push_back(v);
         }
 

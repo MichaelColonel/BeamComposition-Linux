@@ -158,6 +158,7 @@ protected:
 private:
     void processFileData();
     void processFileBatches();
+    void processFileRaw();
 
     Diagrams diagrams;
     QString filename;
@@ -165,7 +166,8 @@ private:
     QList<QListWidgetItem*> batches;
     enum ProcessType {
         PROCESS_BATCHES,
-        PROCESS_FILE
+        PROCESS_FILE,
+        PROCESS_RAW
     };
     ProcessType process_type;
 };

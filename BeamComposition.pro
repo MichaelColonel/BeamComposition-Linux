@@ -80,7 +80,7 @@ FORMS    += mainwindow.ui \
     settingsdialog.ui \
     signalvaluedialog.ui
 
-LIBS += -L/usr/local/GATE/lib64 -lftd2xx
+LIBS += -lftd2xx
 
 RESOURCES += BeamComposition.qrc
 

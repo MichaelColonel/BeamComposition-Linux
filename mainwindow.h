@@ -115,6 +115,7 @@ private slots:
 
 private:
     QString processTextFile( QFile* runfile, QList<QListWidgetItem*>& items);
+    bool processRawFile( QFile* runfile, QList<QListWidgetItem*>& items);
     void batchDataReceived( const DataList& list, const QDateTime&);
     void batchCountsReceived(const CountsList& list);
     void saveSettings(QSettings* set);

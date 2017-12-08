@@ -144,6 +144,7 @@ public:
         filename = fname; flag_background = background_data;
         process_type = PROCESS_FILE;
     }
+
     RunInfo runInfo() const { return runinfo; }
 
 public slots:
@@ -158,7 +159,6 @@ protected:
 private:
     void processFileData();
     void processFileBatches();
-    void processFileRaw();
 
     Diagrams diagrams;
     QString filename;
@@ -166,8 +166,7 @@ private:
     QList<QListWidgetItem*> batches;
     enum ProcessType {
         PROCESS_BATCHES,
-        PROCESS_FILE,
-        PROCESS_RAW
+        PROCESS_FILE
     };
     ProcessType process_type;
 };

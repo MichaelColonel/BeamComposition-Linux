@@ -1188,7 +1188,38 @@ MainWindow::openFile(bool background_data)
         delete runfile;
     }
     else if (filter == tr("Run Files *.raw (*.raw)")) {
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        ui->runDetailsListWidget->clear();
 
+        QList<QListWidgetItem*> details_items;
+        QFile* runfile = new QFile(fileName);
+
+        runfile->open(QFile::ReadOnly);
+        if (runfile->isOpen()) {
+            QApplication::setOverrideCursor(Qt::WaitCursor);
+            flag_background = processRawFile( runfile, details_items);
+            QApplication::restoreOverrideCursor();
+        }
+
+        delete runfile;
+
+        // clear diagrams
+        QTreeWidgetItemIterator iter(ui->treeWidget);
+        while (*iter) {
+            DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(*iter);
+            if (ditem) {
+                TH1* h1 = ditem->getTH1();
+                TH2* h2 = ditem->getTH2();
+                if (h1) h1->Reset();
+                if (h2) h2->Reset();
+            }
+            ++iter;
+        }
+
+        progress_dialog->setRange( 0, details_items.size());
+
+        profile_thread->setBatches( fileName, details_items, flag_background);
+        profile_thread->start();
     }
     else {
         QMessageBox::warning( this, tr("Error"),
@@ -1392,6 +1423,36 @@ MainWindow::processTextFile( QFile* runfile, QList<QListWidgetItem *>& items)
         }
     }
     return run_number;
+}
+
+bool
+MainWindow::processRawFile( QFile* runfile, QList<QListWidgetItem *>& items)
+{
+    QDataStream in(runfile);
+    in.setByteOrder(QDataStream::LittleEndian);
+
+
+    quint8 background_data;
+    quint64 datetime;
+    quint32 bytes_size;
+
+    in >> background_data;
+
+    qint64 offset = 0;
+    int batchnumber = 1;
+    while (!in.atEnd()) {
+        in >> datetime >> bytes_size;
+        QDateTime dtime;
+        dtime.setTime_t(datetime);
+        offset = runfile->pos();
+
+        QListWidgetItem *item = new RunDetailsListWidgetItem( dtime,
+            batchnumber, bytes_size, 0, offset, ui->runDetailsListWidget);
+        batchnumber++;
+        items.append(item);
+        in.skipRawData(bytes_size);
+    }
+    return bool(background_data);
 }
 
 void

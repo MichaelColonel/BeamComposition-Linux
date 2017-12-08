@@ -16,7 +16,7 @@
  */
 
 #include <QDataStream>
-#include <QTextStream>
+//#include <QTextStream>
 #include <QFile>
 
 #include "writeprocess.h"
@@ -83,7 +83,7 @@ WriteDataTimeProcess::run()
 {
     if (filerun && filerun->isOpen()) {
         QDataStream out(filerun);
-//        out.setByteOrder(QDataStream::LittleEndian);
+        out.setByteOrder(QDataStream::LittleEndian);
         out << quint64(datetime);
         out << quint32(data.size());
         for ( quint8 value : data) {

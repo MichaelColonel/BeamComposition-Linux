@@ -21,13 +21,15 @@
 #include <string>
 #include "acquisitionthread.h"
 
+#define COMMAND_SIZE 4
+
 class CommandThread : public AcquireThread {
     Q_OBJECT
 public:
     explicit CommandThread(QObject* parent = 0);
     virtual ~CommandThread();
     void initiate(int delay);
-    void writeCommand( const char* cmd, size_t cmd_size);
+    void writeCommand( const char* cmd, size_t cmd_size = COMMAND_SIZE);
 
 signals:
     void signalExternalSignal();

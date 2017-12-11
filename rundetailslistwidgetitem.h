@@ -33,14 +33,19 @@ public:
         QListWidget* parent = 0, int type = QListWidgetItem::UserType + 1);
     virtual ~RunDetailsListWidgetItem();
     QString file_string() const;
+    void set_number_of_events( size_t new_events, size_t proc_events = 0) {
+        events = new_events;
+        processed_events = proc_events;
+    }
     size_t batch_bytes() const { return bytes; }
     size_t batch_events() const { return events; }
     size_t batch_offset() const { return offset; }
-
+    void update_text();
 private:
     QDateTime date_time;
     int batch_number;
     size_t offset;
     size_t bytes;
     size_t events;
+    size_t processed_events;
 };

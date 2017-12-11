@@ -15,7 +15,6 @@
  *      MA 02110-1301, USA.
  */
 
-#include <QFileInfo>
 #include <QWaitCondition>
 #include <QMutex>
 #include <QDebug>
@@ -352,6 +351,7 @@ ProcessFileThread::processFileBatches()
                 }
                 RunInfo info = params->fit( list, diagrams, flag_background);
                 runinfo += info;
+                ritem->set_number_of_events( info.counted(), info.processed());
 
                 items_proc++;
                 emit progress(items_proc);

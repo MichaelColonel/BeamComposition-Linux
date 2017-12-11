@@ -160,6 +160,8 @@ const int gparams = 3;
 const char* description_channel_a = "FT2232H_MM A";
 const char* description_channel_b = "FT2232H_MM B";
 
+const size_t towrite = COMMAND_SIZE;
+
 } // namespace
 
 MainWindow::MainWindow(QWidget *parent)
@@ -605,7 +607,7 @@ MainWindow::triggersItemChanged(int value)
 {
     char buf[5] = "T000";
     buf[3] += value;
-    size_t towrite = 4;
+
     command_thread->writeCommand( buf, towrite);
     QString message = (value) ? tr("Triggers activated") : tr("Triggers diactivated");
     statusBar()->showMessage( message, 1000);
@@ -619,7 +621,6 @@ MainWindow::motorItemChanged(int value)
     int steps = ui->scanningStepSpinBox->value();
     local_itoa( steps, buf + 2, 2);
 
-    size_t towrite = 4;
     command_thread->writeCommand( buf, towrite);
     QString message;
     switch (value) {
@@ -852,6 +853,13 @@ MainWindow::processFileFinished()
         params->recalculate();
     }
 
+    int run_items = ui->runDetailsListWidget->count();
+    for ( int i = 0; i < run_items; ++i) {
+        QListWidgetItem* item = ui->runDetailsListWidget->item(i);
+        RunDetailsListWidgetItem* ritem = dynamic_cast<RunDetailsListWidgetItem*>(item);
+        ritem->update_text();
+    }
+
     runinfo = profile_thread->runInfo();
     updateRunInfo();
 
@@ -947,7 +955,7 @@ MainWindow::acquisitionTimingChanged(int value)
     char buf[5] = "A100";
     buf[2] = delay_time + '0';
     buf[3] = acquisition_time + '0';
-    size_t towrite = 4;
+
     command_thread->writeCommand( buf, towrite);
     statusBar()->showMessage( tr("Extraction signal update"), 1000);
 }
@@ -1005,7 +1013,7 @@ MainWindow::dataUpdateChanged(int id)
     buf[1] = int(state) + '0';
     buf[2] = delay_time + '0';
     buf[3] = acquisition_time + '0';
-    size_t towrite = 4;
+
     command_thread->writeCommand( buf, towrite);
     if (state)
         statusBar()->showMessage( tr("Extraction signal update"), 1000);
@@ -1687,7 +1695,6 @@ void
 MainWindow::resetAlteraClicked()
 {
     char buf[5] = "R000";
-    size_t towrite = 4;
     command_thread->writeCommand( buf, towrite);
     statusBar()->showMessage( tr("reset ALTERA"), 1000);
 }
@@ -1697,7 +1704,7 @@ MainWindow::setDelayChanged(int delay)
 {
     char buf[5] = "DXXX";
     local_itoa( delay, buf + 1);
-    size_t towrite = 4;
+
     command_thread->writeCommand( buf, towrite);
     statusBar()->showMessage( tr("Delay %1").arg(delay), 1000);
 }
@@ -1783,7 +1790,7 @@ MainWindow::updateRunInfo()
 {
     for ( int i = 0; i < CARBON_Z; ++i) {
         double charge_z = runinfo.averageComposition(i);
-        QTableWidgetItem* item = ui->runInfoTableWidget->item( i + 6, 0);
+        QTableWidgetItem* item = ui->runInfoTableWidget->item( i + CARBON_Z, 0);
         if (charge_z >= 0.) {
             charge_z *= 100.;
             item->setText(QString("%1").arg( charge_z,  3, 'f', 1));
@@ -1818,7 +1825,7 @@ MainWindow::fitChargeDiagram(DiagramType)
     pad->cd();
 
     int zmin = settings->value( "min-fit-charge", 1).toInt();
-    int zmax = settings->value( "max-fit-charge", 6).toInt();
+    int zmax = settings->value( "max-fit-charge", CARBON_Z).toInt();
 
     CalibrationFitting::BeamCompositionFit fbeam( charge, zmin, zmax, 0.3);
     TF1* fit = fbeam.fit( fbeam, charge, zmin, zmax, 0.5); // don't delete

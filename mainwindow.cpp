@@ -824,6 +824,7 @@ MainWindow::processFileStarted()
 {
     qDebug() << "GUI: File processing started";
     progress_dialog->show();
+
 //    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     QApplication::setOverrideCursor(Qt::WaitCursor);
 }
@@ -1150,7 +1151,7 @@ MainWindow::openFile(bool background_data)
         delete runfile;
     }
     else if (filter == tr("Run Files *.txt (*.txt)")) {
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         ui->runDetailsListWidget->clear();
 
         QList<QListWidgetItem*> details_items;
@@ -1196,7 +1197,7 @@ MainWindow::openFile(bool background_data)
         delete runfile;
     }
     else if (filter == tr("Run Files *.raw (*.raw)")) {
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         ui->runDetailsListWidget->clear();
 
         QList<QListWidgetItem*> details_items;

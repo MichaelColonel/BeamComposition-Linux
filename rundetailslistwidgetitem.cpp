@@ -41,8 +41,8 @@ RunDetailsListWidgetItem::RunDetailsListWidgetItem( size_t batch_bytes,
 */
 
 RunDetailsListWidgetItem::RunDetailsListWidgetItem( const QDateTime& datetime,
-    int number, size_t batch_bytes, size_t batch_events, size_t batch_offset,
-    QListWidget* parent, int type)
+    int number, size_t batch_bytes, size_t batch_events, size_t batch_events_processed,
+    size_t batch_offset, QListWidget* parent, int type)
     :
     QListWidgetItem( parent, type),
     date_time(datetime),
@@ -50,8 +50,10 @@ RunDetailsListWidgetItem::RunDetailsListWidgetItem( const QDateTime& datetime,
     offset(batch_offset),
     bytes(batch_bytes),
     events(batch_events),
-    processed_events(0)
+    processed_events(batch_events_processed)
 {
+    update_text();
+/*
     QString date_text = date_time.toString("dd.MM.yyyy");
     QString time_text = date_time.toString("hh:mm:ss");
 
@@ -59,6 +61,7 @@ RunDetailsListWidgetItem::RunDetailsListWidgetItem( const QDateTime& datetime,
             .arg(batch_number).arg(date_text).arg(time_text).arg(bytes).arg(events);
 
     setText(text);
+*/
 }
 
 RunDetailsListWidgetItem::~RunDetailsListWidgetItem()
@@ -72,7 +75,8 @@ RunDetailsListWidgetItem::file_string() const
     QString date_text = date_time.toString("dd.MM.yyyy");
     QString time_text = date_time.toString("hh:mm:ss");
 
-    QString text = QString("%1 %2 %3 %4 %5").arg(date_text).arg(time_text).arg( offset, 16).arg( bytes, 10).arg( events, 10);
+    QString text = QString("%1 %2 %3 %4 %5") \
+            .arg(date_text).arg(time_text).arg( offset, 16).arg( bytes, 10).arg( events, 10);
 
     return text;
 }

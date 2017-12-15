@@ -1426,7 +1426,7 @@ MainWindow::processTextFile( QFile* runfile, QList<QListWidgetItem *>& items)
 //            qDebug() << datestring << " " << timestring << " " << bytes << " " << events;
             QDateTime dtime( date, time);
             QListWidgetItem *item = new RunDetailsListWidgetItem( dtime,
-                batchnumber, bytes, events, offset, ui->runDetailsListWidget);
+                batchnumber, bytes, events, 0, offset, ui->runDetailsListWidget);
             offset += bytes;
             batchnumber++;
             items.append(item);
@@ -1457,7 +1457,7 @@ MainWindow::processRawFile( QFile* runfile, QList<QListWidgetItem *>& items)
         offset = runfile->pos();
 
         QListWidgetItem *item = new RunDetailsListWidgetItem( dtime,
-            batchnumber, bytes_size, 0, offset, ui->runDetailsListWidget);
+            batchnumber, bytes_size, 0, 0, offset, ui->runDetailsListWidget);
         batchnumber++;
         items.append(item);
         in.skipRawData(bytes_size);
@@ -1477,14 +1477,15 @@ MainWindow::processData()
     DataList datalist;
     process_thread->getProcessedData( datalist, countslist);
 
-    int listsize = countslist.size();
+    size_t listsize = countslist.size();
     statusBar()->showMessage( tr("Events received: %1").arg(listsize), 1000);
 
     QDateTime dtime = QDateTime::currentDateTime();
 
     // process data
-    if (listsize > 0)
-        batchCountsReceived(countslist);
+    RunInfo batch_info;
+    if (listsize)
+        batch_info = batchCountsReceived(countslist);
 
     if (filerun && filedat)
         batchDataReceived( datalist, dtime);
@@ -1499,9 +1500,14 @@ MainWindow::processData()
         if (ritem)
            batch_data_offset = ritem->batch_offset() + ritem->batch_bytes();
     }
-
+/*
     RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( dtime, \
         (batch_counts + 1), datalist.size(), countslist.size(), \
+        batch_data_offset, ui->runDetailsListWidget);
+*/
+    RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( dtime, \
+        (batch_counts + 1), datalist.size(),
+        batch_info.counted(), batch_info.processed(), \
         batch_data_offset, ui->runDetailsListWidget);
 
     if (filetxt && filetxt->isOpen()) {
@@ -1579,13 +1585,14 @@ MainWindow::deviceError( FT_HANDLE dev, FT_STATUS ftStatus)
         QMessageBox::Ok | QMessageBox::Default);
 }
 
-void
+RunInfo
 MainWindow::batchCountsReceived(const CountsList &list)
 {
     SharedFitParameters params = FitParameters::instance();
     RunInfo info = params->fit( list, diagrams, process_thread->isBackground());
     runinfo += info;
     emit updateDiagram();
+    return info;
 }
 
 void

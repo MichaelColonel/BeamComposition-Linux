@@ -28,9 +28,10 @@ class RunDetailsListWidgetItem : public QListWidgetItem {
 public:
 //    RunDetailsListWidgetItem( size_t data_bytes, size_t event_counts, size_t offset = 0,
 //        QListWidget* parent = 0, int type = QListWidgetItem::UserType + 1);
-    RunDetailsListWidgetItem( const QDateTime& datetime, int spillnumber,
-        size_t data_bytes, size_t event_counts, size_t offset = 0,
-        QListWidget* parent = 0, int type = QListWidgetItem::UserType + 1);
+    RunDetailsListWidgetItem( const QDateTime& datetime, int spillnumber, \
+        size_t data_bytes, size_t event_counts, size_t event_processed = 0, \
+        size_t data_offset = 0, QListWidget* parent = 0, \
+        int type = QListWidgetItem::UserType + 1);
     virtual ~RunDetailsListWidgetItem();
     QString file_string() const;
     void set_number_of_events( size_t new_events, size_t proc_events = 0) {

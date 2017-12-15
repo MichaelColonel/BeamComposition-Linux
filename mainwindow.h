@@ -117,7 +117,7 @@ private:
     QString processTextFile( QFile* runfile, QList<QListWidgetItem*>& items);
     bool processRawFile( QFile* runfile, QList<QListWidgetItem*>& items);
     void batchDataReceived( const DataList& list, const QDateTime&);
-    void batchCountsReceived(const CountsList& list);
+    RunInfo batchCountsReceived(const CountsList& list);
     void saveSettings(QSettings* set);
     void loadSettings(QSettings* set);
     void deviceError( FT_HANDLE, FT_STATUS);

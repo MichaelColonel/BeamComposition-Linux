@@ -286,8 +286,8 @@ const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.95534924
 //size_t accepted[6] = {};
 //size_t rejected[6] = {};
 
-const double aa = 6.240625;
-const double bb = -6.3625;
+//const double aa = 6.240625;
+//const double bb = -6.3625;
 
 } // namespace
 

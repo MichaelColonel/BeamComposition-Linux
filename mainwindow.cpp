@@ -1118,6 +1118,7 @@ MainWindow::openFile(bool background_data)
     if (fileName.isEmpty())
         return;
 
+    qDebug() << fileName;
     if (filter == tr("Run Files *.dat (*.dat)")) {
         // Open raw data run file
         QFile* runfile = new QFile(fileName);

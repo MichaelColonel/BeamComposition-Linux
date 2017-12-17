@@ -39,12 +39,10 @@
 
 #include <typeinfo>
 
-/*
-#ifdef Q_OS_WIN32 // for MinGW
+#if defined(Q_OS_WIN32) && defined(__MINGW32__)
 #include <windef.h>
 #include <winbase.h>
 #endif
-*/
 
 #include <ftd2xx.h>
 
@@ -645,32 +643,43 @@ MainWindow::createRootHistograms()
 
     int i = 0;
     while (hist1params[i].type != NONE) {
-        TH1* h = nullptr;
+        TH1* h1 = nullptr;
         if (hist1params[i].type == HIST_FITALL) {
-            h = new TH1F( hist1params[i].name, hist1params[i].title,
+            h1 = new TH1F( hist1params[i].name, hist1params[i].title,
                 hist1params[i].bins, hist1params[i].min, hist1params[i].max);
         }
         else {
-            h = new TH1I( hist1params[i].name, hist1params[i].title,
+            h1 = new TH1I( hist1params[i].name, hist1params[i].title,
                 hist1params[i].bins, hist1params[i].min, hist1params[i].max);
         }
-        h->SetFillColor(kViolet + 2);
-        h->SetFillStyle(3001);
-        root_diagrams.insert( hist1params[i].type, std::make_tuple( h, nullptr));
+        h1->SetFillColor(kViolet + 2);
+        h1->SetFillStyle(3001);
+
+        TH2* h2 = nullptr;
+        root_diagrams.insert( hist1params[i].type, std::make_tuple( h1, h2));
+
         ++i;
     }
 
     i = 0;
     while (hist2params[i].type != NONE) {
-        TH2I* h = new TH2I( hist2params[i].name, hist2params[i].title,
+        TH2I* h2 = new TH2I( hist2params[i].name, hist2params[i].title,
             hist2params[i].xbins, hist2params[i].xmin, hist2params[i].xmax,
             hist2params[i].ybins, hist2params[i].ymin, hist2params[i].ymax);
-        h->SetStats(kFALSE);
-        root_diagrams.insert( hist2params[i].type, std::make_tuple( nullptr, h));
+        h2->SetStats(kFALSE);
+
+        TH1* h1 = nullptr;
+        root_diagrams.insert( hist2params[i].type, std::make_tuple( h1, h2));
+
         ++i;
     }
 
+#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+    for ( QList<QTreeWidgetItem*>::iterator it = items.begin(); it != items.end(); ++it) {
+        QTreeWidgetItem* item = *it;
+#elif defined(Q_OS_LINUX)
     for ( QTreeWidgetItem* item : items) {
+#endif
         DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(item);
         if (ditem) {
             DiagramType type = ditem->diagramType();
@@ -853,14 +862,14 @@ MainWindow::processFileFinished()
         // recalculate channels calibration with new background
         params->recalculate();
     }
-
+/*
     int run_items = ui->runDetailsListWidget->count();
     for ( int i = 0; i < run_items; ++i) {
         QListWidgetItem* item = ui->runDetailsListWidget->item(i);
         RunDetailsListWidgetItem* ritem = dynamic_cast<RunDetailsListWidgetItem*>(item);
         ritem->update_text();
     }
-
+*/
     runinfo = profile_thread->runInfo();
     updateRunInfo();
 
@@ -1152,7 +1161,7 @@ MainWindow::openFile(bool background_data)
         delete runfile;
     }
     else if (filter == tr("Run Files *.txt (*.txt)")) {
-//        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         ui->runDetailsListWidget->clear();
 
         QList<QListWidgetItem*> details_items;
@@ -1810,7 +1819,11 @@ MainWindow::updateRunInfo()
     QTableWidgetItem* counted = ui->runInfoTableWidget->item( 13, 0);
     QTableWidgetItem* processed = ui->runInfoTableWidget->item( 14, 0);
     if (runinfo.counted()) {
+#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+        double percent = floor(1000. * runinfo.processed() / runinfo.counted()) / 10.;
+#elif defined(Q_OS_LINUX)
         double percent = round(1000. * runinfo.processed() / runinfo.counted()) / 10.;
+#endif
         counted->setText(QString("%1").arg(runinfo.counted()));
         processed->setText(QString("%1 (%2 %)").arg(runinfo.processed()).arg( percent, 0, 'g', 4));
     }
@@ -1850,7 +1863,7 @@ MainWindow::fitChargeDiagram(DiagramType)
 
     TLegend* legend = new TLegend( 0.75, 0.15, 0.99, 0.55);
     legend->SetTextFont(70);
-    legend->SetTextSize(0.03);
+    legend->SetTextSize(0.03f);
     legend->AddEntry( charge, "Data", "lpe");
     legend->AddEntry( fit, TString::Format( "Total fit : %2.1f %%", datapercent));
 

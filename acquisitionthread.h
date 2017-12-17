@@ -19,12 +19,12 @@
 
 #include <QThread>
 
-/*
-#ifdef Q_OS_WIN32
+
+#if defined(Q_OS_WIN32) && defined(__MINGW32__)
 #include <windef.h>
 #include <winbase.h>
 #endif
-*/
+
 
 #include <ftd2xx.h>
 #include "runinfo.h"

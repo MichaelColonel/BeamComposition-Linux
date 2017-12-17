@@ -66,7 +66,11 @@ SettingsDialog::SettingsDialog(QWidget* parent)
   {
     ui->setupUi(this);
 
+#if QT_VERSION >= 0x050000
+    QHeaderView* hview = new QHeaderView( Qt::Vertical, ui->signalCountsTableWidget);
+#elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
     QHeaderView* hview = new QHeaderView( Qt::Orientation::Vertical, ui->signalCountsTableWidget);
+#endif
 
 #if QT_VERSION >= 0x050000
     hview->setSectionsClickable(true);
@@ -86,16 +90,25 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 
     ui->signalCountsTableWidget->setRowCount(elems);
     int pos = 0;
+#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+    for ( ReferenceSignalMap::const_iterator it = ref_signals.begin(); it != ref_signals.end(); ++it) {
+        int value = it->first;
+#elif defined(Q_OS_LINUX)
     for ( const auto& elem : ref_signals) {
-
+        int value = elem.first;
+#endif
         int column = 0;
 
-        int value = elem.first;
         QTableWidgetItem* item1 = new QTableWidgetItem(tr("%1").arg(value));
         ui->signalCountsTableWidget->setItem( pos, column++, item1);
 
+#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+        for ( SignalArray::const_iterator iter = it->second.begin(); iter != it->second.end(); ++iter) {
+            QString str = SignalValueDelegate::form_text(*iter);
+#elif defined(Q_OS_LINUX)
         for ( const SignalPair& sp : elem.second) {
             QString str = SignalValueDelegate::form_text(sp);
+#endif
             QTableWidgetItem* item = new QTableWidgetItem(str);
             ui->signalCountsTableWidget->setItem( pos, column++, item);
         }
@@ -146,7 +159,11 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     ui->chargeCountsTableWidget->setItem( CARBON_Z - 1, 1, item);
 */
 
+#if QT_VERSION >= 0x050000
+    QHeaderView* hview1 = new QHeaderView( Qt::Vertical, ui->chargeCountsTableWidget);
+#elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
     QHeaderView* hview1 = new QHeaderView( Qt::Orientation::Vertical, ui->chargeCountsTableWidget);
+#endif
 
 #if QT_VERSION >= 0x050000
     hview1->setSectionsClickable(true);
@@ -348,15 +365,24 @@ SettingsDialog::restoreReferenceMatrixClicked()
 
         ui->signalCountsTableWidget->setRowCount(elems);
         int pos = 0;
+#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+        for ( ReferenceSignalMap::const_iterator it = ref_signals.begin(); it != ref_signals.end(); ++it) {
+            int value = it->first;
+#elif defined(Q_OS_LINUX)
         for ( const auto& elem : ref_signals) {
-            int column = 0;
-
             int value = elem.first;
+#endif
+            int column = 0;
             QTableWidgetItem* item1 = new QTableWidgetItem(QString("%1").arg(value));
             ui->signalCountsTableWidget->setItem( pos, column++, item1);
 
+#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+            for ( SignalArray::const_iterator iter = it->second.begin(); iter != it->second.end(); ++iter) {
+                QString str = SignalValueDelegate::form_text(*iter);
+#elif defined(Q_OS_LINUX)
             for ( const SignalPair& sp : elem.second) {
                 QString str = SignalValueDelegate::form_text(sp);
+#endif
                 QTableWidgetItem* item = new QTableWidgetItem(str);
                 ui->signalCountsTableWidget->setItem( pos, column++, item);
             }
@@ -694,10 +720,10 @@ SettingsDialog::showGraphClicked()
     mg->GetHistogram()->SetMaximum(4095.0);   // along
     mg->GetHistogram()->SetMinimum(0.0);  //   Y
 
-    mg->GetXaxis()->SetTitleOffset(1.2);
-    mg->GetXaxis()->SetTitleSize(0.03);
-    mg->GetXaxis()->SetLabelSize(0.03);
-    mg->GetYaxis()->SetTitleOffset(1.3);
+    mg->GetXaxis()->SetTitleOffset(1.2f);
+    mg->GetXaxis()->SetTitleSize(0.03f);
+    mg->GetXaxis()->SetLabelSize(0.03f);
+    mg->GetYaxis()->SetTitleOffset(1.3f);
     mg->GetXaxis()->SetTitle("Reference signal (mV)");
     mg->GetYaxis()->SetTitle("Amplitude (ADC count)");
 

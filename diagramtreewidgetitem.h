@@ -29,12 +29,12 @@ public:
         :
         QTreeWidgetItem(QTreeWidgetItem::UserType),
         root_diagram_type(diagram_type),
-#ifdef Q_OS_LINUX
+#if (defined(__GNUG__) && (__cplusplus >= 201103L)) || (defined(_MSC_VER) && (_MSC_VER >= 1900))
         root_diagram_tuple(std::make_tuple( nullptr, nullptr)),
 #endif
         root_canvas_dialog(nullptr)
     {
-#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
         TH1* h1 = nullptr;
         TH2* h2 = nullptr;
         root_diagram_tuple = std::make_tuple( h1, h2);

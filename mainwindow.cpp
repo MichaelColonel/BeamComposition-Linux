@@ -674,10 +674,10 @@ MainWindow::createRootHistograms()
         ++i;
     }
 
-#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
     for ( QList<QTreeWidgetItem*>::iterator it = items.begin(); it != items.end(); ++it) {
         QTreeWidgetItem* item = *it;
-#elif defined(Q_OS_LINUX)
+#elif defined(__GNUG__) && (__cplusplus >= 201103L)
     for ( QTreeWidgetItem* item : items) {
 #endif
         DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(item);
@@ -1346,6 +1346,10 @@ MainWindow::disconnectDevices()
     if (timerdata->isActive())
         timerdata->stop();
 
+    disconnect( timerdata, SIGNAL(timeout()), this, SLOT(processData()));
+    disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalReceived()));
+    disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
+
     ui->connectButton->setEnabled(true);
     ui->disconnectButton->setEnabled(false);
     ui->dataUpdateGroupBox->setEnabled(false);
@@ -1819,9 +1823,9 @@ MainWindow::updateRunInfo()
     QTableWidgetItem* counted = ui->runInfoTableWidget->item( 13, 0);
     QTableWidgetItem* processed = ui->runInfoTableWidget->item( 14, 0);
     if (runinfo.counted()) {
-#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+#if defined(_MSC_VER)
         double percent = floor(1000. * runinfo.processed() / runinfo.counted()) / 10.;
-#elif defined(Q_OS_LINUX)
+#elif defined(__GNUC__)
         double percent = round(1000. * runinfo.processed() / runinfo.counted()) / 10.;
 #endif
         counted->setText(QString("%1").arg(runinfo.counted()));

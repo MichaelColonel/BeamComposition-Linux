@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <QtGlobal>
+
 #include <memory>
 
 #include "runinfo.h"

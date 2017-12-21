@@ -24,8 +24,6 @@
 #include <queue>
 #include <map>
 
-#include <QtGlobal>
-
 #define CHANNELS 4
 #define CARBON_Z 6
 
@@ -111,13 +109,13 @@ struct Diagrams {
         z14(nullptr),
         z24(nullptr)
     {
-#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
         for ( int i = 0; i < CHANNELS; ++i) {
             channels[i] = nullptr;
             rank[i] = nullptr;
             fit[i] = nullptr;
         }
-#elif defined(Q_OS_LINUX)
+#elif defined(__GNUG__) && (__cplusplus >= 201103L)
         std::fill( channels, channels + CHANNELS, nullptr);
         std::fill( rank, rank + CHANNELS, nullptr);
         std::fill( fit, fit + CHANNELS, nullptr);
@@ -144,13 +142,13 @@ struct Diagrams {
         z14(src.z14),
         z24(src.z24)
     {
-#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
         for ( int i = 0; i < CHANNELS; ++i) {
             this->channels[i] = src.channels[i];
             this->rank[i] = src.rank[i];
             this->fit[i] = src.fit[i];
         }
-#elif defined(Q_OS_LINUX)
+#elif defined(__GNUG__) && (__cplusplus >= 201103L)
         std::copy( src.channels, src.channels + CHANNELS, this->channels);
         std::copy( src.rank, src.rank + CHANNELS, this->rank);
         std::copy( src.fit, src.fit + CHANNELS, this->fit);
@@ -158,13 +156,13 @@ struct Diagrams {
     }
 
     Diagrams& operator=(const Diagrams& src) {
-#if defined(_MSC_VER) && (_MSC_VER < 1900) && defined(Q_OS_WIN)
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
         for ( int i = 0; i < CHANNELS; ++i) {
             this->channels[i] = src.channels[i];
             this->rank[i] = src.rank[i];
             this->fit[i] = src.fit[i];
         }
-#elif defined(Q_OS_LINUX)
+#elif defined(__GNUG__) && (__cplusplus >= 201103L)
         std::copy( src.channels, src.channels + CHANNELS, this->channels);
         std::copy( src.rank, src.rank + CHANNELS, this->rank);
         std::copy( src.fit, src.fit + CHANNELS, this->fit);

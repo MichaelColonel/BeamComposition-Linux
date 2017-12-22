@@ -90,19 +90,19 @@ CommandThread::run()
                 for ( unsigned int i = 0; i < nread; ++i)
                     charlist.push_back(buffer[i]);
 
-                size_t responses = charlist.size() / COMMAND_RESPONSE_SIZE;
+                unsigned int responses = charlist.size() / COMMAND_RESPONSE_SIZE;
 
                 if (responses) {
                     std::vector<char> ldata;
                     ldata.reserve(COMMAND_RESPONSE_SIZE * responses);
-                    for ( size_t i = COMMAND_RESPONSE_SIZE * responses; i != 0; --i) {
+                    for ( unsigned int i = COMMAND_RESPONSE_SIZE * responses; i != 0; --i) {
                         ldata.push_back(charlist.front());
                         charlist.pop_front();
                     }
 
-                    for ( size_t i = 0; i < responses; ++i) {
-                        size_t pbegin = i * COMMAND_RESPONSE_SIZE;
-                        size_t pend = (i + 1) * COMMAND_RESPONSE_SIZE;
+                    for ( unsigned int i = 0; i < responses; ++i) {
+                        unsigned int pbegin = i * COMMAND_RESPONSE_SIZE;
+                        unsigned int pend = (i + 1) * COMMAND_RESPONSE_SIZE;
 
                         std::string Message( ldata.data() + pbegin, ldata.data() + pend);
                         if (!Message.compare(Signal)) { // External signal

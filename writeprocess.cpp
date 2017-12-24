@@ -39,11 +39,11 @@ WriteDataProcess::run()
         QDataStream out(filerun);
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
         for ( DataList::const_iterator it = data.begin(); it != data.end(); ++it) {
-            const quint8& value = *it;
+            unsigned char value = *it;
 #elif defined(__GNUG__) && (__cplusplus >= 201103L)
-        for ( quint8 value : data) {
+        for ( unsigned char value : data) {
 #endif
-            out << value;
+            out << quint8(value);
         }
         filerun->flush();
     }
@@ -93,11 +93,11 @@ WriteDataTimeProcess::run()
         out << quint32(data.size());
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
         for ( DataList::const_iterator it = data.begin(); it != data.end(); ++it) {
-            const quint8& value = *it;
+            unsigned char value = *it;
 #elif defined(__GNUG__) && (__cplusplus >= 201103L)
-        for ( quint8 value : data) {
+        for ( unsigned char value : data) {
 #endif
-            out << value;
+            out << quint8(value);
         }
         filerun->flush();
     }

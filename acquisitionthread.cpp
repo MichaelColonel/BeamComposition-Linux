@@ -52,7 +52,7 @@ check_mask( unsigned char value, unsigned char mask)
     return !((value & MASK_BITS) ^ mask);
 }
 
-#if defined(_MSC_VER_) && (MSC_VER_ < 1900)
+#if defined(_MSC_VER) && (MSC_VER < 1900)
 // mask buffer of the batch (high byte, low byte)
 const unsigned char mask_array[MASK_SIZE] = {
     0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03

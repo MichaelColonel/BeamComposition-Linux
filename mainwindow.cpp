@@ -862,14 +862,14 @@ MainWindow::processFileFinished()
         // recalculate channels calibration with new background
         params->recalculate();
     }
-/*
+
     int run_items = ui->runDetailsListWidget->count();
     for ( int i = 0; i < run_items; ++i) {
         QListWidgetItem* item = ui->runDetailsListWidget->item(i);
         RunDetailsListWidgetItem* ritem = dynamic_cast<RunDetailsListWidgetItem*>(item);
         ritem->update_text();
     }
-*/
+
     runinfo = profile_thread->runInfo();
     updateRunInfo();
 

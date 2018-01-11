@@ -948,11 +948,13 @@ Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
         ChannelsArray delta;
 //        bool big = true;
         for ( int j = 0; j < CHANNELS; ++j) {
-            double diff = z[j] - double(i);
-            delta[j] = diff;
-            r += diff * diff;
+            if (j == 0 || j == 1 || j == 3) {
+                double diff = z[j] - double(i);
+                delta[j] = diff;
+                r += diff * diff;
 //            if (delta[j] < 0.)
 //                big = false;
+            }
         }
 
 //        bool border = fabs(delta[0]) + fabs(delta[CHANNELS - 1]) <= 1.0;
@@ -979,7 +981,7 @@ Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
         else
             rejected[2]++;
 */
-        r = sqrt(r / double(CHANNELS));
+        r = sqrt(r / double(3));
 
         if (/*border && */r <= charge_radius[i - 1]) {
             pos_z = i;

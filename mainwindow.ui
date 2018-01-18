@@ -54,13 +54,13 @@
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="acquisitionPage">
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
+         <y>-213</y>
          <width>277</width>
          <height>784</height>
         </rect>
@@ -984,6 +984,22 @@
    </property>
    <property name="toolTip">
     <string>Select none batches</string>
+   </property>
+  </action>
+  <action name="actionDetailsSelectionSingle">
+   <property name="text">
+    <string>Single Selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Select single batch</string>
+   </property>
+  </action>
+  <action name="actionDetailsSelectionContiguous">
+   <property name="text">
+    <string>Contiguous Selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Select contiguous batches</string>
    </property>
   </action>
  </widget>

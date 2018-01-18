@@ -279,6 +279,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectAll);
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectNone);
+    ui->runDetailsListWidget->addAction(ui->actionDetailsSelectionSingle);
+    ui->runDetailsListWidget->addAction(ui->actionDetailsSelectionContiguous);
 
     QAction* act = new QAction(this);
     act->setSeparator(true);

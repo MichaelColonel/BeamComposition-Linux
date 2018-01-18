@@ -664,6 +664,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
             skip = false;
             for ( int i = 0; i < CHANNELS; ++i) {
                 values[i] = channel_amp[i] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
+//                values[i] = splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
                 if (values[i] <= 0.)
                     skip = true;
             }
@@ -695,20 +696,21 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
             d.fit_median->Fill(median);
             d.fit_mean->Fill(mean);
 
-            if (z > 0) {
-                d.z12->Fill( charge[0], charge[1]);
-                d.z23->Fill( charge[1], charge[2]);
-                d.z34->Fill( charge[2], charge[3]);
-                d.z14->Fill( charge[0], charge[3]);
-                d.z13->Fill( charge[0], charge[2]);
-                d.z24->Fill( charge[1], charge[3]);
+            d.z12->Fill( charge[0], charge[1]);
+            d.z23->Fill( charge[1], charge[2]);
+            d.z34->Fill( charge[2], charge[3]);
+            d.z14->Fill( charge[0], charge[3]);
+            d.z13->Fill( charge[0], charge[2]);
+            d.z24->Fill( charge[1], charge[3]);
 
-                d.c12->Fill( values[0], values[1]);
-                d.c23->Fill( values[1], values[2]);
-                d.c34->Fill( values[2], values[3]);
-                d.c14->Fill( values[0], values[3]);
-                d.c13->Fill( values[0], values[2]);
-                d.c24->Fill( values[1], values[3]);
+            d.c12->Fill( values[0], values[1]);
+            d.c23->Fill( values[1], values[2]);
+            d.c34->Fill( values[2], values[3]);
+            d.c14->Fill( values[0], values[3]);
+            d.c13->Fill( values[0], values[2]);
+            d.c24->Fill( values[1], values[3]);
+
+            if (z > 0) {
 
                 charge_events[z - 1]++; // increase a number of proccessed events for particular charge
                 events_processed++; // increase a number of all proccessed events
@@ -903,7 +905,7 @@ Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charge
             charges[i] = -1.0;
     }
 
-    int res = (charge_detect >= CHANNELS - 1) ? majority_scheme(charges) : -1;
+    int res = (charge_detect >= CHANNELS - 2) ? majority_scheme(charges) : -1;
 
     return res;
 }
@@ -948,13 +950,13 @@ Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
         ChannelsArray delta;
 //        bool big = true;
         for ( int j = 0; j < CHANNELS; ++j) {
-            if (j == 0 || j == 1 || j == 3) {
+//            if (j == 0 || j == 1 || j == 3) {
                 double diff = z[j] - double(i);
                 delta[j] = diff;
                 r += diff * diff;
 //            if (delta[j] < 0.)
 //                big = false;
-            }
+//            }
         }
 
 //        bool border = fabs(delta[0]) + fabs(delta[CHANNELS - 1]) <= 1.0;
@@ -981,7 +983,7 @@ Parameters::majority_scheme(const ChannelsArray& z/*, double radius */) const
         else
             rejected[2]++;
 */
-        r = sqrt(r / double(3));
+        r = sqrt(r / double(CHANNELS));
 
         if (/*border && */r <= charge_radius[i - 1]) {
             pos_z = i;

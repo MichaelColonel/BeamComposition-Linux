@@ -696,21 +696,21 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
             d.fit_median->Fill(median);
             d.fit_mean->Fill(mean);
 
-            d.z12->Fill( charge[0], charge[1]);
-            d.z23->Fill( charge[1], charge[2]);
-            d.z34->Fill( charge[2], charge[3]);
-            d.z14->Fill( charge[0], charge[3]);
-            d.z13->Fill( charge[0], charge[2]);
-            d.z24->Fill( charge[1], charge[3]);
-
-            d.c12->Fill( values[0], values[1]);
-            d.c23->Fill( values[1], values[2]);
-            d.c34->Fill( values[2], values[3]);
-            d.c14->Fill( values[0], values[3]);
-            d.c13->Fill( values[0], values[2]);
-            d.c24->Fill( values[1], values[3]);
-
             if (z > 0) {
+
+                d.z12->Fill( charge[0], charge[1]);
+                d.z23->Fill( charge[1], charge[2]);
+                d.z34->Fill( charge[2], charge[3]);
+                d.z14->Fill( charge[0], charge[3]);
+                d.z13->Fill( charge[0], charge[2]);
+                d.z24->Fill( charge[1], charge[3]);
+
+                d.c12->Fill( values[0], values[1]);
+                d.c23->Fill( values[1], values[2]);
+                d.c34->Fill( values[2], values[3]);
+                d.c14->Fill( values[0], values[3]);
+                d.c13->Fill( values[0], values[2]);
+                d.c24->Fill( values[1], values[3]);
 
                 charge_events[z - 1]++; // increase a number of proccessed events for particular charge
                 events_processed++; // increase a number of all proccessed events

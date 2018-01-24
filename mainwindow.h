@@ -71,6 +71,7 @@ private slots:
     void handle_root_events();
     void treeWidgetItemDoubleClicked( QTreeWidgetItem*, int);
     void treeWidgetItemClicked( QTreeWidgetItem*, int);
+    void runDetailsSelectionTriggered(QAction*);
     void externalSignalReceived();
     void newBatchStateReceived(bool);
     void movementFinished();

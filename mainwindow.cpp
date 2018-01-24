@@ -25,6 +25,7 @@
 #include <TF1.h>
 #include <TLegend.h>
 
+#include <QActionGroup>
 #include <QSettings>
 #include <QTimer>
 #include <QFile>
@@ -225,6 +226,13 @@ MainWindow::MainWindow(QWidget *parent)
         ui->runInfoTableWidget->setItem( i + 13, 0, item);
     }
 
+    QActionGroup* selectionGroup = new QActionGroup(this);
+    selectionGroup->addAction(ui->actionDetailsSelectionSingle);
+    selectionGroup->addAction(ui->actionDetailsSelectionMultiple);
+    selectionGroup->addAction(ui->actionDetailsSelectionContiguous);
+    selectionGroup->addAction(ui->actionDetailsSelectionExtended);
+    ui->actionDetailsSelectionMultiple->setChecked(true);
+
     connect( ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
     connect( ui->actionOpenRun, SIGNAL(triggered()), this, SLOT(openRun()));
     connect( ui->actionOpenBackRun, SIGNAL(triggered()), this, SLOT(openBackRun()));
@@ -233,6 +241,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( ui->actionDetailsClearAll, SIGNAL(triggered()), this, SLOT(detailsClear()));
     connect( ui->actionDetailsSelectAll, SIGNAL(triggered()), this, SLOT(detailsSelectAll()));
     connect( ui->actionDetailsSelectNone, SIGNAL(triggered()), this, SLOT(detailsSelectNone()));
+    connect( selectionGroup, SIGNAL(triggered(QAction*)), this, SLOT(runDetailsSelectionTriggered(QAction*)));
 
     connect( ui->startRunButton, SIGNAL(clicked()), this, SLOT(startRun()));
     connect( ui->stopRunButton, SIGNAL(clicked()), this, SLOT(stopRun()));
@@ -279,12 +288,20 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectAll);
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectNone);
-    ui->runDetailsListWidget->addAction(ui->actionDetailsSelectionSingle);
-    ui->runDetailsListWidget->addAction(ui->actionDetailsSelectionContiguous);
 
-    QAction* act = new QAction(this);
-    act->setSeparator(true);
-    ui->runDetailsListWidget->addAction(act);
+    QAction* act0 = new QAction(this);
+    act0->setSeparator(true);
+    act0->setText(tr("Selection"));
+    ui->runDetailsListWidget->addAction(act0);
+
+    ui->runDetailsListWidget->addAction(ui->actionDetailsSelectionSingle);
+    ui->runDetailsListWidget->addAction(ui->actionDetailsSelectionMultiple);
+    ui->runDetailsListWidget->addAction(ui->actionDetailsSelectionContiguous);
+    ui->runDetailsListWidget->addAction(ui->actionDetailsSelectionExtended);
+
+    QAction* act1 = new QAction(this);
+    act1->setSeparator(true);
+    ui->runDetailsListWidget->addAction(act1);
     ui->runDetailsListWidget->addAction(ui->actionDetailsClearAll);
     ui->runDetailsListWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -1956,7 +1973,27 @@ MainWindow::detailsSelectNone()
 {
     ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->runDetailsListWidget->setCurrentRow(-1);
-    ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+    if (ui->actionDetailsSelectionSingle->isChecked())
+        ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    else if (ui->actionDetailsSelectionMultiple->isChecked())
+        ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+    else if (ui->actionDetailsSelectionExtended->isChecked())
+        ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    else if (ui->actionDetailsSelectionContiguous->isChecked())
+        ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::ContiguousSelection);
+}
+
+void
+MainWindow::runDetailsSelectionTriggered(QAction* action)
+{
+    if (action == ui->actionDetailsSelectionSingle)
+        ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    else if (action == ui->actionDetailsSelectionMultiple)
+        ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+    else if (action == ui->actionDetailsSelectionExtended)
+        ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    else if (action == ui->actionDetailsSelectionContiguous)
+        ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::ContiguousSelection);
 }
 
 void

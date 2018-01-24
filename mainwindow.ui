@@ -60,7 +60,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-213</y>
+         <y>0</y>
          <width>277</width>
          <height>784</height>
         </rect>
@@ -987,19 +987,50 @@
    </property>
   </action>
   <action name="actionDetailsSelectionSingle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Single Selection</string>
    </property>
    <property name="toolTip">
-    <string>Select single batch</string>
+    <string>Single batch selection</string>
    </property>
   </action>
   <action name="actionDetailsSelectionContiguous">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Contiguous Selection</string>
    </property>
    <property name="toolTip">
-    <string>Select contiguous batches</string>
+    <string>Contiguous selection of batches</string>
+   </property>
+  </action>
+  <action name="actionDetailsSelectionExtended">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Extended Selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Extended selection of batches</string>
+   </property>
+  </action>
+  <action name="actionDetailsSelectionMultiple">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Multiple Selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Multiple batches selection</string>
    </property>
   </action>
  </widget>

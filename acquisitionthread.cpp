@@ -22,6 +22,7 @@
 #include <TH1.h>
 #include <TH2.h>
 
+#include <functional>
 #include <fstream>
 #include <bitset>
 
@@ -37,22 +38,28 @@
 
 namespace {
 
-// lambda to check mask within the sequence of raw buffer data
-/*
-std::function< bool( unsigned char, unsigned char) >
-check_mask = [] ( unsigned char value, unsigned char mask) -> bool {
-    return !((value & MASK_BITS) ^ mask);
-};
-*/
-
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
 // function to check mask within the sequence of raw buffer data
 bool
 check_mask( unsigned char value, unsigned char mask)
 {
     return !((value & MASK_BITS) ^ mask);
 }
+#elif defined(__GNUG__) && (__cplusplus >= 201103L)
+// lambda to check mask within the sequence of raw buffer data
+std::function< bool( unsigned char, unsigned char) >
+check_mask = [] ( unsigned char value, unsigned char mask) -> bool {
+    return !((value & MASK_BITS) ^ mask);
+};
+#else
+bool
+check_mask( unsigned char value, unsigned char mask)
+{
+    return !((value & MASK_BITS) ^ mask);
+}
+#endif
 
-#if defined(_MSC_VER) && (MSC_VER < 1900)
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
 // mask buffer of the batch (high byte, low byte)
 const unsigned char mask_array[MASK_SIZE] = {
     0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03

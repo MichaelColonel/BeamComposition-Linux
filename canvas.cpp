@@ -113,16 +113,20 @@ QRootCanvas::mouseReleaseEvent(QMouseEvent *event)
 }
 
 void
-QRootCanvas::resizeEvent(QResizeEvent *)
+QRootCanvas::resizeEvent(QResizeEvent *event)
 {
+    Q_UNUSED(event);
+
     // Handle resize events.
     canvas->Resize();
     canvas->Update();
 }
 
 void
-QRootCanvas::paintEvent(QPaintEvent *)
+QRootCanvas::paintEvent(QPaintEvent *event)
 {
+    Q_UNUSED(event);
+
     // Handle paint events.
     canvas->Resize();
     canvas->Update();

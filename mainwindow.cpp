@@ -983,7 +983,13 @@ MainWindow::acquisitionTimingChanged(int value)
 
     char buf[5] = "A100";
     buf[2] = delay_time + '0';
-    buf[3] = acquisition_time + '0';
+
+    if (acquisition_time >= 0 && acquisition_time <= 9)
+        buf[3] = acquisition_time + '0';
+    else if (acquisition_time >= 10 && acquisition_time <= 15)
+        buf[3] = (acquisition_time - 10) + 'A';
+    else
+        buf[3] = '5';
 
     command_thread->writeCommand( buf, towrite);
     statusBar()->showMessage( tr("Extraction signal update"), 1000);

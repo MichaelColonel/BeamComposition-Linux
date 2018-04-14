@@ -261,36 +261,6 @@
                  <string>1000 ms</string>
                 </property>
                </item>
-               <item>
-                <property name="text">
-                 <string>1100 ms</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>1200 ms</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>1300 ms</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>1400 ms</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>1500 ms</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>1600 ms</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item row="2" column="0">

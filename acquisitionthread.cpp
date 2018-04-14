@@ -24,7 +24,6 @@
 
 #include <functional>
 #include <fstream>
-#include <bitset>
 
 #include "runinfo.h"
 #include "channelscountsfit.h"

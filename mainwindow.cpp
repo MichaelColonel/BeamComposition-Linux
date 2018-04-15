@@ -738,9 +738,20 @@ MainWindow::processThreadStarted()
 
     int n = ui->runNumberSpinBox->value();
 
-    QString namerun = QString("Run%1.dat").arg( int(n), int(4), int(10), QLatin1Char('0'));
-    QString nametxt = QString("Run%1.txt").arg( int(n), int(4), int(10), QLatin1Char('0'));
-    QString nameraw = QString("Run%1.raw").arg( int(n), int(4), int(10), QLatin1Char('0'));
+    QDateTime dt = QDateTime::currentDateTime();
+    QString dt_string = dt.toString("ddMMyyyy_hhmmss");
+    QString namerun, nametxt, nameraw;
+
+    if (flag_background) {
+        namerun = QString("Run%1_back_%2.dat").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+        nametxt = QString("Run%1_back_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+        nameraw = QString("Run%1_back_%2.raw").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+    }
+    else {
+        namerun = QString("Run%1_data_%2.dat").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+        nametxt = QString("Run%1_data_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+        nameraw = QString("Run%1_data_%2.raw").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+    }
 
     QDir* dir = new QDir(rundir);
     QString filenamedat = dir->filePath(namerun);
@@ -1001,17 +1012,18 @@ MainWindow::runTypeChanged(int id)
     QAbstractButton* button = ui->runTypeButtonGroup->button(id);
     QRadioButton* rbutton = qobject_cast<QRadioButton*>(button);
 
-    if (rbutton == ui->fixedRunRadioButton) {
-        flag_background = false;
-        ui->triggersComboBox->setEnabled(true);
-        ui->triggersComboBox->setCurrentIndex(0);
-        process_thread->setBackground(false);
-    }
-    else if (rbutton == ui->backgroundRunRadioButton) {
+    flag_background = false;
+
+    if (rbutton == ui->backgroundRunRadioButton) {
         flag_background = true;
         ui->triggersComboBox->setEnabled(false);
         ui->triggersComboBox->setCurrentIndex(4); // "T004"
         process_thread->setBackground(true);
+    }
+    else if (rbutton == ui->fixedRunRadioButton) {
+        ui->triggersComboBox->setEnabled(true);
+        ui->triggersComboBox->setCurrentIndex(0);
+        process_thread->setBackground(false);
     }
 }
 
@@ -1020,9 +1032,11 @@ MainWindow::dataUpdateChanged(int id)
 {
     QAbstractButton* button = ui->updateDataButtonGroup->button(id);
     QRadioButton* rbutton = qobject_cast<QRadioButton*>(button);
-    bool state = 0;
+
+    int state = 0;
     int delay_time = 0;
     int acquisition_time = 0;
+
     if (rbutton == ui->dataUpdateStartRadioButton) {
         qDebug() << "Extraction signal update";
 //        flag_batch_state = false;
@@ -1045,9 +1059,15 @@ MainWindow::dataUpdateChanged(int id)
     ui->delayTimeComboBox->setEnabled(state);
 
     char buf[5] = "A000";
-    buf[1] = int(state) + '0';
+    buf[1] = state + '0';
     buf[2] = delay_time + '0';
-    buf[3] = acquisition_time + '0';
+
+    if (acquisition_time >= 0 && acquisition_time <= 9)
+        buf[3] = acquisition_time + '0';
+    else if (acquisition_time >= 10 && acquisition_time <= 15)
+        buf[3] = (acquisition_time - 10) + 'A';
+    else
+        buf[3] = '5';
 
     command_thread->writeCommand( buf, towrite);
     if (state)

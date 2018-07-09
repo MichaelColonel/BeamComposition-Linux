@@ -2059,3 +2059,9 @@ MainWindow::detailsItemSelectionChanged()
         ui->processPushButton->setEnabled(false);
     }
 }
+
+void
+MainWindow::test_me()
+{
+
+}

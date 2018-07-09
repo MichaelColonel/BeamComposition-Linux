@@ -51,7 +51,8 @@ typedef std::map< int, SignalPair > ChargeSignalMap;
 enum RunType {
     RUN_BACKGROUND,
     RUN_FIXED_POSITION,
-    RUN_SCANNING
+    RUN_SCANNING,
+    RUN_EXTERNAL_COMMAND
 };
 
 enum DiagramType {

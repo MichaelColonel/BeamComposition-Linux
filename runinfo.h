@@ -30,6 +30,7 @@ public:
     RunInfo& operator=(const RunInfo& src);
     RunInfo operator+(const RunInfo& src);
     RunInfo& operator+=(const RunInfo& src);
+    bool operator==(const RunInfo& src) const;
 
     size_t counted() const { return triggers_counted; }
     size_t processed() const { return triggers_processed; }
@@ -114,6 +115,19 @@ RunInfo::operator+=(const RunInfo& obj)
 }
 
 inline
+bool
+RunInfo::operator==(const RunInfo& obj) const
+{
+    bool res = false;
+    bool size1 = this->triggers_counted == obj.triggers_counted;
+    bool size2 = this->triggers_processed == obj.triggers_processed;
+    if (size1 && size2) {
+         res = std::equal( this->comp.begin(), this->comp.end(), obj.comp.begin());
+    }
+    return res;
+}
+
+inline
 void
 RunInfo::clear()
 {
@@ -126,5 +140,5 @@ inline
 double
 RunInfo::averageComposition(int Z) const
 {
-    return (triggers_processed) ? double(comp[Z]) / double(triggers_processed) : -1.0;
+    return (triggers_processed) ? double(comp[Z]) / triggers_processed : -1.0;
 }

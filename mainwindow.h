@@ -61,6 +61,9 @@ public:
     explicit MainWindow(QWidget* parent = 0);
     virtual ~MainWindow();
 
+public slots:
+     static void test_me();
+
 protected:
     void closeEvent(QCloseEvent*);
 

@@ -168,7 +168,8 @@ MainWindow::MainWindow(QWidget *parent)
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     timer(new QTimer(this)),
-    timerdata(new QTimer(this)),
+    timer_data(new QTimer(this)),
+    timer_opcua(new QTimer(this)),
     channel_a(nullptr),
     channel_b(nullptr),
     filerun(nullptr),
@@ -182,7 +183,8 @@ MainWindow::MainWindow(QWidget *parent)
         tr("Abort Process"), 0, 0, this)),
     settings(new QSettings( "BeamComposition", "configure")),
     flag_background(false),
-    flag_write_run(true)
+    flag_write_run(true),
+    sys_status(STATUS_DEVICE_DISCONNECTED)
 {
     ui->setupUi(this);
 
@@ -310,15 +312,18 @@ MainWindow::MainWindow(QWidget *parent)
     timer->start(20);
 
     int update_period = settings->value( "update-timeout", 3).toInt() * 1000;
-    timerdata->setInterval(update_period);
+    timer_data->setInterval(update_period);
+
+    update_period = settings->value( "opcua_update-timeout", 2).toInt() * 1000;
+    timer_opcua->setInterval(update_period);
 
     ui->treeWidget->expandAll();
 }
 
 MainWindow::~MainWindow()
 {
-    timerdata->stop();
-    delete timerdata;
+    timer_data->stop();
+    delete timer_data;
 
     timer->stop();
     delete timer;
@@ -924,7 +929,7 @@ MainWindow::startRun()
     }
 
     if (ui->dataUpdateAutoRadioButton->isChecked())
-        timerdata->start();
+        timer_data->start();
 
     acquire_thread->start();
     process_thread->start();
@@ -934,7 +939,7 @@ void
 MainWindow::stopRun()
 {
     if (ui->dataUpdateAutoRadioButton->isChecked())
-        timerdata->stop();
+        timer_data->stop();
 
     acquire_thread->stop();
     process_thread->stop();
@@ -1040,7 +1045,7 @@ MainWindow::dataUpdateChanged(int id)
     if (rbutton == ui->dataUpdateStartRadioButton) {
         qDebug() << "Extraction signal update";
 //        flag_batch_state = false;
-        disconnect( timerdata, SIGNAL(timeout()), this, SLOT(processData()));
+        disconnect( timer_data, SIGNAL(timeout()), this, SLOT(processData()));
         connect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalReceived()));
         connect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
         delay_time = ui->delayTimeComboBox->currentIndex();
@@ -1050,7 +1055,7 @@ MainWindow::dataUpdateChanged(int id)
     else if (rbutton == ui->dataUpdateAutoRadioButton) {
         qDebug() << "Automatic timeout update";
 //        flag_batch_state = true;
-        connect( timerdata, SIGNAL(timeout()), this, SLOT(processData()));
+        connect( timer_data, SIGNAL(timeout()), this, SLOT(processData()));
         disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalReceived()));
         disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
     }
@@ -1087,7 +1092,7 @@ MainWindow::setRunSettings()
         rundir = settings->value( "run-directory", "/home").toString();
         flag_write_run = settings->value( "write-run", true).toBool();
         int update_period = settings->value( "update-timeout", 3).toInt() * 1000;
-        timerdata->setInterval(update_period);
+        timer_data->setInterval(update_period);
 
         updateDiagrams();
     }
@@ -1388,10 +1393,10 @@ MainWindow::disconnectDevices()
         std::cerr << "FT2232H Channel B close error." << std::endl;
     }
 
-    if (timerdata->isActive())
-        timerdata->stop();
+    if (timer_data->isActive())
+        timer_data->stop();
 
-    disconnect( timerdata, SIGNAL(timeout()), this, SLOT(processData()));
+    disconnect( timer_data, SIGNAL(timeout()), this, SLOT(processData()));
     disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalReceived()));
     disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
 
@@ -1527,8 +1532,8 @@ void
 MainWindow::processData()
 {
     if (ui->dataUpdateAutoRadioButton->isChecked()) {
-        qDebug() << "GUI: timerdata stopped";
-        timerdata->stop();
+        qDebug() << "GUI: data timer is stopped";
+        timer_data->stop();
     }
 
     CountsList countslist;
@@ -1576,8 +1581,8 @@ MainWindow::processData()
     updateRunInfo();
 
     if (ui->dataUpdateAutoRadioButton->isChecked()) {
-        qDebug() << "GUI: timerdata started";
-        timerdata->start();
+        qDebug() << "GUI: data timer is started";
+        timer_data->start();
     }
 }
 

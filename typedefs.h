@@ -55,6 +55,17 @@ enum RunType {
     RUN_EXTERNAL_COMMAND
 };
 
+// System status for information
+enum SystemCurrentStatus {
+    STATUS_NONE,
+    STATUS_DEVICE_DISCONNECTED,
+    STATUS_IDLE,
+    STATUS_ACQUISITION_BACKGROUND,
+    STATUS_ACQUISITION_CHARGE,
+    STATUS_POSITION_MOVE,
+    STATUS_POSITION_REMOVE
+};
+
 enum DiagramType {
     NONE,
     HIST_CHANNELS,

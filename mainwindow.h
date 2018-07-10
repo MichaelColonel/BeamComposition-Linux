@@ -45,6 +45,8 @@ class QCloseEvent;
 class QProgressDialog;
 class QSettings;
 class QDateTime;
+class QStateMachine;
+class QState;
 
 class CommandThread;
 class AcquireThread;
@@ -134,7 +136,8 @@ private:
 
     Ui::MainWindow* ui;
     QTimer* timer; // ROOT GUI update timer
-    QTimer* timerdata; // data update timer
+    QTimer* timer_data; // data update timer
+    QTimer* timer_opcua; // OPC UA update timer
 
     FT_HANDLE channel_a;
     FT_HANDLE channel_b;
@@ -156,4 +159,5 @@ private:
 //    bool flag_batch_state; // if "true" then process data, if "false" - do not process them
     SharedFitParameters params;
     RunInfo runinfo;
+    SystemCurrentStatus sys_status;
 };

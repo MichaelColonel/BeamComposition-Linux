@@ -71,6 +71,7 @@ protected:
 
 signals:
     void updateDiagram();
+    void systemCurrentStatusChanged(SystemCurrentStatus);
 
 private slots:
     void handle_root_events();

@@ -148,3 +148,33 @@ CommandThread::run()
 
     stopped = false;
 }
+
+
+ExternalCommandThread::ExternalCommandThread(QObject* parent)
+    :
+    AcquireThread(parent),
+    nof_spills(-1)
+{
+}
+
+ExternalCommandThread::~ExternalCommandThread()
+{
+}
+
+void
+ExternalCommandThread::initiate(int spills)
+{
+    nof_spills = spills;
+}
+
+void
+ExternalCommandThread::setSystemCurrentStatus(SystemCurrentStatus)
+{
+
+}
+
+void
+ExternalCommandThread::run()
+{
+
+}

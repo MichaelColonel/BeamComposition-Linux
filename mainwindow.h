@@ -63,15 +63,12 @@ public:
     explicit MainWindow(QWidget* parent = 0);
     virtual ~MainWindow();
 
-public slots:
-     static void test_me();
-
 protected:
     void closeEvent(QCloseEvent*);
 
 signals:
     void updateDiagram();
-    void systemCurrentStatusChanged(SystemCurrentStatus);
+    void signalSystemCurrentStatus(SystemCurrentStatus);
 
 private slots:
     void handle_root_events();

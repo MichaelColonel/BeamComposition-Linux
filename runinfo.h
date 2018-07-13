@@ -17,11 +17,15 @@
 
 #pragma once
 
+#include <algorithm>
+
 #include "typedefs.h"
 
 class RunInfo {
 public:
     typedef std::array< size_t, CARBON_Z > ChargeEventArray;
+    typedef std::array< float, CARBON_Z > BeamSpectrumArray;
+
     RunInfo();
     RunInfo( size_t counted, size_t processed,
         const ChargeEventArray& composition);
@@ -36,6 +40,8 @@ public:
     size_t processed() const { return triggers_processed; }
 
     double averageComposition(int Z) const;
+    BeamSpectrumArray averageComposition() const;
+
     void clear();
 
 private:
@@ -141,4 +147,26 @@ double
 RunInfo::averageComposition(int Z) const
 {
     return (triggers_processed) ? double(comp[Z]) / triggers_processed : -1.0;
+}
+
+inline
+RunInfo::BeamSpectrumArray
+RunInfo::averageComposition() const
+{
+    RunInfo::BeamSpectrumArray arr;
+
+    size_t proc = triggers_processed;
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
+    // lambda to calculate charge beam spectrum composition
+    auto calc_cbsc = [proc] (size_t events) -> float {
+        return (proc) ? float(events) / proc : -1.0f;
+    };
+
+    std::transform( comp.begin(), comp.end(), arr.begin(), calc_cbsc);
+#else
+    for ( size_t i = 0; arr.size(); ++i) {
+        arr[i] = (triggers_processed) ? float(comp[i]) / triggers_processed : -1.0f;
+    }
+#endif
+    return arr;
 }

@@ -1371,6 +1371,9 @@ MainWindow::connectDevices()
     ui->dataUpdateAutoRadioButton->setChecked(true);
     int button_id = ui->updateDataButtonGroup->id(ui->dataUpdateAutoRadioButton);
     dataUpdateChanged(button_id);
+
+    sys_status = STATUS_IDLE;
+    emit signalSystemCurrentStatus(sys_status);
 }
 
 void
@@ -1408,6 +1411,9 @@ MainWindow::disconnectDevices()
     ui->runTypeGroupBox->setEnabled(false);
     ui->startRunButton->setEnabled(false);
     ui->stopRunButton->setEnabled(false);
+
+    sys_status = STATUS_DEVICE_DISCONNECTED;
+    emit signalSystemCurrentStatus(sys_status);
 }
 
 void
@@ -2063,10 +2069,4 @@ MainWindow::detailsItemSelectionChanged()
     else {
         ui->processPushButton->setEnabled(false);
     }
-}
-
-void
-MainWindow::test_me()
-{
-
 }

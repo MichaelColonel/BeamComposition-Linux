@@ -53,6 +53,8 @@ class ProcessThread;
 class ProcessFileThread;
 class DiagramTreeWidgetItem;
 class RootCanvasDialog;
+class OpcUaClient;
+class OpcUaClientDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -125,7 +127,6 @@ private:
     void loadSettings(QSettings* set);
     void deviceError( FT_HANDLE, FT_STATUS);
 
-
     void createTreeWidgetItems();
     void createRootHistograms();
     RootCanvasDialog* createCanvasDialog(DiagramTreeWidgetItem*);
@@ -157,4 +158,6 @@ private:
     SharedFitParameters params;
     RunInfo runinfo;
     SystemCurrentStatus sys_status;
+    OpcUaClient* opcua_client;
+    OpcUaClientDialog* opcua_dialog;
 };

@@ -18,15 +18,42 @@
 
 #pragma once
 
+#include <QObject>
+#include <QString>
+
 #include <open62541.h>
+#include "runinfo.h"
 
-void onConnectCallback( UA_Client* client, void* userdata,
-    UA_UInt32 requestId, void* status);
-void onReadExtCommandAttributeCallback( UA_Client* client, void* userdata,
-    UA_UInt32 requestId, UA_Variant* var);
+class OpcUaClient : public QObject {
+    Q_OBJECT
+public:
+    OpcUaClient( const UA_ClientConfig& config = UA_ClientConfig_default, QObject* parent = 0);
+    virtual ~OpcUaClient();
+    UA_StatusCode connect_async( const QString& path, int port);
 
-#ifdef UA_ENABLE_SUBSCRIPTIONS
-void
-onSubscriptionExtCommandValueChanged( UA_Client* client, UA_UInt32 subId, void* subContext,
-    UA_UInt32 monId, void* monContext, UA_DataValue* value);
-#endif
+    static void onConnectCallback( UA_Client* client, void* userdata,
+        UA_UInt32 requestId, void* status);
+    static void onReadExtCommandAttributeCallback( UA_Client* client, void* userdata,
+        UA_UInt32 requestId, UA_Variant* var);
+
+    #ifdef UA_ENABLE_SUBSCRIPTIONS
+    static void
+    onSubscriptionExtCommandValueChanged( UA_Client* client, UA_UInt32 subId, void* subContext,
+        UA_UInt32 monId, void* monContext, UA_DataValue* value);
+    #endif
+public slots:
+    UA_StatusCode writeBeamSpectrumValue(const RunInfo::BeamSpectrumArray&);
+    UA_StatusCode writeBeamIntegralSpectrumValue(const RunInfo::BeamSpectrumArray&);
+    UA_StatusCode writeHeartBeatValue(int);
+    UA_StatusCode writeHeartBeatValue();
+    UA_StatusCode writeCurrentStatusValue(int);
+
+signals:
+    void signalConnected();
+    void signalExternalCommandChanged(int);
+
+private:
+    UA_Client* client;
+    QString server_path;
+    int server_port;
+};

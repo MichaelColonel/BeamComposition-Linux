@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="chageCompositionTabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_5">
       <attribute name="title">
@@ -692,7 +692,7 @@
            <item>
             <widget class="QLineEdit" name="serverLineEdit">
              <property name="text">
-              <string>opc.tcp://localhost</string>
+              <string notr="true">opc.tcp://localhost</string>
              </property>
             </widget>
            </item>

@@ -32,9 +32,85 @@ const UA_NodeId NODE_ID_STATE = UA_NODEID_STRING( 0, "State");
 
 }
 
+OpcUaClient::OpcUaClient( const UA_ClientConfig& config, QObject* parent)
+    :
+    QObject(parent),
+    client(0),
+    server_path("opc.tcp://localhost"),
+    server_port(4840)
+{
+    client = UA_Client_new(config);
+}
+
+OpcUaClient::~OpcUaClient()
+{
+    if (client) {
+        UA_Client_disconnect(client);
+        UA_Client_delete(client); /* Disconnects the client internally */
+        client = 0;
+    }
+}
+
+UA_StatusCode
+OpcUaClient::connect_async( const QString& path, int port)
+{
+    server_path = path;
+    server_port = port;
+
+    QString server_string = QString("%1:%2").arg(server_path).arg(server_port);
+    std::string serv_string = server_string.toStdString();
+
+    UA_StatusCode retval = UA_Client_connect_async( client, serv_string.c_str(),
+        onConnectCallback, this);
+/*
+    if (retval != UA_STATUSCODE_GOOD) {
+        UA_Client_delete(opcua_client);
+        opcua_client = 0;
+        ui->statusBar->showMessage( tr("Connection failed"), 1000);
+    }
+    else {
+        progress_dialog->show();
+        ui->connectPushButton->setEnabled(false);
+        ui->statusBar->showMessage( tr("Async connection initiated..."), static_cast<int>(config.timeout));
+        opcua_timer->start();
+    }
+*/
+    return retval;
+}
+
+UA_StatusCode
+OpcUaClient::writeBeamSpectrumValue(const RunInfo::BeamSpectrumArray&)
+{
+
+}
+
+UA_StatusCode
+OpcUaClient::writeBeamIntegralSpectrumValue(const RunInfo::BeamSpectrumArray&)
+{
+
+}
+
+UA_StatusCode
+OpcUaClient::writeHeartBeatValue(int)
+{
+
+}
+
+UA_StatusCode
+OpcUaClient::writeHeartBeatValue()
+{
+
+}
+
+UA_StatusCode
+OpcUaClient::writeCurrentStatusValue(int)
+{
+
+}
+
 #ifdef UA_ENABLE_SUBSCRIPTIONS
 void
-onSubscriptionExtCommandValueChanged( UA_Client* /* client */,
+OpcUaClient::onSubscriptionExtCommandValueChanged( UA_Client* /* client */,
     UA_UInt32 /* subId */, void* /* subContext */, UA_UInt32 /* monId */,
     void* /* monContext */, UA_DataValue* value)
 {
@@ -45,7 +121,7 @@ onSubscriptionExtCommandValueChanged( UA_Client* /* client */,
 #endif
 
 void
-onConnectCallback( UA_Client* client, void* userdata,
+OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
     UA_UInt32 requestId, void* status)
 {
     UA_StatusCode status_code = *(UA_StatusCode*)status;
@@ -58,7 +134,7 @@ onConnectCallback( UA_Client* client, void* userdata,
 }
 
 void
-onReadExtCommandAttributeCallback( UA_Client* client, void* userdata,
+OpcUaClient::onReadExtCommandAttributeCallback( UA_Client* client, void* userdata,
     UA_UInt32 requestId, UA_Variant* var)
 {
 

@@ -56,3 +56,9 @@ OpcUaClientDialog::setIntergalBreamSpectrumValue(const RunInfo::BeamSpectrumArra
 {
 
 }
+
+void
+OpcUaClientDialog::startUpConnection()
+{
+
+}

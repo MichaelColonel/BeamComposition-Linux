@@ -60,7 +60,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
+         <y>-207</y>
          <width>277</width>
          <height>787</height>
         </rect>
@@ -878,6 +878,7 @@
    <addaction name="actionSaveRun"/>
    <addaction name="separator"/>
    <addaction name="actionSettings"/>
+   <addaction name="actionOpcUaClient"/>
    <addaction name="separator"/>
    <addaction name="actionQuit"/>
   </widget>
@@ -1038,6 +1039,18 @@
    </property>
    <property name="toolTip">
     <string>Multiple batches selection</string>
+   </property>
+  </action>
+  <action name="actionOpcUaClient">
+   <property name="icon">
+    <iconset resource="BeamComposition.qrc">
+     <normaloff>:/icons/Sc_insertrows.png</normaloff>:/icons/Sc_insertrows.png</iconset>
+   </property>
+   <property name="text">
+    <string>OPC UA Client...</string>
+   </property>
+   <property name="toolTip">
+    <string>OPC unified architecture client connection and nodes</string>
    </property>
   </action>
  </widget>

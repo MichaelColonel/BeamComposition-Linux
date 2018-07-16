@@ -24,6 +24,8 @@ namespace Ui {
 class OpcUaClientDialog;
 }
 
+class QSettings;
+
 class OpcUaClientDialog : public QDialog
 {
     Q_OBJECT
@@ -31,8 +33,10 @@ class OpcUaClientDialog : public QDialog
 public:
     explicit OpcUaClientDialog(QWidget *parent = 0);
     ~OpcUaClientDialog();
+    void setSettings(QSettings* set);
 
 public slots:
+    void startUpConnection();
     void setExtCommandValue(int);
     void setStateValue(int);
     void setHeatBeatValue(int);

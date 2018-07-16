@@ -30,9 +30,9 @@
       </widget>
      </item>
      <item row="0" column="3">
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="disconnectPushButton">
        <property name="text">
-        <string>PushButton</string>
+        <string>Disconnect</string>
        </property>
       </widget>
      </item>
@@ -44,9 +44,9 @@
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="connectPushButton">
        <property name="text">
-        <string>PushButton</string>
+        <string>Connect</string>
        </property>
       </widget>
      </item>
@@ -75,31 +75,40 @@
           </column>
           <item>
            <property name="text">
-            <string>RBS.BeamSpectrum.01</string>
+            <string notr="true">RBS.BeamSpectrum.01</string>
            </property>
            <item>
             <property name="text">
-             <string>State</string>
+             <string notr="true">State</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Command</string>
+             <string notr="true">Command</string>
             </property>
            </item>
            <item>
             <property name="text">
              <string>Value</string>
             </property>
+            <property name="text">
+             <string notr="true"/>
+            </property>
            </item>
            <item>
             <property name="text">
              <string>ValueIntegral</string>
             </property>
+            <property name="text">
+             <string notr="true"/>
+            </property>
            </item>
            <item>
             <property name="text">
              <string>HeartBeat</string>
+            </property>
+            <property name="text">
+             <string notr="true"/>
             </property>
            </item>
           </item>

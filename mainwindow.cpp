@@ -52,6 +52,7 @@
 #include "writeprocess.h"
 #include "rootcanvasdialog.h"
 #include "settingsdialog.h"
+#include "opcuaclientdialog.h"
 
 #include "backgroundvaluedelegate.h"
 #include "signalvaluedelegate.h"
@@ -63,7 +64,7 @@
 #include "channelscountsfit.h"
 #include "channelschargefit.h"
 
-#include "opcuanodes.h"
+#include "opcuaclient.h"
 
 #include "ui_mainwindow.h"
 #include "mainwindow.h"
@@ -186,11 +187,11 @@ MainWindow::MainWindow(QWidget *parent)
     settings(new QSettings( "BeamComposition", "configure")),
     flag_background(false),
     flag_write_run(true),
-    sys_status(STATUS_DEVICE_DISCONNECTED)
+    sys_status(STATUS_DEVICE_DISCONNECTED),
+    opcua_client(new OpcUaClient( UA_ClientConfig_default, this)),
+    opcua_dialog(new OpcUaClientDialog(this))
 {
     ui->setupUi(this);
-
-    opcua_initiate_nodes();
 
     loadSettings(settings);
 
@@ -318,8 +319,12 @@ MainWindow::MainWindow(QWidget *parent)
     int update_period = settings->value( "update-timeout", 3).toInt() * 1000;
     timer_data->setInterval(update_period);
 
-    update_period = settings->value( "opcua_update-timeout", 2).toInt() * 1000;
+    update_period = settings->value( "opcua-update-timeout", 2).toInt() * 1000;    
     timer_opcua->setInterval(update_period);
+
+    bool opcua_startup = settings->value( "opcua-connect-startup", false).toBool();
+    if (opcua_startup)
+        QTimer::singleShot( 1000, opcua_dialog, SLOT(startUpConnection()));
 
     ui->treeWidget->expandAll();
 }
@@ -367,6 +372,7 @@ MainWindow::~MainWindow()
         delete filedat;
     }
 
+    delete opcua_client;
     delete progress_dialog;
 
     delete settings;

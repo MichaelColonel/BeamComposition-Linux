@@ -24,15 +24,6 @@
 extern "C" {
 #endif /* __cpluplus */
 
-extern UA_NodeId NODE_ID_SPECTRUM_SYSTEM;
-extern UA_NodeId NODE_ID_EXTERNAL_COMMAND;
-extern UA_NodeId NODE_ID_CHARGE_VALUE;
-extern UA_NodeId NODE_ID_CHARGE_VALUE_INTEGRAL;
-extern UA_NodeId NODE_ID_HEART_BEAT;
-extern UA_NodeId NODE_ID_STATE;
-
-void opcua_initiate_nodes(void);
-
 #ifdef __cplusplus
 }
 #endif /* __cpluplus */

@@ -172,9 +172,9 @@ const struct ChargeCountsSignals {
 double* fit_data[SIZE] = {};
 
 double
-splfit( double w, double *x, double *y, double *z, int m, double tn)
+ccmath_splfit( double w, double *x, double *y, double *z, int m, double tn)
 {
-    return (tn != 0.) ? tnsfit( w, x, y, z, m, tn) : csfit( w, x, y, z, m);
+    return (tn != 0.) ? ccmath_tnsfit( w, x, y, z, m, tn) : ccmath_csfit( w, x, y, z, m);
 }
 /*
 const double mc2e = 511000.; // eV
@@ -569,10 +569,10 @@ Parameters::recalculate()
 
     size_t fitn = n - 1;
 
-    cspl( y1, x, p1, fitn, tension_parameter);
-    cspl( y2, x, p2, fitn, tension_parameter);
-    cspl( y3, x, p3, fitn, tension_parameter);
-    cspl( y4, x, p4, fitn, tension_parameter);
+    ccmath_cspl( y1, x, p1, fitn, tension_parameter);
+    ccmath_cspl( y2, x, p2, fitn, tension_parameter);
+    ccmath_cspl( y3, x, p3, fitn, tension_parameter);
+    ccmath_cspl( y4, x, p4, fitn, tension_parameter);
 /*
     double* ylin = y4;
     switch (reference_channel) {
@@ -663,7 +663,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
 
             skip = false;
             for ( int i = 0; i < CHANNELS; ++i) {
-                values[i] = channel_amp[i] * splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
+                values[i] = channel_amp[i] * ccmath_splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
 //                values[i] = splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
                 if (values[i] <= 0.)
                     skip = true;

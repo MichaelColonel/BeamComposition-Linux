@@ -31,7 +31,7 @@
 
 #include "ccmath_lib.h"
 
-void cspl(double *x,double *y,double *z,int m,double tn)
+void ccmath_cspl(double *x,double *y,double *z,int m,double tn)
 { double h,s,t,*pa,*pb,*a,*b; int j;
   if(tn==0.) tn=2.;
   else{ h=sinh(tn); tn=(tn*cosh(tn)-h)/(h-tn);}
@@ -48,7 +48,7 @@ void cspl(double *x,double *y,double *z,int m,double tn)
   free(pa);
 }
 
-double csfit(double w,double *x,double *y,double *z,int m)
+double ccmath_csfit(double w,double *x,double *y,double *z,int m)
 { double s,t; int j,k;
   if(w<x[0] || w>x[m]) return 0.;
   for(j=1; w>x[j] ;++j)
@@ -58,7 +58,7 @@ double csfit(double w,double *x,double *y,double *z,int m)
   return (t*y[j]+(1.-t)*y[k]-s*(z[j]*(1.+t)+z[k]*(2.-t)));
 }
 
-double tnsfit(double w,double *x,double *y,double *z,int m,double tn)
+double ccmath_tnsfit(double w,double *x,double *y,double *z,int m,double tn)
 { double s,t,u,a=sinh(tn); int j,k;
   if(w<x[0] || w>x[m]) return 0.;
   for(j=1; w>x[j] ;++j)

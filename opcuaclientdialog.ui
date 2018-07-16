@@ -53,7 +53,7 @@
      <item row="1" column="0" colspan="4">
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>GroupBox</string>
+        <string>Beam charge spectrum composition</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
@@ -73,6 +73,36 @@
             <string>Date time stamp</string>
            </property>
           </column>
+          <item>
+           <property name="text">
+            <string>RBS.BeamSpectrum.01</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>State</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Command</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Value</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ValueIntegral</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>HeartBeat</string>
+            </property>
+           </item>
+          </item>
          </widget>
         </item>
        </layout>

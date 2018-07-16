@@ -63,6 +63,8 @@
 #include "channelscountsfit.h"
 #include "channelschargefit.h"
 
+#include "opcuanodes.h"
+
 #include "ui_mainwindow.h"
 #include "mainwindow.h"
 
@@ -187,6 +189,8 @@ MainWindow::MainWindow(QWidget *parent)
     sys_status(STATUS_DEVICE_DISCONNECTED)
 {
     ui->setupUi(this);
+
+    opcua_initiate_nodes();
 
     loadSettings(settings);
 

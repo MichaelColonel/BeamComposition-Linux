@@ -14,28 +14,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
  *
- *
- */
-
-
-/*             CCMATH mathematics library source code.
- *
- *  Copyright (C)  2000   Daniel A. Atkinson    All rights reserved.
- *  This code may be redistributed under the terms of the GNU library
- *  public license (LGPL). ( See the lgpl.license file for details.)
- * ------------------------------------------------------------------------
  */
 
 #pragma once
 
+#include <open62541.h>
+
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cpluplus */
 
-void ccmath_cspl(double *x,double *y,double *z,int m,double tn);
-double ccmath_csfit(double w,double *x,double *y,double *z,int m);
-double ccmath_tnsfit(double w,double *x,double *y,double *z,int m,double tn);
+extern UA_NodeId NODE_ID_SPECTRUM_SYSTEM;
+extern UA_NodeId NODE_ID_EXTERNAL_COMMAND;
+extern UA_NodeId NODE_ID_CHARGE_VALUE;
+extern UA_NodeId NODE_ID_CHARGE_VALUE_INTEGRAL;
+extern UA_NodeId NODE_ID_HEART_BEAT;
+extern UA_NodeId NODE_ID_STATE;
+
+void opcua_initiate_nodes(void);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cpluplus */

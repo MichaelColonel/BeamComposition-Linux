@@ -17,8 +17,6 @@ exists ($(ROOTSYS)/include/rootcint.pri) {
 #    CREATE_ROOT_DICT_FOR_CLASSES *= ${HEADERS} RSLinkDef.h
 }
 
-win32:INCLUDEPATH += C:\root\include
-
 #INCLUDEPATH += /usr/local/GATE/include/root
 
 #LIBS += -L/usr/local/GATE/lib/root -lCore -lCint -lRIO -lNet -lHist \
@@ -55,7 +53,9 @@ SOURCES += main.cpp \
     commandthread.cpp \
     chargevaluedelegate.cpp \
     rundetailslistwidgetitem.cpp \
-    opcuaclientdialog.cpp
+    opcuaclientdialog.cpp \
+    opcuaclient.cpp \
+    opcuanodes.c
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -77,7 +77,9 @@ HEADERS  += mainwindow.h \
     commandthread.h \
     chargevaluedelegate.h \
     rundetailslistwidgetitem.h \
-    opcuaclientdialog.h
+    opcuaclientdialog.h \
+    opcuaclient.h \
+    opcuanodes.h
 
 FORMS    += mainwindow.ui \
     rootcanvasdialog.ui \
@@ -85,11 +87,20 @@ FORMS    += mainwindow.ui \
     signalvaluedialog.ui \
     opcuaclientdialog.ui
 
-unix:LIBS += -lftd2xx
+
+unix {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += open62541
+    LIBS += -lftd2xx
+}
+
+win32 {
+    LIBS += -L$$PWD/../FTDI_DriverNew/i386/ -lftd2xx
+    INCLUDEPATH += C:\root\include
+    INCLUDEPATH += $$PWD/../FTDI_DriverNew
+}
 
 RESOURCES += BeamComposition.qrc
 
 TRANSLATIONS += BeamComposition_ru.ts
 
-win32:LIBS += -L$$PWD/../FTDI_DriverNew/i386/ -lftd2xx
-win32:INCLUDEPATH += $$PWD/../FTDI_DriverNew

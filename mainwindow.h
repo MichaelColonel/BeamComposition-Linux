@@ -27,7 +27,6 @@
 
 
 #include <ftd2xx.h>
-
 #include "channelscountsfit.h"
 
 #include "runinfo.h"

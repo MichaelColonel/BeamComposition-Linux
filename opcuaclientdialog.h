@@ -18,6 +18,7 @@
 #pragma once
 
 #include <QDialog>
+#include "runinfo.h"
 
 namespace Ui {
 class OpcUaClientDialog;
@@ -30,7 +31,14 @@ class OpcUaClientDialog : public QDialog
 public:
     explicit OpcUaClientDialog(QWidget *parent = 0);
     ~OpcUaClientDialog();
-    
+
+public slots:
+    void setExtCommandValue(int);
+    void setStateValue(int);
+    void setHeatBeatValue(int);
+    void setBreamSpectrumValue(const RunInfo::BeamSpectrumArray&);
+    void setIntergalBreamSpectrumValue(const RunInfo::BeamSpectrumArray&);
+
 private:
     Ui::OpcUaClientDialog *ui;
 };

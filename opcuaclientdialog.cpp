@@ -29,3 +29,30 @@ OpcUaClientDialog::~OpcUaClientDialog()
 {
     delete ui;
 }
+
+void
+OpcUaClientDialog::setExtCommandValue(int)
+{
+
+}
+
+void
+OpcUaClientDialog::setStateValue(int)
+{
+}
+
+void
+OpcUaClientDialog::setHeatBeatValue(int)
+{
+}
+
+void
+OpcUaClientDialog::setBreamSpectrumValue(const RunInfo::BeamSpectrumArray&)
+{
+}
+
+void
+OpcUaClientDialog::setIntergalBreamSpectrumValue(const RunInfo::BeamSpectrumArray&)
+{
+
+}

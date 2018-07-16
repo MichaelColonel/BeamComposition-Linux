@@ -14,28 +14,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
  *
- *
  */
 
+#include "opcuanodes.h"
 
-/*             CCMATH mathematics library source code.
- *
- *  Copyright (C)  2000   Daniel A. Atkinson    All rights reserved.
- *  This code may be redistributed under the terms of the GNU library
- *  public license (LGPL). ( See the lgpl.license file for details.)
- * ------------------------------------------------------------------------
- */
+UA_NodeId NODE_ID_SPECTRUM_SYSTEM;
+UA_NodeId NODE_ID_EXTERNAL_COMMAND;
+UA_NodeId NODE_ID_CHARGE_VALUE;
+UA_NodeId NODE_ID_CHARGE_VALUE_INTEGRAL;
+UA_NodeId NODE_ID_HEART_BEAT;
+UA_NodeId NODE_ID_STATE;
 
-#pragma once
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void ccmath_cspl(double *x,double *y,double *z,int m,double tn);
-double ccmath_csfit(double w,double *x,double *y,double *z,int m);
-double ccmath_tnsfit(double w,double *x,double *y,double *z,int m,double tn);
-
-#ifdef __cplusplus
+void
+opcua_initiate_nodes(void)
+{
+    NODE_ID_SPECTRUM_SYSTEM = UA_NODEID_STRING( 0, "RBS.Prectrum.01");
+    NODE_ID_EXTERNAL_COMMAND = UA_NODEID_STRING( 0, "Command");
+    NODE_ID_CHARGE_VALUE = UA_NODEID_STRING( 0, "Value");
+    NODE_ID_CHARGE_VALUE_INTEGRAL = UA_NODEID_STRING( 0, "ValueIntegral");
+    NODE_ID_HEART_BEAT = UA_NODEID_STRING( 0, "HeartBeat");
+    NODE_ID_STATE = UA_NODEID_STRING( 0, "State");
 }
-#endif

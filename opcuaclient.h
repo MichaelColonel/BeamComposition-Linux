@@ -14,28 +14,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
  *
- *
- */
-
-
-/*             CCMATH mathematics library source code.
- *
- *  Copyright (C)  2000   Daniel A. Atkinson    All rights reserved.
- *  This code may be redistributed under the terms of the GNU library
- *  public license (LGPL). ( See the lgpl.license file for details.)
- * ------------------------------------------------------------------------
  */
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <open62541.h>
 
-void ccmath_cspl(double *x,double *y,double *z,int m,double tn);
-double ccmath_csfit(double w,double *x,double *y,double *z,int m);
-double ccmath_tnsfit(double w,double *x,double *y,double *z,int m,double tn);
+void onConnectCallback( UA_Client* client, void* userdata,
+    UA_UInt32 requestId, void* status);
+void onReadExtCommandAttributeCallback( UA_Client* client, void* userdata,
+    UA_UInt32 requestId, UA_Variant* var);
 
-#ifdef __cplusplus
-}
+#ifdef UA_ENABLE_SUBSCRIPTIONS
+void
+onSubscriptionExtCommandValueChanged( UA_Client* client, UA_UInt32 subId, void* subContext,
+    UA_UInt32 monId, void* monContext, UA_DataValue* value);
 #endif

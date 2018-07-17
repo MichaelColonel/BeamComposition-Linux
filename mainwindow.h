@@ -79,6 +79,7 @@ private slots:
     void externalSignalReceived();
     void newBatchStateReceived(bool);
     void movementFinished();
+    void opcUaClientDialog();
     void commandThreadStarted();
     void commandThreadFinished();
     void acquireThreadStarted();
@@ -159,5 +160,4 @@ private:
     RunInfo runinfo;
     SystemCurrentStatus sys_status;
     OpcUaClient* opcua_client;
-    OpcUaClientDialog* opcua_dialog;
 };

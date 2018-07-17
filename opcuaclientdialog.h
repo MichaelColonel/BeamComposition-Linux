@@ -18,6 +18,8 @@
 #pragma once
 
 #include <QDialog>
+#include <QProgressDialog>
+
 #include "runinfo.h"
 
 namespace Ui {
@@ -25,24 +27,31 @@ class OpcUaClientDialog;
 }
 
 class QSettings;
+class OpcUaClient;
 
 class OpcUaClientDialog : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit OpcUaClientDialog(QWidget *parent = 0);
+    explicit OpcUaClientDialog( const QString& path, OpcUaClient* client, QWidget *parent = 0);
     ~OpcUaClientDialog();
-    void setSettings(QSettings* set);
 
 public slots:
-    void startUpConnection();
+    void onClientConnected();
+
     void setExtCommandValue(int);
     void setStateValue(int);
     void setHeatBeatValue(int);
     void setBreamSpectrumValue(const RunInfo::BeamSpectrumArray&);
     void setIntergalBreamSpectrumValue(const RunInfo::BeamSpectrumArray&);
 
+private slots:
+    void onConnectClicked();
+    void onDisconnectClicked();
+
 private:
     Ui::OpcUaClientDialog *ui;
+    OpcUaClient* opcua_client;
+    QProgressDialog* progress_dialog;
 };

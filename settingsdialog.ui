@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="chageCompositionTabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab_5">
       <attribute name="title">
@@ -690,7 +690,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="serverLineEdit">
+            <widget class="QLineEdit" name="opcUaPathLineEdit">
              <property name="text">
               <string notr="true">opc.tcp://localhost</string>
              </property>
@@ -704,7 +704,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="serverPortSpinBox">
+            <widget class="QSpinBox" name="opcUaPortSpinBox">
              <property name="maximum">
               <number>65535</number>
              </property>
@@ -731,7 +731,7 @@
         </spacer>
        </item>
        <item row="1" column="0">
-        <widget class="QCheckBox" name="connectOnStartUpCheckBox">
+        <widget class="QCheckBox" name="opcUaConnectOnStartUpCheckBox">
          <property name="text">
           <string>Connect on start up</string>
          </property>

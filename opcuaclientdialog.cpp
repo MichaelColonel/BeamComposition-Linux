@@ -15,25 +15,52 @@
  *      MA 02110-1301, USA.
  */
 
+#include <iostream>
+
+#include "opcuaclient.h"
+
 #include "opcuaclientdialog.h"
 #include "ui_opcuaclientdialog.h"
 
-OpcUaClientDialog::OpcUaClientDialog(QWidget *parent) :
+OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client, QWidget *parent)
+    :
     QDialog(parent),
-    ui(new Ui::OpcUaClientDialog)
+    ui(new Ui::OpcUaClientDialog),
+    opcua_client(client),
+    progress_dialog(new QProgressDialog( tr("Connection..."), \
+        tr("Abort Connection"), 0, 0, this))
 {
     ui->setupUi(this);
+
+    connect( ui->connectPushButton, SIGNAL(clicked()), this, SLOT(onConnectClicked()));
+    connect( ui->disconnectPushButton, SIGNAL(clicked()), this, SLOT(onDisconnectClicked()));
+
+    ui->treeWidget->expandAll();
+
+    if (opcua_client) {
+        connect( opcua_client, SIGNAL(connected()), this, SLOT(onClientConnected()));
+    }
+    if (opcua_client && opcua_client->isConnected()) {
+        ui->connectPushButton->setEnabled(false);
+        ui->disconnectPushButton->setEnabled(true);
+    }
+    else {
+        ui->connectPushButton->setEnabled(true);
+        ui->disconnectPushButton->setEnabled(false);
+    }
+
+    ui->OpcUaServerNameLabel->setText(path);
 }
 
 OpcUaClientDialog::~OpcUaClientDialog()
 {
     delete ui;
+    delete progress_dialog;
 }
 
 void
 OpcUaClientDialog::setExtCommandValue(int)
 {
-
 }
 
 void
@@ -54,11 +81,34 @@ OpcUaClientDialog::setBreamSpectrumValue(const RunInfo::BeamSpectrumArray&)
 void
 OpcUaClientDialog::setIntergalBreamSpectrumValue(const RunInfo::BeamSpectrumArray&)
 {
-
 }
 
 void
-OpcUaClientDialog::startUpConnection()
+OpcUaClientDialog::onClientConnected()
 {
+    ui->connectPushButton->setEnabled(false);
+    ui->disconnectPushButton->setEnabled(true);
+    progress_dialog->hide();
+}
 
+void
+OpcUaClientDialog::onConnectClicked()
+{
+    if (opcua_client && !opcua_client->isConnected()) {
+        QString path = ui->OpcUaServerNameLabel->text();
+        opcua_client->connect_async(path);
+        progress_dialog->show();
+        ui->connectPushButton->setEnabled(false);
+        ui->disconnectPushButton->setEnabled(false);
+    }
+}
+
+void
+OpcUaClientDialog::onDisconnectClicked()
+{
+    if (opcua_client && opcua_client->isConnected()) {
+        opcua_client->disconnect();
+        ui->connectPushButton->setEnabled(true);
+        ui->disconnectPushButton->setEnabled(false);
+    }
 }

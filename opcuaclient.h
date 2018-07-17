@@ -27,9 +27,13 @@
 class OpcUaClient : public QObject {
     Q_OBJECT
 public:
-    OpcUaClient( const UA_ClientConfig& config = UA_ClientConfig_default, QObject* parent = 0);
+    OpcUaClient(QObject* parent = 0);
     virtual ~OpcUaClient();
-    UA_StatusCode connect_async( const QString& path, int port);
+    UA_StatusCode connect_async( const QString& server, int port,
+        const UA_ClientConfig& config = UA_ClientConfig_default);
+    UA_StatusCode connect_async( const QString& path,
+        const UA_ClientConfig& config = UA_ClientConfig_default);
+    void disconnect();
 
     static void onConnectCallback( UA_Client* client, void* userdata,
         UA_UInt32 requestId, void* status);
@@ -41,7 +45,10 @@ public:
     onSubscriptionExtCommandValueChanged( UA_Client* client, UA_UInt32 subId, void* subContext,
         UA_UInt32 monId, void* monContext, UA_DataValue* value);
     #endif
+    void signalConnected();
+    bool isConnected() const { return bool(client != nullptr); }
 public slots:
+    void iterate();
     UA_StatusCode writeBeamSpectrumValue(const RunInfo::BeamSpectrumArray&);
     UA_StatusCode writeBeamIntegralSpectrumValue(const RunInfo::BeamSpectrumArray&);
     UA_StatusCode writeHeartBeatValue(int);
@@ -49,8 +56,9 @@ public slots:
     UA_StatusCode writeCurrentStatusValue(int);
 
 signals:
-    void signalConnected();
-    void signalExternalCommandChanged(int);
+    void disconnected();
+    void connected();
+    void externalCommandChanged(int);
 
 private:
     UA_Client* client;

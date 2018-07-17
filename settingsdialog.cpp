@@ -320,6 +320,15 @@ SettingsDialog::setSettingsParameters( QSettings* set,
     projectile_charge = settings->value( "projectile-charge", CARBON_Z).toInt();
     ui->referenceChargeSpinBox->setValue(reference_charge);
     ui->projectileChargeSpinBox->setValue(projectile_charge);
+
+    bool opcua_startup = settings->value( "opcua-connect-startup", false).toBool();
+    ui->opcUaConnectOnStartUpCheckBox->setChecked(opcua_startup);
+
+    QString opcua_path = settings->value( "opcua-path", "opc.tcp://localhost").toString();
+    ui->opcUaPathLineEdit->setText(opcua_path);
+
+    int opcua_port = settings->value( "opcua-port", 4840).toInt();
+    ui->opcUaPortSpinBox->setValue(opcua_port);
 }
 
 void

@@ -188,8 +188,7 @@ MainWindow::MainWindow(QWidget *parent)
     flag_background(false),
     flag_write_run(true),
     sys_status(STATUS_DEVICE_DISCONNECTED),
-    opcua_client(new OpcUaClient( UA_ClientConfig_default, this)),
-    opcua_dialog(new OpcUaClientDialog(this))
+    opcua_client(new OpcUaClient(this))
 {
     ui->setupUi(this);
 
@@ -245,6 +244,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( ui->actionOpenBackRun, SIGNAL(triggered()), this, SLOT(openBackRun()));
     connect( ui->actionSaveRun, SIGNAL(triggered()), this, SLOT(saveRun()));
     connect( ui->actionSettings, SIGNAL(triggered()), this, SLOT(setRunSettings()));
+    connect( ui->actionOpcUaClient, SIGNAL(triggered()), this, SLOT(opcUaClientDialog()));
     connect( ui->actionDetailsClearAll, SIGNAL(triggered()), this, SLOT(detailsClear()));
     connect( ui->actionDetailsSelectAll, SIGNAL(triggered()), this, SLOT(detailsSelectAll()));
     connect( ui->actionDetailsSelectNone, SIGNAL(triggered()), this, SLOT(detailsSelectNone()));
@@ -276,6 +276,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( ui->updateDataButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(dataUpdateChanged(int)));
 
     connect( timer, SIGNAL(timeout()), this, SLOT(handle_root_events()));
+    connect( timer_opcua, SIGNAL(timeout()), opcua_client, SLOT(iterate()));
 
     connect( command_thread, SIGNAL(started()), this, SLOT(commandThreadStarted()));
     connect( command_thread, SIGNAL(finished()), this, SLOT(commandThreadFinished()));
@@ -321,10 +322,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     update_period = settings->value( "opcua-update-timeout", 2).toInt() * 1000;    
     timer_opcua->setInterval(update_period);
+    timer_opcua->start();
 
     bool opcua_startup = settings->value( "opcua-connect-startup", false).toBool();
-    if (opcua_startup)
-        QTimer::singleShot( 1000, opcua_dialog, SLOT(startUpConnection()));
+    if (opcua_startup) {
+
+    }
 
     ui->treeWidget->expandAll();
 }
@@ -372,8 +375,8 @@ MainWindow::~MainWindow()
         delete filedat;
     }
 
-    delete opcua_client;
     delete progress_dialog;
+    delete opcua_client;
 
     delete settings;
     delete ui;
@@ -1687,6 +1690,23 @@ MainWindow::batchDataReceived( const DataList& datalist, const QDateTime& dt)
     QThreadPool* threadPool = QThreadPool::globalInstance();
     threadPool->start(writedata);
     threadPool->start(writedatatime);
+}
+
+void
+MainWindow::opcUaClientDialog()
+{
+    QString opcua_path = settings->value( "opcua-path", "opc.tcp://localhost").toString();
+    int opcua_port = settings->value( "opcua-port", 4840).toInt();
+
+    QString server_path = QString("%1:%2").arg(opcua_path).arg(opcua_port);
+
+    OpcUaClientDialog* dialog = new OpcUaClientDialog( server_path, opcua_client, this);
+    int result = dialog->exec();
+    if (result) {
+        ;
+    }
+
+    delete dialog;
 }
 
 void

@@ -34,12 +34,13 @@ class OpcUaClientDialog : public QDialog
     Q_OBJECT
     
 public:
-    explicit OpcUaClientDialog( const QString& path, OpcUaClient* client, QWidget *parent = 0);
+    explicit OpcUaClientDialog( const QString& path, OpcUaClient* client,
+        bool connect_on_start = false, QWidget *parent = 0);
     ~OpcUaClientDialog();
 
 public slots:
     void onClientConnected();
-
+    void onCancelConnectionClicked();
     void setExtCommandValue(int);
     void setStateValue(int);
     void setHeatBeatValue(int);

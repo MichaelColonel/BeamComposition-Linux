@@ -33,7 +33,8 @@ const UA_NodeId NODE_ID_HEART_BEAT = UA_NODEID_STRING( 0, "HeartBeat");
 const UA_NodeId NODE_ID_STATE = UA_NODEID_STRING( 0, "State");
 
 OpcUaClient* local_client_ptr = 0;
-}
+
+} // namespace
 
 OpcUaClient::OpcUaClient(QObject* parent)
     :

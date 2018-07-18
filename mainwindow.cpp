@@ -314,6 +314,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->runDetailsListWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
 
     progress_dialog->setWindowModality(Qt::WindowModal);
+    progress_dialog->setWindowTitle(tr("Progress"));
 
     timer->start(20);
 
@@ -326,7 +327,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     bool opcua_startup = settings->value( "opcua-connect-startup", false).toBool();
     if (opcua_startup) {
-
+        QTimer::singleShot( 0, this, SLOT(opcUaStartUp()));
     }
 
     ui->treeWidget->expandAll();
@@ -1700,11 +1701,22 @@ MainWindow::opcUaClientDialog()
 
     QString server_path = QString("%1:%2").arg(opcua_path).arg(opcua_port);
 
-    OpcUaClientDialog* dialog = new OpcUaClientDialog( server_path, opcua_client, this);
-    int result = dialog->exec();
-    if (result) {
-        ;
-    }
+    OpcUaClientDialog* dialog = new OpcUaClientDialog( server_path, opcua_client, false, this);
+    dialog->exec();
+
+    delete dialog;
+}
+
+void
+MainWindow::opcUaStartUp()
+{
+    QString opcua_path = settings->value( "opcua-path", "opc.tcp://localhost").toString();
+    int opcua_port = settings->value( "opcua-port", 4840).toInt();
+
+    QString server_path = QString("%1:%2").arg(opcua_path).arg(opcua_port);
+
+    OpcUaClientDialog* dialog = new OpcUaClientDialog( server_path, opcua_client, true, this);
+    dialog->exec();
 
     delete dialog;
 }

@@ -80,6 +80,7 @@ private slots:
     void newBatchStateReceived(bool);
     void movementFinished();
     void opcUaClientDialog();
+    void opcUaStartUp();
     void commandThreadStarted();
     void commandThreadFinished();
     void acquireThreadStarted();

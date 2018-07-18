@@ -15,6 +15,7 @@
  *      MA 02110-1301, USA.
  */
 
+#include <QTimer>
 #include <iostream>
 
 #include "opcuaclient.h"
@@ -22,16 +23,18 @@
 #include "opcuaclientdialog.h"
 #include "ui_opcuaclientdialog.h"
 
-OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client, QWidget *parent)
+OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
+    bool connect_on_start, QWidget *parent)
     :
     QDialog(parent),
     ui(new Ui::OpcUaClientDialog),
     opcua_client(client),
     progress_dialog(new QProgressDialog( tr("Connection..."), \
-        tr("Abort Connection"), 0, 0, this))
+        tr("Cancel Connection"), 0, 0, this))
 {
     ui->setupUi(this);
 
+    connect( progress_dialog, SIGNAL(canceled()), this, SLOT(onCancelConnectionClicked()));
     connect( ui->connectPushButton, SIGNAL(clicked()), this, SLOT(onConnectClicked()));
     connect( ui->disconnectPushButton, SIGNAL(clicked()), this, SLOT(onDisconnectClicked()));
 
@@ -50,6 +53,11 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client, 
     }
 
     ui->OpcUaServerNameLabel->setText(path);
+    progress_dialog->setWindowTitle(tr("Connection progress"));
+
+    if (connect_on_start) {
+        QTimer::singleShot( 1000, this, SLOT(onConnectClicked()));
+    }
 }
 
 OpcUaClientDialog::~OpcUaClientDialog()
@@ -86,9 +94,9 @@ OpcUaClientDialog::setIntergalBreamSpectrumValue(const RunInfo::BeamSpectrumArra
 void
 OpcUaClientDialog::onClientConnected()
 {
+    progress_dialog->hide();
     ui->connectPushButton->setEnabled(false);
     ui->disconnectPushButton->setEnabled(true);
-    progress_dialog->hide();
 }
 
 void
@@ -111,4 +119,13 @@ OpcUaClientDialog::onDisconnectClicked()
         ui->connectPushButton->setEnabled(true);
         ui->disconnectPushButton->setEnabled(false);
     }
+}
+
+void
+OpcUaClientDialog::onCancelConnectionClicked()
+{
+    opcua_client->disconnect();
+    ui->connectPushButton->setEnabled(true);
+    ui->disconnectPushButton->setEnabled(false);
+    progress_dialog->hide();
 }

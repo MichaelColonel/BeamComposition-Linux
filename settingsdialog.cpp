@@ -520,6 +520,15 @@ SettingsDialog::applyChanges()
     }
     params->recalculate();
     params->recalculate_charge_fit();
+
+    bool opcua_startup = ui->opcUaConnectOnStartUpCheckBox->isChecked();
+    settings->setValue( "opcua-connect-startup", opcua_startup);
+
+    QString opcua_path = ui->opcUaPathLineEdit->text();
+    settings->value( "opcua-path", opcua_path);
+
+    int opcua_port = ui->opcUaPortSpinBox->value();
+    settings->setValue( "opcua-port", opcua_port);
 }
 
 void

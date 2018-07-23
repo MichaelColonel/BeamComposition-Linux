@@ -1696,8 +1696,8 @@ MainWindow::batchDataReceived( const DataList& datalist, const QDateTime& dt)
 void
 MainWindow::opcUaClientDialog()
 {
-    QString opcua_path = settings->value( "opcua-path", "opc.tcp://localhost").toString();
-    int opcua_port = settings->value( "opcua-port", 4840).toInt();
+    QString opcua_path = settings->value( "opcua-server-path", "opc.tcp://localhost").toString();
+    int opcua_port = settings->value( "opcua-server-port", 4840).toInt();
 
     QString server_path = QString("%1:%2").arg(opcua_path).arg(opcua_port);
 
@@ -1710,8 +1710,8 @@ MainWindow::opcUaClientDialog()
 void
 MainWindow::opcUaStartUp()
 {
-    QString opcua_path = settings->value( "opcua-path", "opc.tcp://localhost").toString();
-    int opcua_port = settings->value( "opcua-port", 4840).toInt();
+    QString opcua_path = settings->value( "opcua-server-path", "opc.tcp://localhost").toString();
+    int opcua_port = settings->value( "opcua-server-port", 4840).toInt();
 
     QString server_path = QString("%1:%2").arg(opcua_path).arg(opcua_port);
 

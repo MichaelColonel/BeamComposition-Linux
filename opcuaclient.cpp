@@ -116,9 +116,35 @@ OpcUaClient::connect_async( const QString& path, const UA_ClientConfig& config)
 }
 
 UA_StatusCode
-OpcUaClient::writeBeamSpectrumValue(const RunInfo::BeamSpectrumArray&)
+OpcUaClient::writeBeamSpectrumValue(const RunInfo::BeamSpectrumArray& bs_array)
 {
+    const float* bs_data = bs_array.data();
 
+    UA_Variant valueIntVar;
+    UA_Variant_init(&valueIntVar);
+    UA_Variant_setArrayCopy( &valueIntVar, bs_data, CARBON_Z, &UA_TYPES[UA_TYPES_FLOAT]);
+
+    UA_WriteValue valueIntWV;
+    UA_WriteValue_init(&valueIntWV);
+    valueIntWV.nodeId = NODE_ID_CHARGE_VALUE;
+    valueIntWV.attributeId = UA_ATTRIBUTEID_VALUE;
+    valueIntWV.value.status = UA_STATUSCODE_GOOD;
+    valueIntWV.value.sourceTimestamp = UA_DateTime_now();
+    valueIntWV.value.hasStatus = true;
+    valueIntWV.value.value = valueIntVar;
+    valueIntWV.value.hasValue = true;
+
+    UA_WriteRequest wReq;
+    UA_WriteRequest_init(&wReq);
+    wReq.nodesToWrite = &valueIntWV;
+    wReq.nodesToWriteSize = 1;
+    UA_WriteResponse wResp = UA_Client_Service_write(client, wReq);
+    if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
+
+    }
+    UA_WriteRequest_deleteMembers(&wReq);
+    UA_WriteResponse_deleteMembers(&wResp);
+    return UA_STATUSCODE_GOOD;
 }
 
 UA_StatusCode
@@ -189,4 +215,10 @@ void
 OpcUaClient::signalConnected()
 {
     emit connected();
+}
+
+void
+OpcUaClient::writeBeamComposition( const RunInfo& batch, const RunInfo& total, const QDateTime& datetime)
+{
+
 }

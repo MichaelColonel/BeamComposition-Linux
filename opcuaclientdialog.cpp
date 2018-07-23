@@ -52,7 +52,7 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
         ui->disconnectPushButton->setEnabled(false);
     }
 
-    ui->OpcUaServerNameLabel->setText(path);
+    ui->opcUaServerNameLabel->setText(path);
     progress_dialog->setWindowTitle(tr("Connection progress"));
 
     if (connect_on_start) {
@@ -103,7 +103,7 @@ void
 OpcUaClientDialog::onConnectClicked()
 {
     if (opcua_client && !opcua_client->isConnected()) {
-        QString path = ui->OpcUaServerNameLabel->text();
+        QString path = ui->opcUaServerNameLabel->text();
         opcua_client->connect_async(path);
         progress_dialog->show();
         ui->connectPushButton->setEnabled(false);

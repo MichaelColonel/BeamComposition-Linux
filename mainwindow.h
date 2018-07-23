@@ -70,6 +70,8 @@ protected:
 signals:
     void updateDiagram();
     void signalSystemCurrentStatus(SystemCurrentStatus);
+    void signalBeamCompositionChanged( const RunInfo& batch,
+        const RunInfo& total, const QDateTime& date_time);
 
 private slots:
     void handle_root_events();

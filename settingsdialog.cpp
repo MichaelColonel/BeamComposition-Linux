@@ -324,10 +324,10 @@ SettingsDialog::setSettingsParameters( QSettings* set,
     bool opcua_startup = settings->value( "opcua-connect-startup", false).toBool();
     ui->opcUaConnectOnStartUpCheckBox->setChecked(opcua_startup);
 
-    QString opcua_path = settings->value( "opcua-path", "opc.tcp://localhost").toString();
+    QString opcua_path = settings->value( "opcua-server-path", "opc.tcp://localhost").toString();
     ui->opcUaPathLineEdit->setText(opcua_path);
 
-    int opcua_port = settings->value( "opcua-port", 4840).toInt();
+    int opcua_port = settings->value( "opcua-server-port", 4840).toInt();
     ui->opcUaPortSpinBox->setValue(opcua_port);
 }
 
@@ -525,10 +525,10 @@ SettingsDialog::applyChanges()
     settings->setValue( "opcua-connect-startup", opcua_startup);
 
     QString opcua_path = ui->opcUaPathLineEdit->text();
-    settings->value( "opcua-path", opcua_path);
+    settings->value( "opcua-server-path", opcua_path);
 
     int opcua_port = ui->opcUaPortSpinBox->value();
-    settings->setValue( "opcua-port", opcua_port);
+    settings->setValue( "opcua-server-port", opcua_port);
 }
 
 void

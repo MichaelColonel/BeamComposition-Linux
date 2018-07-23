@@ -24,6 +24,8 @@
 #include <open62541.h>
 #include "runinfo.h"
 
+class QDateTime;
+
 class OpcUaClient : public QObject {
     Q_OBJECT
 public:
@@ -40,15 +42,16 @@ public:
     static void onReadExtCommandAttributeCallback( UA_Client* client, void* userdata,
         UA_UInt32 requestId, UA_Variant* var);
 
-    #ifdef UA_ENABLE_SUBSCRIPTIONS
+#ifdef UA_ENABLE_SUBSCRIPTIONS
     static void
     onSubscriptionExtCommandValueChanged( UA_Client* client, UA_UInt32 subId, void* subContext,
         UA_UInt32 monId, void* monContext, UA_DataValue* value);
-    #endif
+#endif
     void signalConnected();
     bool isConnected() const { return bool(client != nullptr); }
 public slots:
     void iterate();
+    void writeBeamComposition( const RunInfo& batch, const RunInfo& total, const QDateTime& datetime);
     UA_StatusCode writeBeamSpectrumValue(const RunInfo::BeamSpectrumArray&);
     UA_StatusCode writeBeamIntegralSpectrumValue(const RunInfo::BeamSpectrumArray&);
     UA_StatusCode writeHeartBeatValue(int);
@@ -61,6 +64,9 @@ signals:
     void externalCommandChanged(int);
 
 private:
+    UA_WriteValue* createBeamSpectrumWriteValue(const RunInfo&);
+    UA_WriteValue* createCurrentStatusValue(int);
+
     UA_Client* client;
     QString server_path;
     int server_port;

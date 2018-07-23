@@ -20,7 +20,7 @@
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="1">
-      <widget class="QLabel" name="OpcUaServerNameLabel">
+      <widget class="QLabel" name="opcUaServerNameLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -56,11 +56,14 @@
      <item row="1" column="0" colspan="4">
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>Beam charge spectrum composition</string>
+        <string>OPC UA Nodes</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
          <widget class="QTreeWidget" name="treeWidget">
+          <attribute name="headerDefaultSectionSize">
+           <number>200</number>
+          </attribute>
           <column>
            <property name="text">
             <string>Node</string>

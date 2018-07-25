@@ -60,7 +60,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-207</y>
+         <y>0</y>
          <width>277</width>
          <height>787</height>
         </rect>
@@ -582,8 +582,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>290</width>
-         <height>580</height>
+         <width>141</width>
+         <height>133</height>
         </rect>
        </property>
        <attribute name="label">
@@ -629,8 +629,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>290</width>
-         <height>580</height>
+         <width>229</width>
+         <height>291</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -1047,10 +1047,10 @@
      <normaloff>:/icons/Sc_insertrows.png</normaloff>:/icons/Sc_insertrows.png</iconset>
    </property>
    <property name="text">
-    <string>OPC UA Client...</string>
+    <string>OPC UA Client Dialog...</string>
    </property>
    <property name="toolTip">
-    <string>OPC unified architecture client connection and nodes</string>
+    <string>OPC UA connection and nodes</string>
    </property>
   </action>
  </widget>

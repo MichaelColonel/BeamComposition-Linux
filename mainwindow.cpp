@@ -38,6 +38,8 @@
 #include <QThreadPool>
 #include <QDebug>
 
+#include <cstdio>
+
 #include <typeinfo>
 
 #if defined(Q_OS_WIN32) && defined(__MINGW32__)
@@ -325,8 +327,8 @@ MainWindow::MainWindow(QWidget *parent)
     timer_opcua->setInterval(update_period);
     timer_opcua->start();
 
-    bool opcua_startup = settings->value( "opcua-connect-startup", false).toBool();
-    if (opcua_startup) {
+    bool opcua_at_startup = settings->value( "opcua-connect-startup", false).toBool();
+    if (opcua_at_startup) {
         QTimer::singleShot( 0, this, SLOT(opcUaStartUp()));
     }
 

@@ -95,7 +95,7 @@
            </item>
            <item>
             <property name="text">
-             <string>Value</string>
+             <string notr="true">Value</string>
             </property>
             <property name="text">
              <string notr="true"/>
@@ -103,7 +103,7 @@
            </item>
            <item>
             <property name="text">
-             <string>ValueIntegral</string>
+             <string notr="true">ValueIntegral</string>
             </property>
             <property name="text">
              <string notr="true"/>
@@ -111,7 +111,7 @@
            </item>
            <item>
             <property name="text">
-             <string>HeartBeat</string>
+             <string notr="true">HeartBeat</string>
             </property>
             <property name="text">
              <string notr="true"/>

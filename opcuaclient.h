@@ -51,12 +51,9 @@ public:
     bool isConnected() const { return bool(client != nullptr); }
 public slots:
     void iterate();
-    void writeBeamComposition( const RunInfo& batch, const RunInfo& total, const QDateTime& datetime);
-    UA_StatusCode writeBeamSpectrumValue(const RunInfo::BeamSpectrumArray&);
-    UA_StatusCode writeBeamIntegralSpectrumValue(const RunInfo::BeamSpectrumArray&);
-    UA_StatusCode writeHeartBeatValue(int);
-    UA_StatusCode writeHeartBeatValue();
-    UA_StatusCode writeCurrentStatusValue(int);
+    bool writeBeamComposition( const RunInfo& batch, const RunInfo& mean, const QDateTime& datetime);
+    bool writeHeartBeatValue(int);
+    bool writeCurrentStateValue(int);
 
 signals:
     void disconnected();

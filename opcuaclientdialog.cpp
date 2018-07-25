@@ -24,7 +24,7 @@
 #include "ui_opcuaclientdialog.h"
 
 OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
-    bool connect_on_start, QWidget *parent)
+    bool connect_at_start, QWidget *parent)
     :
     QDialog(parent),
     ui(new Ui::OpcUaClientDialog),
@@ -55,7 +55,7 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
     ui->opcUaServerNameLabel->setText(path);
     progress_dialog->setWindowTitle(tr("Connection progress"));
 
-    if (connect_on_start) {
+    if (connect_at_start) {
         QTimer::singleShot( 1000, this, SLOT(onConnectClicked()));
     }
 }

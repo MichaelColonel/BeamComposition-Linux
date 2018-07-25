@@ -19,13 +19,14 @@
 #include <iostream>
 
 #include <QDebug>
+#include <QDateTime>
 
 #include "opcuanodes.h"
 #include "opcuaclient.h"
 
 namespace {
 
-const UA_NodeId NODE_ID_SPECTRUM_SYSTEM = UA_NODEID_STRING( 0, "RBS.Prectrum.01");
+const UA_NodeId NODE_ID_SPECTRUM_SYSTEM = UA_NODEID_STRING( 0, "RBS.BeamPrectrum.01");
 const UA_NodeId NODE_ID_EXTERNAL_COMMAND = UA_NODEID_STRING( 0, "Command");
 const UA_NodeId NODE_ID_CHARGE_VALUE = UA_NODEID_STRING( 0, "Value");
 const UA_NodeId NODE_ID_CHARGE_VALUE_INTEGRAL = UA_NODEID_STRING( 0, "ValueIntegral");
@@ -115,60 +116,72 @@ OpcUaClient::connect_async( const QString& path, const UA_ClientConfig& config)
     return retval;
 }
 
-UA_StatusCode
-OpcUaClient::writeBeamSpectrumValue(const RunInfo::BeamSpectrumArray& bs_array)
+bool
+OpcUaClient::writeBeamComposition( const RunInfo& batch, const RunInfo& mean, const QDateTime& datetime)
 {
-    const float* bs_data = bs_array.data();
+    uint t = datetime.toTime_t();
+    UA_DateTime ua_dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));
 
-    UA_Variant valueIntVar;
-    UA_Variant_init(&valueIntVar);
-    UA_Variant_setArrayCopy( &valueIntVar, bs_data, CARBON_Z, &UA_TYPES[UA_TYPES_FLOAT]);
+    RunInfo::BeamSpectrumArray batch_array = batch.averageComposition();
+    const float* batch_data = batch_array.data();
 
-    UA_WriteValue valueIntWV;
-    UA_WriteValue_init(&valueIntWV);
-    valueIntWV.nodeId = NODE_ID_CHARGE_VALUE;
-    valueIntWV.attributeId = UA_ATTRIBUTEID_VALUE;
-    valueIntWV.value.status = UA_STATUSCODE_GOOD;
-    valueIntWV.value.sourceTimestamp = UA_DateTime_now();
-    valueIntWV.value.hasStatus = true;
-    valueIntWV.value.value = valueIntVar;
-    valueIntWV.value.hasValue = true;
+    UA_Variant batch_var;
+    UA_Variant_init(&batch_var);
+    UA_Variant_setArrayCopy( &batch_var, batch_data, CARBON_Z, &UA_TYPES[UA_TYPES_FLOAT]);
 
-    UA_WriteRequest wReq;
-    UA_WriteRequest_init(&wReq);
-    wReq.nodesToWrite = &valueIntWV;
-    wReq.nodesToWriteSize = 1;
-    UA_WriteResponse wResp = UA_Client_Service_write(client, wReq);
-    if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
+    UA_WriteValue batch_value;
+    UA_WriteValue_init(&batch_value);
+    batch_value.nodeId = NODE_ID_CHARGE_VALUE;
+    batch_value.attributeId = UA_ATTRIBUTEID_VALUE;
+    batch_value.value.status = UA_STATUSCODE_GOOD;
+    batch_value.value.sourceTimestamp = ua_dt;
+    batch_value.value.hasStatus = true;
+    batch_value.value.value = batch_var;
+    batch_value.value.hasValue = true;
 
+    RunInfo::BeamSpectrumArray mean_array = mean.averageComposition();
+    const float* mean_data = mean_array.data();
+
+    UA_Variant mean_var;
+    UA_Variant_init(&mean_var);
+    UA_Variant_setArrayCopy( &mean_var, mean_data, CARBON_Z, &UA_TYPES[UA_TYPES_FLOAT]);
+
+    UA_WriteValue mean_value;
+    UA_WriteValue_init(&mean_value);
+    mean_value.nodeId = NODE_ID_CHARGE_VALUE;
+    mean_value.attributeId = UA_ATTRIBUTEID_VALUE;
+    mean_value.value.status = UA_STATUSCODE_GOOD;
+    mean_value.value.sourceTimestamp = ua_dt;
+    mean_value.value.hasStatus = true;
+    mean_value.value.value = mean_var;
+    mean_value.value.hasValue = true;
+
+    UA_WriteValue values[2] = { batch_value, mean_value };
+    UA_WriteRequest write_request;
+    UA_WriteRequest_init(&write_request);
+    write_request.nodesToWrite = values;
+    write_request.nodesToWriteSize = 2;
+    UA_WriteResponse write_response = UA_Client_Service_write( client, write_request);
+    bool result = false;
+    if (write_response.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
+        result = true;
     }
-    UA_WriteRequest_deleteMembers(&wReq);
-    UA_WriteResponse_deleteMembers(&wResp);
-    return UA_STATUSCODE_GOOD;
+
+    UA_WriteRequest_deleteMembers(&write_request);
+    UA_WriteResponse_deleteMembers(&write_response);
+    return result;
 }
 
-UA_StatusCode
-OpcUaClient::writeBeamIntegralSpectrumValue(const RunInfo::BeamSpectrumArray&)
-{
-
-}
-
-UA_StatusCode
+bool
 OpcUaClient::writeHeartBeatValue(int)
 {
-
+    return false;
 }
 
-UA_StatusCode
-OpcUaClient::writeHeartBeatValue()
+bool
+OpcUaClient::writeCurrentStateValue(int)
 {
-
-}
-
-UA_StatusCode
-OpcUaClient::writeCurrentStatusValue(int)
-{
-
+    return false;
 }
 
 void
@@ -215,10 +228,4 @@ void
 OpcUaClient::signalConnected()
 {
     emit connected();
-}
-
-void
-OpcUaClient::writeBeamComposition( const RunInfo& batch, const RunInfo& total, const QDateTime& datetime)
-{
-
 }

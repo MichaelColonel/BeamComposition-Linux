@@ -48,7 +48,10 @@ public:
         UA_UInt32 monId, void* monContext, UA_DataValue* value);
 #endif
     void signalConnected();
-    bool isConnected() const { return bool(client != nullptr); }
+    void signalExternalCommandChanged(int);
+
+    bool isConnected() const;
+    bool initExternalCommandSubscription();
 public slots:
     void iterate();
     bool writeBeamComposition( const RunInfo& batch, const RunInfo& mean, const QDateTime& datetime);

@@ -35,6 +35,11 @@ const UA_NodeId NODE_ID_STATE = UA_NODEID_STRING( 0, "State");
 
 OpcUaClient* local_client_ptr = 0;
 
+#ifdef UA_ENABLE_SUBSCRIPTIONS
+const UA_CreateSubscriptionRequest request = UA_CreateSubscriptionRequest_default();
+const UA_MonitoredItemCreateRequest monRequest = UA_MonitoredItemCreateRequest_default(NODE_ID_EXTERNAL_COMMAND);
+#endif
+
 } // namespace
 
 OpcUaClient::OpcUaClient(QObject* parent)
@@ -119,12 +124,52 @@ OpcUaClient::connect_async( const QString& path, const UA_ClientConfig& config)
 bool
 OpcUaClient::writeBeamComposition( const RunInfo& batch, const RunInfo& mean, const QDateTime& datetime)
 {
+    if (!isConnected())
+        return false;
+
+    bool result = false;
     uint t = datetime.toTime_t();
-    UA_DateTime ua_dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));
+    UA_DateTime dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));
 
     RunInfo::BeamSpectrumArray batch_array = batch.averageComposition();
     const float* batch_data = batch_array.data();
 
+    RunInfo::BeamSpectrumArray mean_array = mean.averageComposition();
+    const float* mean_data = mean_array.data();
+
+    void* ptr = UA_Array_new( 2, &UA_TYPES[UA_TYPES_WRITEVALUE]);
+    UA_WriteValue* values = reinterpret_cast<UA_WriteValue*>(ptr);
+
+    UA_WriteRequest wReq;
+    UA_WriteRequest_init(&wReq);
+    wReq.nodesToWrite = values;
+    wReq.nodesToWriteSize = 2;
+    wReq.nodesToWrite[0].nodeId = UA_NODEID_STRING_ALLOC( 0, "Value");
+    wReq.nodesToWrite[0].attributeId = UA_ATTRIBUTEID_VALUE;
+    wReq.nodesToWrite[0].value.hasValue = true;
+    wReq.nodesToWrite[0].value.sourceTimestamp = dt;
+    wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_FLOAT];
+    wReq.nodesToWrite[0].value.value.storageType = UA_VARIANT_DATA_NODELETE;
+    UA_Variant_setArrayCopy( &wReq.nodesToWrite[0].value.value, batch_data, CARBON_Z, &UA_TYPES[UA_TYPES_FLOAT]);
+
+    wReq.nodesToWrite[1].nodeId = UA_NODEID_STRING_ALLOC( 0, "ValueIntegral");
+    wReq.nodesToWrite[1].attributeId = UA_ATTRIBUTEID_VALUE;
+    wReq.nodesToWrite[1].value.hasValue = true;
+    wReq.nodesToWrite[1].value.sourceTimestamp = dt;
+    wReq.nodesToWrite[1].value.value.type = &UA_TYPES[UA_TYPES_FLOAT];
+    wReq.nodesToWrite[1].value.value.storageType = UA_VARIANT_DATA_NODELETE;
+    UA_Variant_setArrayCopy( &wReq.nodesToWrite[1].value.value, mean_data, CARBON_Z, &UA_TYPES[UA_TYPES_FLOAT]);
+
+
+    UA_WriteResponse wResp = UA_Client_Service_write( client, wReq);
+    if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
+        result = true;
+    }
+    UA_WriteRequest_deleteMembers(&wReq);
+    UA_WriteResponse_deleteMembers(&wResp);
+    return result;
+
+/*
     UA_Variant batch_var;
     UA_Variant_init(&batch_var);
     UA_Variant_setArrayCopy( &batch_var, batch_data, CARBON_Z, &UA_TYPES[UA_TYPES_FLOAT]);
@@ -138,9 +183,6 @@ OpcUaClient::writeBeamComposition( const RunInfo& batch, const RunInfo& mean, co
     batch_value.value.hasStatus = true;
     batch_value.value.value = batch_var;
     batch_value.value.hasValue = true;
-
-    RunInfo::BeamSpectrumArray mean_array = mean.averageComposition();
-    const float* mean_data = mean_array.data();
 
     UA_Variant mean_var;
     UA_Variant_init(&mean_var);
@@ -170,18 +212,65 @@ OpcUaClient::writeBeamComposition( const RunInfo& batch, const RunInfo& mean, co
     UA_WriteRequest_deleteMembers(&write_request);
     UA_WriteResponse_deleteMembers(&write_response);
     return result;
+*/
 }
 
 bool
-OpcUaClient::writeHeartBeatValue(int)
+OpcUaClient::writeHeartBeatValue(int heart_beat)
 {
-    return false;
+    if (!isConnected())
+        return false;
+
+    bool result = false;
+
+    UA_UInt32 value = heart_beat;
+
+    UA_WriteRequest wReq;
+    UA_WriteRequest_init(&wReq);
+    wReq.nodesToWrite = UA_WriteValue_new();
+    wReq.nodesToWriteSize = 1;
+    wReq.nodesToWrite[0].nodeId = UA_NODEID_STRING_ALLOC( 0, "HeartBeat");
+    wReq.nodesToWrite[0].attributeId = UA_ATTRIBUTEID_VALUE;
+    wReq.nodesToWrite[0].value.hasValue = true;
+    wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_UINT32];
+    wReq.nodesToWrite[0].value.value.storageType = UA_VARIANT_DATA_NODELETE; /* do not free the integer on deletion */
+    wReq.nodesToWrite[0].value.value.data = &value;
+    UA_WriteResponse wResp = UA_Client_Service_write( client, wReq);
+    if (wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
+        result = true;
+    }
+    UA_WriteRequest_deleteMembers(&wReq);
+    UA_WriteResponse_deleteMembers(&wResp);
+    return result;
 }
 
 bool
-OpcUaClient::writeCurrentStateValue(int)
+OpcUaClient::writeCurrentStateValue(int current_state)
 {
-    return false;
+    if (!isConnected())
+        return false;
+
+    bool result = false;
+
+    UA_Int16 value = current_state;
+
+    UA_WriteRequest wReq;
+    UA_WriteRequest_init(&wReq);
+    wReq.nodesToWrite = UA_WriteValue_new();
+    wReq.nodesToWriteSize = 1;
+    wReq.nodesToWrite[0].nodeId = UA_NODEID_STRING_ALLOC( 0, "State");
+    wReq.nodesToWrite[0].attributeId = UA_ATTRIBUTEID_VALUE;
+    wReq.nodesToWrite[0].value.hasValue = true;
+    wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_INT16];
+    wReq.nodesToWrite[0].value.value.storageType = UA_VARIANT_DATA_NODELETE; /* do not free the integer on deletion */
+    wReq.nodesToWrite[0].value.value.data = &value;
+    UA_WriteResponse wResp = UA_Client_Service_write( client, wReq);
+    if (wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
+        result = true;
+    }
+    UA_WriteRequest_deleteMembers(&wReq);
+    UA_WriteResponse_deleteMembers(&wResp);
+    return result;
 }
 
 void
@@ -199,27 +288,31 @@ OpcUaClient::onSubscriptionExtCommandValueChanged( UA_Client* /* client */,
 {
     if(UA_Variant_hasScalarType( &value->value, &UA_TYPES[UA_TYPES_INT16])) {
         UA_Int16 ext_command = *(UA_Int16*) value->value.data;
+        if (local_client_ptr) {
+            local_client_ptr->signalExternalCommandChanged(ext_command);
+        }
     }
 }
 #endif
 
 void
-OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
-    UA_UInt32 requestId, void* status)
+OpcUaClient::onConnectCallback( UA_Client* /* client */, void* userdata,
+    UA_UInt32 /* requestId */, void* status)
 {
     UA_StatusCode status_code = *(UA_StatusCode*)status;
 
     local_client_ptr = reinterpret_cast<OpcUaClient*>(userdata);
     if (local_client_ptr && (status_code == UA_STATUSCODE_GOOD)) {
-        local_client_ptr->signalConnected();
+        if (local_client_ptr->initExternalCommandSubscription())
+            local_client_ptr->signalConnected();
     }
     else if (local_client_ptr) {
     }
 }
 
 void
-OpcUaClient::onReadExtCommandAttributeCallback( UA_Client* client, void* userdata,
-    UA_UInt32 requestId, UA_Variant* var)
+OpcUaClient::onReadExtCommandAttributeCallback( UA_Client* /* client */, void* /* userdata */,
+    UA_UInt32 /* requestId */, UA_Variant* /*var */)
 {
 
 }
@@ -228,4 +321,46 @@ void
 OpcUaClient::signalConnected()
 {
     emit connected();
+}
+
+void
+OpcUaClient::signalExternalCommandChanged(int value)
+{
+    emit externalCommandChanged(value);
+}
+
+bool
+OpcUaClient::initExternalCommandSubscription()
+{
+    bool result = false;
+#ifdef UA_ENABLE_SUBSCRIPTIONS
+    UA_CreateSubscriptionResponse response;
+    response = UA_Client_Subscriptions_create( client, request, NULL, NULL, NULL);
+
+//    UA_UInt32 subId = response.subscriptionId;
+    if (response.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
+
+        UA_MonitoredItemCreateResult monResponse;
+        monResponse = UA_Client_MonitoredItems_createDataChange( client,
+            response.subscriptionId, UA_TIMESTAMPSTORETURN_BOTH,
+            monRequest, NULL, onSubscriptionExtCommandValueChanged, NULL);
+
+        if (monResponse.statusCode == UA_STATUSCODE_GOOD)
+            result = true;
+    }
+#endif
+    return result;
+}
+
+bool
+OpcUaClient::isConnected() const
+{
+    if (client) {
+        UA_ClientState res = UA_Client_getState(client);
+        return (res == UA_CLIENTSTATE_CONNECTED ||
+                res == UA_CLIENTSTATE_SECURECHANNEL ||
+                res == UA_CLIENTSTATE_SESSION);
+    }
+    else
+        return false;
 }

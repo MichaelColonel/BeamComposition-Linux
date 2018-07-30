@@ -30,7 +30,12 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
     ui(new Ui::OpcUaClientDialog),
     opcua_client(client),
     progress_dialog(new QProgressDialog( tr("Connection..."), \
-        tr("Cancel Connection"), 0, 0, this))
+        tr("Cancel Connection"), 0, 0, this)),
+    item_state(nullptr),
+    item_value(nullptr),
+    item_value_int(nullptr),
+    item_ext_command(nullptr),
+    item_heartbeat(nullptr)
 {
     ui->setupUi(this);
 
@@ -38,7 +43,7 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
     connect( ui->connectPushButton, SIGNAL(clicked()), this, SLOT(onConnectClicked()));
     connect( ui->disconnectPushButton, SIGNAL(clicked()), this, SLOT(onDisconnectClicked()));
 
-    ui->treeWidget->expandAll();
+    ui->opcUaNodesTreeWidget->expandAll();
 
     if (opcua_client) {
         connect( opcua_client, SIGNAL(connected()), this, SLOT(onClientConnected()));
@@ -55,6 +60,35 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
     ui->opcUaServerNameLabel->setText(path);
     progress_dialog->setWindowTitle(tr("Connection progress"));
 
+    QTreeWidgetItem* item = ui->opcUaNodesTreeWidget->topLevelItem(0);
+    if (item) {
+        if (opcua_client && opcua_client->isConnected())
+            item->setText( 1, tr("Connected"));
+        else
+            item->setText( 1, tr("Disconnected"));
+
+        QTreeWidgetItem* child = item->child(0);
+        if (child) {
+            item_state = child;
+        }
+        child = item->child(1);
+        if (child) {
+            item_ext_command = child;
+        }
+        child = item->child(2);
+        if (child) {
+            item_value = child;
+        }
+        child = item->child(3);
+        if (child) {
+            item_value_int = child;
+        }
+        child = item->child(4);
+        if (child) {
+            item_heartbeat = child;
+        }
+    }
+
     if (connect_at_start) {
         QTimer::singleShot( 1000, this, SLOT(onConnectClicked()));
     }
@@ -63,22 +97,27 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
 OpcUaClientDialog::~OpcUaClientDialog()
 {
     delete ui;
-    delete progress_dialog;
 }
 
 void
-OpcUaClientDialog::setExtCommandValue(int)
+OpcUaClientDialog::setExtCommandValue(int value)
 {
+    if (item_ext_command)
+        item_ext_command->setText( 1, QString("%1").arg(value));
 }
 
 void
-OpcUaClientDialog::setStateValue(int)
+OpcUaClientDialog::setStateValue(int value)
 {
+    if (item_state)
+        item_state->setText( 1, QString("%1").arg(value));
 }
 
 void
-OpcUaClientDialog::setHeatBeatValue(int)
+OpcUaClientDialog::setHeatBeatValue(int value)
 {
+    if (item_heartbeat)
+        item_heartbeat->setText( 1, QString("%1").arg(value));
 }
 
 void
@@ -97,6 +136,9 @@ OpcUaClientDialog::onClientConnected()
     progress_dialog->hide();
     ui->connectPushButton->setEnabled(false);
     ui->disconnectPushButton->setEnabled(true);
+    QTreeWidgetItem* item = ui->opcUaNodesTreeWidget->topLevelItem(0);
+    if (item)
+        item->setText( 1, tr("Connected"));
 }
 
 void
@@ -118,14 +160,22 @@ OpcUaClientDialog::onDisconnectClicked()
         opcua_client->disconnect();
         ui->connectPushButton->setEnabled(true);
         ui->disconnectPushButton->setEnabled(false);
+        QTreeWidgetItem* item = ui->opcUaNodesTreeWidget->topLevelItem(0);
+        if (item)
+            item->setText( 1, tr("Disconnected"));
     }
 }
 
 void
 OpcUaClientDialog::onCancelConnectionClicked()
 {
-    opcua_client->disconnect();
+    if (opcua_client)
+        opcua_client->disconnect();
+
     ui->connectPushButton->setEnabled(true);
     ui->disconnectPushButton->setEnabled(false);
     progress_dialog->hide();
+    QTreeWidgetItem* item = ui->opcUaNodesTreeWidget->topLevelItem(0);
+    if (item)
+        item->setText( 1, tr("Disconnected"));
 }

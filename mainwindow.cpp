@@ -190,7 +190,8 @@ MainWindow::MainWindow(QWidget *parent)
     flag_background(false),
     flag_write_run(true),
     sys_status(STATUS_DEVICE_DISCONNECTED),
-    opcua_client(new OpcUaClient(this))
+    opcua_client(new OpcUaClient(this)),
+    opcua_dialog(nullptr)
 {
     ui->setupUi(this);
 
@@ -1703,10 +1704,11 @@ MainWindow::opcUaClientDialog()
 
     QString server_path = QString("%1:%2").arg(opcua_path).arg(opcua_port);
 
-    OpcUaClientDialog* dialog = new OpcUaClientDialog( server_path, opcua_client, false, this);
-    dialog->exec();
-
-    delete dialog;
+    if (!opcua_dialog) {
+        opcua_dialog = new OpcUaClientDialog( server_path, opcua_client, false, this);
+    }
+    if (opcua_dialog)
+        opcua_dialog->show();
 }
 
 void
@@ -1717,10 +1719,11 @@ MainWindow::opcUaStartUp()
 
     QString server_path = QString("%1:%2").arg(opcua_path).arg(opcua_port);
 
-    OpcUaClientDialog* dialog = new OpcUaClientDialog( server_path, opcua_client, true, this);
-    dialog->exec();
-
-    delete dialog;
+    if (!opcua_dialog) {
+        opcua_dialog = new OpcUaClientDialog( server_path, opcua_client, true, this);
+    }
+    if (opcua_dialog)
+        opcua_dialog->show();
 }
 
 void

@@ -163,4 +163,5 @@ private:
     RunInfo runinfo;
     SystemCurrentStatus sys_status;
     OpcUaClient* opcua_client;
+    OpcUaClientDialog* opcua_dialog;
 };

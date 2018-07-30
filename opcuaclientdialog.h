@@ -26,6 +26,7 @@ namespace Ui {
 class OpcUaClientDialog;
 }
 
+class QTreeWidgetItem;
 class QSettings;
 class OpcUaClient;
 
@@ -55,4 +56,9 @@ private:
     Ui::OpcUaClientDialog *ui;
     OpcUaClient* opcua_client;
     QProgressDialog* progress_dialog;
+    QTreeWidgetItem* item_state;
+    QTreeWidgetItem* item_value;
+    QTreeWidgetItem* item_value_int;
+    QTreeWidgetItem* item_ext_command;
+    QTreeWidgetItem* item_heartbeat;
 };

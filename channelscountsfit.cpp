@@ -697,7 +697,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
             d.fit_mean->Fill(mean);
 
             if (z > 0) {
-
+                size_t& charge_event = charge_events[z - 1];
                 d.z12->Fill( charge[0], charge[1]);
                 d.z23->Fill( charge[1], charge[2]);
                 d.z34->Fill( charge[2], charge[3]);
@@ -712,7 +712,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
                 d.c13->Fill( values[0], values[2]);
                 d.c24->Fill( values[1], values[3]);
 
-                charge_events[z - 1]++; // increase a number of proccessed events for particular charge
+                charge_event++; // increase a number of proccessed events for particular charge
                 events_processed++; // increase a number of all proccessed events
 
                 ChannelsArray tmp(charge);
@@ -721,8 +721,6 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
                 double charge_rank2 = (tmp[1] + tmp[2]) / 2.;
                 d.z->Fill(charge_rank2); // rank 2
                 d.z2->Fill(charge_rank2 * charge_rank2);
-            }
-            else {
             }
         }
     }

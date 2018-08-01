@@ -122,7 +122,8 @@ OpcUaClient::connect_async( const QString& path, const UA_ClientConfig& config)
 }
 
 bool
-OpcUaClient::writeBeamComposition( const RunInfo& batch, const RunInfo& mean, const QDateTime& datetime)
+OpcUaClient::writeBeamSpectrumValue( const RunInfo::BeamSpectrumArray& batch_array,
+    const RunInfo::BeamSpectrumArray& mean_array, const QDateTime& datetime)
 {
     if (!isConnected())
         return false;
@@ -130,11 +131,7 @@ OpcUaClient::writeBeamComposition( const RunInfo& batch, const RunInfo& mean, co
     bool result = false;
     uint t = datetime.toTime_t();
     UA_DateTime dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));
-
-    RunInfo::BeamSpectrumArray batch_array = batch.averageComposition();
     const float* batch_data = batch_array.data();
-
-    RunInfo::BeamSpectrumArray mean_array = mean.averageComposition();
     const float* mean_data = mean_array.data();
 
     void* ptr = UA_Array_new( 2, &UA_TYPES[UA_TYPES_WRITEVALUE]);
@@ -216,12 +213,15 @@ OpcUaClient::writeBeamComposition( const RunInfo& batch, const RunInfo& mean, co
 }
 
 bool
-OpcUaClient::writeHeartBeatValue(int heart_beat)
+OpcUaClient::writeHeartBeatValue( int heart_beat, const QDateTime& datetime)
 {
     if (!isConnected())
         return false;
 
     bool result = false;
+
+    uint t = datetime.toTime_t();
+    UA_DateTime dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));
 
     UA_UInt32 value = heart_beat;
 
@@ -233,6 +233,7 @@ OpcUaClient::writeHeartBeatValue(int heart_beat)
     wReq.nodesToWrite[0].attributeId = UA_ATTRIBUTEID_VALUE;
     wReq.nodesToWrite[0].value.hasValue = true;
     wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_UINT32];
+    wReq.nodesToWrite[0].value.sourceTimestamp = dt;
     wReq.nodesToWrite[0].value.value.storageType = UA_VARIANT_DATA_NODELETE; /* do not free the integer on deletion */
     wReq.nodesToWrite[0].value.value.data = &value;
     UA_WriteResponse wResp = UA_Client_Service_write( client, wReq);
@@ -245,12 +246,15 @@ OpcUaClient::writeHeartBeatValue(int heart_beat)
 }
 
 bool
-OpcUaClient::writeCurrentStateValue(int current_state)
+OpcUaClient::writeCurrentStateValue( int current_state, const QDateTime& datetime)
 {
     if (!isConnected())
         return false;
 
     bool result = false;
+
+    uint t = datetime.toTime_t();
+    UA_DateTime dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));
 
     UA_Int16 value = current_state;
 
@@ -262,6 +266,7 @@ OpcUaClient::writeCurrentStateValue(int current_state)
     wReq.nodesToWrite[0].attributeId = UA_ATTRIBUTEID_VALUE;
     wReq.nodesToWrite[0].value.hasValue = true;
     wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_INT16];
+    wReq.nodesToWrite[0].value.sourceTimestamp = dt;
     wReq.nodesToWrite[0].value.value.storageType = UA_VARIANT_DATA_NODELETE; /* do not free the integer on deletion */
     wReq.nodesToWrite[0].value.value.data = &value;
     UA_WriteResponse wResp = UA_Client_Service_write( client, wReq);

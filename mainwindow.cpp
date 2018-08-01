@@ -297,6 +297,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect( profile_thread, SIGNAL(progress(int)), progress_dialog, SLOT(setValue(int)));
     connect( progress_dialog, SIGNAL(canceled()), profile_thread, SLOT(stop()));
 
+    connect( this, SIGNAL(signalBeamSpectrumChanged(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)),
+        opcua_client, SLOT(writeBeamSpectrumValue(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)));
+
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectAll);
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectNone);
 
@@ -381,6 +384,8 @@ MainWindow::~MainWindow()
 
     delete progress_dialog;
     delete opcua_client;
+    if (opcua_dialog)
+        delete opcua_dialog;
 
     delete settings;
     delete ui;
@@ -1522,7 +1527,7 @@ MainWindow::processTextFile( QFile* runfile, QList<QListWidgetItem *>& items)
 }
 
 bool
-MainWindow::processRawFile( QFile* runfile, QList<QListWidgetItem *>& items)
+MainWindow::processRawFile( QFile* runfile, QList<QListWidgetItem*>& items)
 {
     QDataStream in(runfile);
     in.setByteOrder(QDataStream::LittleEndian);
@@ -1566,7 +1571,7 @@ MainWindow::processData()
     size_t listsize = countslist.size();
     statusBar()->showMessage( tr("Events received: %1").arg(listsize), 1000);
 
-    QDateTime dtime = QDateTime::currentDateTime();
+    QDateTime datetime = QDateTime::currentDateTime();
 
     // process data
     RunInfo batch_info;
@@ -1574,7 +1579,7 @@ MainWindow::processData()
         batch_info = batchCountsReceived(countslist);
 
     if (filerun && filedat)
-        batchDataReceived( datalist, dtime);
+        batchDataReceived( datalist, datetime);
 
     int batch_counts = ui->runDetailsListWidget->count();
 
@@ -1591,7 +1596,7 @@ MainWindow::processData()
         (batch_counts + 1), datalist.size(), countslist.size(), \
         batch_data_offset, ui->runDetailsListWidget);
 */
-    RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( dtime, \
+    RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( datetime, \
         (batch_counts + 1), datalist.size(),
         batch_info.counted(), batch_info.processed(), \
         batch_data_offset, ui->runDetailsListWidget);
@@ -1602,6 +1607,11 @@ MainWindow::processData()
         out << item->file_string() << endl;
     }
     updateRunInfo();
+
+    RunInfo::BeamSpectrumArray batch_array = batch_info.averageComposition();
+    RunInfo::BeamSpectrumArray mean_array = runinfo.averageComposition();
+
+    emit signalBeamSpectrumChanged( batch_array, mean_array, datetime);
 
     if (ui->dataUpdateAutoRadioButton->isChecked()) {
         qDebug() << "GUI: data timer is started";
@@ -1706,6 +1716,8 @@ MainWindow::opcUaClientDialog()
 
     if (!opcua_dialog) {
         opcua_dialog = new OpcUaClientDialog( server_path, opcua_client, false, this);
+        connect( this, SIGNAL(signalBeamSpectrumChanged(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)),
+            opcua_dialog, SLOT(setBreamSpectrumValue(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)));
     }
     if (opcua_dialog)
         opcua_dialog->show();

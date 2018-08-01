@@ -26,6 +26,7 @@ namespace Ui {
 class OpcUaClientDialog;
 }
 
+class QDateTime;
 class QTreeWidgetItem;
 class QSettings;
 class OpcUaClient;
@@ -42,11 +43,11 @@ public:
 public slots:
     void onClientConnected();
     void onCancelConnectionClicked();
-    void setExtCommandValue(int);
-    void setStateValue(int);
-    void setHeatBeatValue(int);
-    void setBreamSpectrumValue(const RunInfo::BeamSpectrumArray&);
-    void setIntergalBreamSpectrumValue(const RunInfo::BeamSpectrumArray&);
+    void setBeamSpectrumState( int, const QDateTime&);
+    void setExtCommandValue( int, const QDateTime&);
+    void setStateValue( int, const QDateTime&);
+    void setHeatBeatValue( int, const QDateTime&);
+    void setBreamSpectrumValue( const RunInfo::BeamSpectrumArray&, const RunInfo::BeamSpectrumArray&, const QDateTime&);
 
 private slots:
     void onConnectClicked();

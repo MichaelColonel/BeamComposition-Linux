@@ -100,33 +100,29 @@ OpcUaClientDialog::~OpcUaClientDialog()
 }
 
 void
-OpcUaClientDialog::setExtCommandValue(int value)
+OpcUaClientDialog::setExtCommandValue( int value, const QDateTime&)
 {
     if (item_ext_command)
         item_ext_command->setText( 1, QString("%1").arg(value));
 }
 
 void
-OpcUaClientDialog::setStateValue(int value)
+OpcUaClientDialog::setStateValue( int value, const QDateTime&)
 {
     if (item_state)
         item_state->setText( 1, QString("%1").arg(value));
 }
 
 void
-OpcUaClientDialog::setHeatBeatValue(int value)
+OpcUaClientDialog::setHeatBeatValue( int value, const QDateTime&)
 {
     if (item_heartbeat)
         item_heartbeat->setText( 1, QString("%1").arg(value));
 }
 
 void
-OpcUaClientDialog::setBreamSpectrumValue(const RunInfo::BeamSpectrumArray&)
-{
-}
-
-void
-OpcUaClientDialog::setIntergalBreamSpectrumValue(const RunInfo::BeamSpectrumArray&)
+OpcUaClientDialog::setBreamSpectrumValue( const RunInfo::BeamSpectrumArray& batch_array,
+    const RunInfo::BeamSpectrumArray& mean_array, const QDateTime& datetime)
 {
 }
 
@@ -177,5 +173,15 @@ OpcUaClientDialog::onCancelConnectionClicked()
     progress_dialog->hide();
     QTreeWidgetItem* item = ui->opcUaNodesTreeWidget->topLevelItem(0);
     if (item)
+        item->setText( 1, tr("Disconnected"));
+}
+
+void
+OpcUaClientDialog::setBeamSpectrumState( int state, const QDateTime&)
+{
+    QTreeWidgetItem* item = ui->opcUaNodesTreeWidget->topLevelItem(0);
+    if (item && state)
+        item->setText( 1, tr("Connected"));
+    else if (item && !state)
         item->setText( 1, tr("Disconnected"));
 }

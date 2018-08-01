@@ -54,9 +54,10 @@ public:
     bool initExternalCommandSubscription();
 public slots:
     void iterate();
-    bool writeBeamComposition( const RunInfo& batch, const RunInfo& mean, const QDateTime& datetime);
-    bool writeHeartBeatValue(int);
-    bool writeCurrentStateValue(int);
+    bool writeBeamSpectrumValue( const RunInfo::BeamSpectrumArray& batch,
+        const RunInfo::BeamSpectrumArray& mean, const QDateTime&);
+    bool writeHeartBeatValue( int, const QDateTime& datetime);
+    bool writeCurrentStateValue( int, const QDateTime& datetime);
 
 signals:
     void disconnected();
@@ -64,9 +65,6 @@ signals:
     void externalCommandChanged(int);
 
 private:
-    UA_WriteValue* createBeamSpectrumWriteValue(const RunInfo&);
-    UA_WriteValue* createCurrentStatusValue(int);
-
     UA_Client* client;
     QString server_path;
     int server_port;

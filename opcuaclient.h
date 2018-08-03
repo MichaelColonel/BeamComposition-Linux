@@ -48,7 +48,7 @@ public:
         UA_UInt32 monId, void* monContext, UA_DataValue* value);
 #endif
     void signalConnected();
-    void signalExternalCommandChanged(int);
+    void signalExternalCommandChanged( int, const QDateTime&);
 
     bool isConnected() const;
     bool initExternalCommandSubscription();
@@ -62,7 +62,7 @@ public slots:
 signals:
     void disconnected();
     void connected();
-    void externalCommandChanged(int);
+    void externalCommandChanged( int, const QDateTime&);
 
 private:
     UA_Client* client;

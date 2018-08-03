@@ -293,8 +293,10 @@ OpcUaClient::onSubscriptionExtCommandValueChanged( UA_Client* /* client */,
 {
     if(UA_Variant_hasScalarType( &value->value, &UA_TYPES[UA_TYPES_INT16])) {
         UA_Int16 ext_command = *(UA_Int16*) value->value.data;
+        UA_Int64 dtut = UA_DateTime_toUnixTime(value->sourceTimestamp);
+        QDateTime dt = QDateTime::fromMSecsSinceEpoch(dtut);
         if (local_client_ptr) {
-            local_client_ptr->signalExternalCommandChanged(ext_command);
+            local_client_ptr->signalExternalCommandChanged( int(ext_command), dt);
         }
     }
 }
@@ -329,9 +331,9 @@ OpcUaClient::signalConnected()
 }
 
 void
-OpcUaClient::signalExternalCommandChanged(int value)
+OpcUaClient::signalExternalCommandChanged( int value, const QDateTime& timestamp)
 {
-    emit externalCommandChanged(value);
+    emit externalCommandChanged( value, timestamp);
 }
 
 bool

@@ -40,8 +40,8 @@ typedef std::list< unsigned char > DataList;
 typedef std::vector< unsigned char > DataVector;
 typedef std::queue< DataVector > DataQueue;
 
-// pair.first: mu -- mean, average value
-// pair.second: sigma -- RMS, sqrt(variance)
+// SignalPair.first: mu -- mean, average value
+// SignalPair.second: sigma -- RMS, sqrt(variance)
 typedef std::pair< double, double > SignalPair;
 typedef std::array< SignalPair, CHANNELS > SignalArray;
 typedef std::map< double, SignalArray > ReferenceSignalMap;

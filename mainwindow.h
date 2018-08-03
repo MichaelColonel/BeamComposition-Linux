@@ -78,11 +78,10 @@ private slots:
     void treeWidgetItemDoubleClicked( QTreeWidgetItem*, int);
     void treeWidgetItemClicked( QTreeWidgetItem*, int);
     void runDetailsSelectionTriggered(QAction*);
-    void externalSignalReceived();
+    void externalSignalReceived( int, const QDateTime&);
     void newBatchStateReceived(bool);
     void movementFinished();
-    void opcUaClientDialog();
-    void opcUaStartUp();
+    void opcUaClientDialog(bool state = true);
     void commandThreadStarted();
     void commandThreadFinished();
     void acquireThreadStarted();

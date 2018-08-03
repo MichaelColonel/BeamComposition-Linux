@@ -23,10 +23,10 @@
 #include <TH1.h>
 #include <TH2.h>
 
+#include <typeinfo>
+
 #include "typedefs.h"
 #include "diagramparameters.h"
-
-#include <typeinfo>
 
 namespace Ui {
 class RootCanvasDialog;

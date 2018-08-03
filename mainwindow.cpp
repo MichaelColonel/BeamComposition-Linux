@@ -247,7 +247,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( ui->actionOpenBackRun, SIGNAL(triggered()), this, SLOT(openBackRun()));
     connect( ui->actionSaveRun, SIGNAL(triggered()), this, SLOT(saveRun()));
     connect( ui->actionSettings, SIGNAL(triggered()), this, SLOT(setRunSettings()));
-    connect( ui->actionOpcUaClient, SIGNAL(triggered()), this, SLOT(opcUaClientDialog()));
+    connect( ui->actionOpcUaClient, SIGNAL(triggered(bool)), this, SLOT(opcUaClientDialog(bool)));
     connect( ui->actionDetailsClearAll, SIGNAL(triggered()), this, SLOT(detailsClear()));
     connect( ui->actionDetailsSelectAll, SIGNAL(triggered()), this, SLOT(detailsSelectAll()));
     connect( ui->actionDetailsSelectNone, SIGNAL(triggered()), this, SLOT(detailsSelectNone()));
@@ -300,6 +300,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect( this, SIGNAL(signalBeamSpectrumChanged(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)),
         opcua_client, SLOT(writeBeamSpectrumValue(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)));
 
+    connect( opcua_client, SIGNAL(externalCommandChanged( int, QDateTime)),
+        this, SLOT(externalSignalReceived( int, QDateTime)));
+
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectAll);
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectNone);
 
@@ -333,7 +336,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     bool opcua_at_startup = settings->value( "opcua-connect-startup", false).toBool();
     if (opcua_at_startup) {
-        QTimer::singleShot( 0, this, SLOT(opcUaStartUp()));
+        QTimer::singleShot( 0, this, SLOT(opcUaClientDialog()));
     }
 
     ui->treeWidget->expandAll();
@@ -1457,9 +1460,9 @@ MainWindow::acquireDeviceError()
 }
 
 void
-MainWindow::externalSignalReceived()
+MainWindow::externalSignalReceived( int value, const QDateTime& timestamp)
 {
-    qDebug() << "GUI: External signal received";
+    qDebug() << "GUI: External signal received: " << value << " timestamp: " << timestamp.toString();
 }
 
 /// if rising edge (state is high), then process data
@@ -1707,7 +1710,7 @@ MainWindow::batchDataReceived( const DataList& datalist, const QDateTime& dt)
 }
 
 void
-MainWindow::opcUaClientDialog()
+MainWindow::opcUaClientDialog(bool state)
 {
     QString opcua_path = settings->value( "opcua-server-path", "opc.tcp://localhost").toString();
     int opcua_port = settings->value( "opcua-server-port", 4840).toInt();
@@ -1715,14 +1718,16 @@ MainWindow::opcUaClientDialog()
     QString server_path = QString("%1:%2").arg(opcua_path).arg(opcua_port);
 
     if (!opcua_dialog) {
-        opcua_dialog = new OpcUaClientDialog( server_path, opcua_client, false, this);
+        opcua_dialog = new OpcUaClientDialog( server_path, opcua_client, state, this);
         connect( this, SIGNAL(signalBeamSpectrumChanged(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)),
             opcua_dialog, SLOT(setBreamSpectrumValue(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)));
+        connect( opcua_client, SIGNAL(externalCommandChanged( int, QDateTime)),
+            opcua_dialog, SLOT(setExtCommandValue( int, QDateTime)));
     }
     if (opcua_dialog)
         opcua_dialog->show();
 }
-
+/*
 void
 MainWindow::opcUaStartUp()
 {
@@ -1733,11 +1738,15 @@ MainWindow::opcUaStartUp()
 
     if (!opcua_dialog) {
         opcua_dialog = new OpcUaClientDialog( server_path, opcua_client, true, this);
+        connect( this, SIGNAL(signalBeamSpectrumChanged(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)),
+            opcua_dialog, SLOT(setBreamSpectrumValue(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)));
+        connect( opcua_client, SIGNAL(externalCommandChanged( int, QDateTime)),
+            opcua_dialog, SLOT(externalSignalReceived( int, QDateTime)));
     }
     if (opcua_dialog)
         opcua_dialog->show();
 }
-
+*/
 void
 MainWindow::saveSettings(QSettings* set)
 {

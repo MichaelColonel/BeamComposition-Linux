@@ -26,6 +26,14 @@
 
 class QDateTime;
 
+enum ChildrenNodesType {
+    STATE_NODE,
+    HEART_BEAT_NODE,
+    VALUE_NODE,
+    VALUE_INTEGRAL_NODE,
+    COMMAND_NODE
+};
+
 class OpcUaClient : public QObject {
     Q_OBJECT
 public:
@@ -37,6 +45,13 @@ public:
         const UA_ClientConfig& config = UA_ClientConfig_default);
     void disconnect();
 
+    void signalConnected();
+    void signalExternalCommandChanged( int, const QDateTime&);
+
+    bool isConnected() const;
+    bool initExternalCommandSubscription();
+    void setChildNode( const UA_NodeId& child, ChildrenNodesType type);
+
     static void onConnectCallback( UA_Client* client, void* userdata,
         UA_UInt32 requestId, void* status);
     static void onReadExtCommandAttributeCallback( UA_Client* client, void* userdata,
@@ -47,11 +62,11 @@ public:
     onSubscriptionExtCommandValueChanged( UA_Client* client, UA_UInt32 subId, void* subContext,
         UA_UInt32 monId, void* monContext, UA_DataValue* value);
 #endif
-    void signalConnected();
-    void signalExternalCommandChanged( int, const QDateTime&);
 
-    bool isConnected() const;
-    bool initExternalCommandSubscription();
+    static UA_StatusCode nodeIterCallback( UA_NodeId childId,
+        UA_Boolean isInverse, UA_NodeId referenceTypeId,
+        void* handle);
+
 public slots:
     void iterate();
     bool writeBeamSpectrumValue( const RunInfo::BeamSpectrumArray& batch,
@@ -68,4 +83,5 @@ private:
     UA_Client* client;
     QString server_path;
     int server_port;
+    std::map< ChildrenNodesType, UA_NodeId > children_nodes;
 };

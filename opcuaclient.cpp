@@ -26,18 +26,25 @@
 
 namespace {
 
+const UA_String parent_node_str = UA_STRING_STATIC("RBS.BeamPrectrum.01");
+const UA_String heart_beat_str = UA_STRING_STATIC("HeartBeat");
+const UA_String state_str = UA_STRING_STATIC("State");
+const UA_String value_str = UA_STRING_STATIC("Value");
+const UA_String value_integral_str = UA_STRING_STATIC("ValueIntegral");
+const UA_String command_str = UA_STRING_STATIC("Command");
+/*
 const UA_NodeId NODE_ID_SPECTRUM_SYSTEM = UA_NODEID_STRING( 0, "RBS.BeamPrectrum.01");
 const UA_NodeId NODE_ID_EXTERNAL_COMMAND = UA_NODEID_STRING( 0, "Command");
 const UA_NodeId NODE_ID_CHARGE_VALUE = UA_NODEID_STRING( 0, "Value");
 const UA_NodeId NODE_ID_CHARGE_VALUE_INTEGRAL = UA_NODEID_STRING( 0, "ValueIntegral");
 const UA_NodeId NODE_ID_HEART_BEAT = UA_NODEID_STRING( 0, "HeartBeat");
 const UA_NodeId NODE_ID_STATE = UA_NODEID_STRING( 0, "State");
-
+*/
 OpcUaClient* local_client_ptr = 0;
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS
 const UA_CreateSubscriptionRequest request = UA_CreateSubscriptionRequest_default();
-const UA_MonitoredItemCreateRequest monRequest = UA_MonitoredItemCreateRequest_default(NODE_ID_EXTERNAL_COMMAND);
+UA_MonitoredItemCreateRequest monRequest = UA_MonitoredItemCreateRequest_default(UA_NODEID_STRING( 0, "Command"));
 #endif
 
 } // namespace
@@ -141,7 +148,8 @@ OpcUaClient::writeBeamSpectrumValue( const RunInfo::BeamSpectrumArray& batch_arr
     UA_WriteRequest_init(&wReq);
     wReq.nodesToWrite = values;
     wReq.nodesToWriteSize = 2;
-    wReq.nodesToWrite[0].nodeId = UA_NODEID_STRING_ALLOC( 0, "Value");
+    UA_NodeId_copy( &children_nodes[VALUE_NODE], &wReq.nodesToWrite[0].nodeId);
+//    wReq.nodesToWrite[0].nodeId = UA_NODEID_STRING_ALLOC( 0, "Value");
     wReq.nodesToWrite[0].attributeId = UA_ATTRIBUTEID_VALUE;
     wReq.nodesToWrite[0].value.hasValue = true;
     wReq.nodesToWrite[0].value.sourceTimestamp = dt;
@@ -149,7 +157,8 @@ OpcUaClient::writeBeamSpectrumValue( const RunInfo::BeamSpectrumArray& batch_arr
     wReq.nodesToWrite[0].value.value.storageType = UA_VARIANT_DATA_NODELETE;
     UA_Variant_setArrayCopy( &wReq.nodesToWrite[0].value.value, batch_data, CARBON_Z, &UA_TYPES[UA_TYPES_FLOAT]);
 
-    wReq.nodesToWrite[1].nodeId = UA_NODEID_STRING_ALLOC( 0, "ValueIntegral");
+    UA_NodeId_copy( &children_nodes[VALUE_INTEGRAL_NODE], &wReq.nodesToWrite[1].nodeId);
+//    wReq.nodesToWrite[1].nodeId = UA_NODEID_STRING_ALLOC( 0, "ValueIntegral");
     wReq.nodesToWrite[1].attributeId = UA_ATTRIBUTEID_VALUE;
     wReq.nodesToWrite[1].value.hasValue = true;
     wReq.nodesToWrite[1].value.sourceTimestamp = dt;
@@ -229,7 +238,8 @@ OpcUaClient::writeHeartBeatValue( int heart_beat, const QDateTime& datetime)
     UA_WriteRequest_init(&wReq);
     wReq.nodesToWrite = UA_WriteValue_new();
     wReq.nodesToWriteSize = 1;
-    wReq.nodesToWrite[0].nodeId = UA_NODEID_STRING_ALLOC( 0, "HeartBeat");
+    UA_NodeId_copy( &children_nodes[HEART_BEAT_NODE], &wReq.nodesToWrite[0].nodeId);
+//    wReq.nodesToWrite[0].nodeId = UA_NODEID_STRING_ALLOC( 0, "HeartBeat");
     wReq.nodesToWrite[0].attributeId = UA_ATTRIBUTEID_VALUE;
     wReq.nodesToWrite[0].value.hasValue = true;
     wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_UINT32];
@@ -262,7 +272,8 @@ OpcUaClient::writeCurrentStateValue( int current_state, const QDateTime& datetim
     UA_WriteRequest_init(&wReq);
     wReq.nodesToWrite = UA_WriteValue_new();
     wReq.nodesToWriteSize = 1;
-    wReq.nodesToWrite[0].nodeId = UA_NODEID_STRING_ALLOC( 0, "State");
+    UA_NodeId_copy( &children_nodes[STATE_NODE], &wReq.nodesToWrite[0].nodeId);
+//    wReq.nodesToWrite[0].nodeId = UA_NODEID_STRING_ALLOC( 0, "State");
     wReq.nodesToWrite[0].attributeId = UA_ATTRIBUTEID_VALUE;
     wReq.nodesToWrite[0].value.hasValue = true;
     wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_INT16];
@@ -303,14 +314,24 @@ OpcUaClient::onSubscriptionExtCommandValueChanged( UA_Client* /* client */,
 #endif
 
 void
-OpcUaClient::onConnectCallback( UA_Client* /* client */, void* userdata,
+OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
     UA_UInt32 /* requestId */, void* status)
 {
     UA_StatusCode status_code = *(UA_StatusCode*)status;
+    std::cout << "Client connected: " << UA_StatusCode_name(status_code) << std::endl;
 
     local_client_ptr = reinterpret_cast<OpcUaClient*>(userdata);
     if (local_client_ptr && (status_code == UA_STATUSCODE_GOOD)) {
-        if (local_client_ptr->initExternalCommandSubscription())
+
+        const char* str = reinterpret_cast<const char*>(parent_node_str.data);
+        UA_NodeId parent = UA_NODEID_STRING_ALLOC( 0, str);
+        status_code = UA_Client_forEachChildNodeCall( client, parent, nodeIterCallback, userdata);
+
+        UA_NodeId_deleteMembers(&parent);
+
+        std::cout << "Client node iteration: " << UA_StatusCode_name(status_code) << std::endl;
+
+        if ((status_code == UA_STATUSCODE_GOOD) && local_client_ptr->initExternalCommandSubscription())
             local_client_ptr->signalConnected();
     }
     else if (local_client_ptr) {
@@ -370,4 +391,53 @@ OpcUaClient::isConnected() const
     }
     else
         return false;
+}
+
+UA_StatusCode
+OpcUaClient::nodeIterCallback( UA_NodeId childId, UA_Boolean isInverse, UA_NodeId /* referenceTypeId */,
+    void* handle)
+{
+    std::cout << "Test" << std::endl;
+
+    if(isInverse)
+        return UA_STATUSCODE_GOOD;
+
+    OpcUaClient* ptr = reinterpret_cast<OpcUaClient*>(handle);
+/*
+    printf( "%s ---> NodeId %d, %s\n",
+        referenceTypeId.identifier.string.data, childId.namespaceIndex,
+        childId.identifier.string.data);
+*/
+    if (ptr) {
+        std::cout << "Test2" << std::endl;
+
+        if (UA_String_equal( &childId.identifier.string, &heart_beat_str)) {
+            std::cout << "Heart Beat Node OK!" << std::endl;
+            ptr->setChildNode( childId, HEART_BEAT_NODE);
+        }
+        else if (UA_String_equal( &childId.identifier.string, &state_str)) {
+            std::cout << "State Node OK!" << std::endl;
+            ptr->setChildNode( childId, STATE_NODE);
+        }
+        else if (UA_String_equal( &childId.identifier.string, &value_str)) {
+            std::cout << "Value Node OK!" << std::endl;
+            ptr->setChildNode( childId, VALUE_NODE);
+        }
+        else if (UA_String_equal( &childId.identifier.string, &value_integral_str)) {
+            std::cout << "Value Integral Node OK!" << std::endl;
+            ptr->setChildNode( childId, VALUE_INTEGRAL_NODE);
+        }
+        else if (UA_String_equal( &childId.identifier.string, &command_str)) {
+            std::cout << "Command Node OK!" << std::endl;
+            ptr->setChildNode( childId, COMMAND_NODE);
+            monRequest = UA_MonitoredItemCreateRequest_default(childId);
+        }
+    }
+    return UA_STATUSCODE_GOOD;
+}
+
+void
+OpcUaClient::setChildNode(const UA_NodeId &child, ChildrenNodesType type)
+{
+    UA_NodeId_copy( &child, &children_nodes[type]);
 }

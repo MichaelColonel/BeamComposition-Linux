@@ -62,6 +62,9 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
 
     QTreeWidgetItem* item = ui->opcUaNodesTreeWidget->topLevelItem(0);
     if (item) {
+        item->setTextAlignment( 1, Qt::AlignHCenter | Qt::AlignVCenter);
+        item->setTextAlignment( 2, Qt::AlignHCenter | Qt::AlignVCenter);
+
         if (opcua_client && opcua_client->isConnected())
             item->setText( 1, tr("Connected"));
         else
@@ -69,22 +72,32 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
 
         QTreeWidgetItem* child = item->child(0);
         if (child) {
+            child->setTextAlignment( 1, Qt::AlignHCenter | Qt::AlignVCenter);
+            child->setTextAlignment( 2, Qt::AlignHCenter | Qt::AlignVCenter);
             item_state = child;
         }
         child = item->child(1);
         if (child) {
+            child->setTextAlignment( 1, Qt::AlignHCenter | Qt::AlignVCenter);
+            child->setTextAlignment( 2, Qt::AlignHCenter | Qt::AlignVCenter);
             item_ext_command = child;
         }
         child = item->child(2);
         if (child) {
+            child->setTextAlignment( 1, Qt::AlignHCenter | Qt::AlignVCenter);
+            child->setTextAlignment( 2, Qt::AlignHCenter | Qt::AlignVCenter);
             item_value = child;
         }
         child = item->child(3);
         if (child) {
+            child->setTextAlignment( 1, Qt::AlignHCenter | Qt::AlignVCenter);
+            child->setTextAlignment( 2, Qt::AlignHCenter | Qt::AlignVCenter);
             item_value_int = child;
         }
         child = item->child(4);
         if (child) {
+            child->setTextAlignment( 1, Qt::AlignHCenter | Qt::AlignVCenter);
+            child->setTextAlignment( 2, Qt::AlignHCenter | Qt::AlignVCenter);
             item_heartbeat = child;
         }
     }

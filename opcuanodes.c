@@ -17,7 +17,7 @@
  */
 
 #include "opcuanodes.h"
-
+/*
 static UA_NodeId NODE_ID_SPECTRUM_SYSTEM;
 static UA_NodeId NODE_ID_EXTERNAL_COMMAND;
 static UA_NodeId NODE_ID_CHARGE_VALUE;
@@ -35,3 +35,4 @@ opcua_initiate_nodes(void)
     NODE_ID_HEART_BEAT = UA_NODEID_STRING( 0, "HeartBeat");
     NODE_ID_STATE = UA_NODEID_STRING( 0, "State");
 }
+*/

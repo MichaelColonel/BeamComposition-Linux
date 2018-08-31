@@ -120,6 +120,9 @@ private slots:
     void detailsItemSelectionChanged();
     void processBatchesClicked();
     void processData();
+    void onOpcUaTimeout();
+    void onOpcUaClientConnected();
+    void onOpcUaClientDisconnected();
 
 private:
     QString processTextFile( QFile* runfile, QList<QListWidgetItem*>& items);

@@ -280,6 +280,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect( timer, SIGNAL(timeout()), this, SLOT(handle_root_events()));
     connect( timer_opcua, SIGNAL(timeout()), opcua_client, SLOT(iterate()));
+    connect( timer_opcua, SIGNAL(timeout()), this, SLOT(onOpcUaTimeout()));
 
     connect( command_thread, SIGNAL(started()), this, SLOT(commandThreadStarted()));
     connect( command_thread, SIGNAL(finished()), this, SLOT(commandThreadFinished()));
@@ -302,6 +303,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect( opcua_client, SIGNAL(externalCommandChanged( int, QDateTime)),
         this, SLOT(externalSignalReceived( int, QDateTime)));
+    connect( opcua_client, SIGNAL(connected()), this, SLOT(onOpcUaClientConnected()));
+    connect( opcua_client, SIGNAL(disconnected()), this, SLOT(onOpcUaClientDisconnected()));
 
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectAll);
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectNone);
@@ -384,12 +387,12 @@ MainWindow::~MainWindow()
         filedat->close();
         delete filedat;
     }
-
+/*
     delete progress_dialog;
     delete opcua_client;
     if (opcua_dialog)
         delete opcua_dialog;
-
+*/
     delete settings;
     delete ui;
 }
@@ -1830,6 +1833,12 @@ MainWindow::closeEvent(QCloseEvent* event)
     }
 
     if (res == QMessageBox::Yes) {
+        if (opcua_client && opcua_client->isConnected()) {
+            int value = 0;
+            QDateTime now = QDateTime::currentDateTime();
+            bool res = opcua_client->writeHeartBeatValue( value, now);
+            std::cout << "OPC UA HeartBeat result: " << res << ", value: " << value << std::endl;
+        }
         saveSettings(settings);
         event->accept();
     }
@@ -2137,4 +2146,28 @@ MainWindow::detailsItemSelectionChanged()
     else {
         ui->processPushButton->setEnabled(false);
     }
+}
+
+void
+MainWindow::onOpcUaClientConnected()
+{
+    ui->statusBar->showMessage( "OPC UA server connection successfull", 1000);
+}
+
+void
+MainWindow::onOpcUaTimeout()
+{
+/*    if (opcua_client && opcua_client->isConnected()) {
+        int value = 1;
+        QDateTime now = QDateTime::currentDateTime();
+        bool res = opcua_client->writeHeartBeatValue( value, now);
+        if (opcua_dialog) opcua_dialog->setHeatBeatValue( value, now);
+        std::cout << "OPC UA HeartBeat result: " << res << ", value: " << value << std::endl;
+    }
+*/
+}
+
+void
+MainWindow::onOpcUaClientDisconnected()
+{
 }

@@ -68,15 +68,24 @@
            <property name="text">
             <string>Node</string>
            </property>
+           <property name="textAlignment">
+            <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+           </property>
           </column>
           <column>
            <property name="text">
             <string>Value</string>
            </property>
+           <property name="textAlignment">
+            <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+           </property>
           </column>
           <column>
            <property name="text">
             <string>Date time stamp</string>
+           </property>
+           <property name="textAlignment">
+            <set>AlignHCenter|AlignVCenter|AlignCenter</set>
            </property>
           </column>
           <item>

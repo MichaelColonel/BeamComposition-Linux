@@ -21,12 +21,10 @@
 #include <QDebug>
 #include <QDateTime>
 
-#include "opcuanodes.h"
 #include "opcuaclient.h"
 
 namespace {
-
-const UA_String parent_node_str = UA_STRING_STATIC("RBS.BeamPrectrum.01");
+const UA_String parent_node_str = UA_STRING_STATIC("RBS.BeamSpectrum.01");
 const UA_String heart_beat_str = UA_STRING_STATIC("HeartBeat");
 const UA_String state_str = UA_STRING_STATIC("State");
 const UA_String value_str = UA_STRING_STATIC("Value");
@@ -44,7 +42,7 @@ OpcUaClient* local_client_ptr = 0;
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS
 const UA_CreateSubscriptionRequest request = UA_CreateSubscriptionRequest_default();
-UA_MonitoredItemCreateRequest monRequest = UA_MonitoredItemCreateRequest_default(UA_NODEID_STRING( 0, "Command"));
+UA_MonitoredItemCreateRequest monRequest;
 #endif
 
 } // namespace
@@ -109,6 +107,24 @@ OpcUaClient::connect_async( const QString& path, const UA_ClientConfig& config)
     std::string serv_string = path.toStdString();
 
     client = UA_Client_new(config);
+/*
+    UA_StatusCode retval = UA_Client_connect( client, serv_string.c_str());
+    if (retval != UA_STATUSCODE_GOOD) {
+        UA_Client_delete(client);
+        client = nullptr;
+    }
+    else {
+        const char* str = reinterpret_cast<const char*>(parent_node_str.data);
+        UA_NodeId parent = UA_NODEID_STRING_ALLOC( 0, str);
+        retval = UA_Client_forEachChildNodeCall( client, parent, nodeIterCallback, this);
+//        UA_NodeId_deleteMembers(&parent);
+
+        if ((retval == UA_STATUSCODE_GOOD) && initExternalCommandSubscription()) {
+            emit connected();
+        }
+    }
+    return retval;
+*/
 
     UA_StatusCode retval = UA_Client_connect_async( client, serv_string.c_str(),
         onConnectCallback, this);
@@ -303,9 +319,9 @@ OpcUaClient::onSubscriptionExtCommandValueChanged( UA_Client* /* client */,
     void* /* monContext */, UA_DataValue* value)
 {
     if(UA_Variant_hasScalarType( &value->value, &UA_TYPES[UA_TYPES_INT16])) {
-        UA_Int16 ext_command = *(UA_Int16*) value->value.data;
+        UA_Int16 ext_command = *(UA_Int16*)value->value.data;
         UA_Int64 dtut = UA_DateTime_toUnixTime(value->sourceTimestamp);
-        QDateTime dt = QDateTime::fromMSecsSinceEpoch(dtut);
+        QDateTime dt = QDateTime::fromMSecsSinceEpoch(dtut * 1000);
         if (local_client_ptr) {
             local_client_ptr->signalExternalCommandChanged( int(ext_command), dt);
         }
@@ -318,7 +334,7 @@ OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
     UA_UInt32 /* requestId */, void* status)
 {
     UA_StatusCode status_code = *(UA_StatusCode*)status;
-    std::cout << "Client connected: " << UA_StatusCode_name(status_code) << std::endl;
+//    std::cout << "Client connected: " << UA_StatusCode_name(status_code) << std::endl;
 
     local_client_ptr = reinterpret_cast<OpcUaClient*>(userdata);
     if (local_client_ptr && (status_code == UA_STATUSCODE_GOOD)) {
@@ -329,10 +345,11 @@ OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
 
         UA_NodeId_deleteMembers(&parent);
 
-        std::cout << "Client node iteration: " << UA_StatusCode_name(status_code) << std::endl;
-
-        if ((status_code == UA_STATUSCODE_GOOD) && local_client_ptr->initExternalCommandSubscription())
+        if ((status_code == UA_STATUSCODE_GOOD) && local_client_ptr->initExternalCommandSubscription()) {
+//            bool res = local_client_ptr->initExternalCommandSubscription();
+//            std::cout << "Monitor initiation result: " << res << std::endl;
             local_client_ptr->signalConnected();
+        }
     }
     else if (local_client_ptr) {
     }
@@ -365,6 +382,9 @@ OpcUaClient::initExternalCommandSubscription()
     UA_CreateSubscriptionResponse response;
     response = UA_Client_Subscriptions_create( client, request, NULL, NULL, NULL);
 
+    UA_NodeId monitored_node;
+    UA_NodeId_copy( &children_nodes[COMMAND_NODE], &monitored_node);
+    monRequest = UA_MonitoredItemCreateRequest_default(monitored_node);
 //    UA_UInt32 subId = response.subscriptionId;
     if (response.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
 
@@ -376,6 +396,8 @@ OpcUaClient::initExternalCommandSubscription()
         if (monResponse.statusCode == UA_STATUSCODE_GOOD)
             result = true;
     }
+    UA_NodeId_deleteMembers(&monitored_node);
+
 #endif
     return result;
 }
@@ -397,8 +419,6 @@ UA_StatusCode
 OpcUaClient::nodeIterCallback( UA_NodeId childId, UA_Boolean isInverse, UA_NodeId /* referenceTypeId */,
     void* handle)
 {
-    std::cout << "Test" << std::endl;
-
     if(isInverse)
         return UA_STATUSCODE_GOOD;
 
@@ -409,28 +429,26 @@ OpcUaClient::nodeIterCallback( UA_NodeId childId, UA_Boolean isInverse, UA_NodeI
         childId.identifier.string.data);
 */
     if (ptr) {
-        std::cout << "Test2" << std::endl;
 
         if (UA_String_equal( &childId.identifier.string, &heart_beat_str)) {
-            std::cout << "Heart Beat Node OK!" << std::endl;
+//            std::cout << "Heart Beat Node OK!" << std::endl;
             ptr->setChildNode( childId, HEART_BEAT_NODE);
         }
         else if (UA_String_equal( &childId.identifier.string, &state_str)) {
-            std::cout << "State Node OK!" << std::endl;
+//            std::cout << "State Node OK!" << std::endl;
             ptr->setChildNode( childId, STATE_NODE);
         }
         else if (UA_String_equal( &childId.identifier.string, &value_str)) {
-            std::cout << "Value Node OK!" << std::endl;
+//            std::cout << "Value Node OK!" << std::endl;
             ptr->setChildNode( childId, VALUE_NODE);
         }
         else if (UA_String_equal( &childId.identifier.string, &value_integral_str)) {
-            std::cout << "Value Integral Node OK!" << std::endl;
+//            std::cout << "Value Integral Node OK!" << std::endl;
             ptr->setChildNode( childId, VALUE_INTEGRAL_NODE);
         }
         else if (UA_String_equal( &childId.identifier.string, &command_str)) {
-            std::cout << "Command Node OK!" << std::endl;
+//            std::cout << "Command Node OK!" << std::endl;
             ptr->setChildNode( childId, COMMAND_NODE);
-            monRequest = UA_MonitoredItemCreateRequest_default(childId);
         }
     }
     return UA_STATUSCODE_GOOD;

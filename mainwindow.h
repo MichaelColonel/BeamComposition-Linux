@@ -141,7 +141,8 @@ private:
     Ui::MainWindow* ui;
     QTimer* timer; // ROOT GUI update timer
     QTimer* timer_data; // data update timer
-    QTimer* timer_opcua; // OPC UA update timer
+    QTimer* timer_opcua; // OPC UA iterate timer
+    QTimer* timer_heartbeat; // OPC UA heartbeat timer
 
     FT_HANDLE channel_a;
     FT_HANDLE channel_b;

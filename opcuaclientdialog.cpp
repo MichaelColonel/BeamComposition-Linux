@@ -16,6 +16,7 @@
  */
 
 #include <QTimer>
+#include <QDateTime>
 #include <iostream>
 
 #include "opcuaclient.h"
@@ -113,24 +114,33 @@ OpcUaClientDialog::~OpcUaClientDialog()
 }
 
 void
-OpcUaClientDialog::setExtCommandValue( int value, const QDateTime&)
+OpcUaClientDialog::setExtCommandValue( int value, const QDateTime& dt)
 {
-    if (item_ext_command)
+    QString dt_str = dt.toString(Qt::ISODate);
+    if (item_ext_command) {
         item_ext_command->setText( 1, QString("%1").arg(value));
+        item_ext_command->setText( 2, dt_str);
+    }
 }
 
 void
-OpcUaClientDialog::setStateValue( int value, const QDateTime&)
+OpcUaClientDialog::setStateValue( int value, const QDateTime& dt)
 {
-    if (item_state)
+    QString dt_str = dt.toString(Qt::ISODate);
+    if (item_state) {
         item_state->setText( 1, QString("%1").arg(value));
+        item_state->setText( 2, dt_str);
+    }
 }
 
 void
-OpcUaClientDialog::setHeatBeatValue( int value, const QDateTime&)
+OpcUaClientDialog::setHeatBeatValue( int value, const QDateTime& dt)
 {
-    if (item_heartbeat)
+    QString dt_str = dt.toString(Qt::ISODate);
+    if (item_heartbeat) {
         item_heartbeat->setText( 1, QString("%1").arg(value));
+        item_heartbeat->setText( 2, dt_str);
+    }
 }
 
 void
@@ -166,6 +176,12 @@ void
 OpcUaClientDialog::onDisconnectClicked()
 {
     if (opcua_client && opcua_client->isConnected()) {
+
+        QDateTime now = QDateTime::currentDateTime();
+        if (opcua_client->writeHeartBeatValue( 0, now)) {
+            setHeatBeatValue( 0, now);
+        }
+
         opcua_client->disconnect();
         ui->connectPushButton->setEnabled(true);
         ui->disconnectPushButton->setEnabled(false);

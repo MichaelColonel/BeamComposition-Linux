@@ -41,6 +41,7 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
     ui->setupUi(this);
 
     connect( progress_dialog, SIGNAL(canceled()), this, SLOT(onCancelConnectionClicked()));
+
     connect( ui->connectPushButton, SIGNAL(clicked()), this, SLOT(onConnectClicked()));
     connect( ui->disconnectPushButton, SIGNAL(clicked()), this, SLOT(onDisconnectClicked()));
 
@@ -48,6 +49,7 @@ OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
 
     if (opcua_client) {
         connect( opcua_client, SIGNAL(connected()), this, SLOT(onClientConnected()));
+        connect( opcua_client, SIGNAL(disconnected()), progress_dialog, SLOT(cancel()));
     }
     if (opcua_client && opcua_client->isConnected()) {
         ui->connectPushButton->setEnabled(false);

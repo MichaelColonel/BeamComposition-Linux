@@ -79,12 +79,8 @@ OpcUaClient::connect_async( const QString& path, int port, const UA_ClientConfig
     server_port = port;
 
     QString server_string = QString("%1:%2").arg(server_path).arg(server_port);
-    std::string serv_string = server_string.toStdString();
 
-    client = UA_Client_new(config);
-
-    UA_StatusCode retval = UA_Client_connect_async( client, serv_string.c_str(),
-        onConnectCallback, this);
+    UA_StatusCode retval = connect_async( server_string, config);
 /*
     if (retval != UA_STATUSCODE_GOOD) {
         UA_Client_delete(opcua_client);
@@ -339,16 +335,23 @@ OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
     local_client_ptr = reinterpret_cast<OpcUaClient*>(userdata);
     if (local_client_ptr && (status_code == UA_STATUSCODE_GOOD)) {
 
-        const char* str = reinterpret_cast<const char*>(parent_node_str.data);
-        UA_NodeId parent = UA_NODEID_STRING_ALLOC( 0, str);
-        status_code = UA_Client_forEachChildNodeCall( client, parent, nodeIterCallback, userdata);
+        char* str = reinterpret_cast<char*>(parent_node_str.data);
+        UA_NodeId parent = UA_NODEID_STRING( 0, str);
 
-        UA_NodeId_deleteMembers(&parent);
+        UA_NodeId* res = UA_NodeId_new();
+        status_code = UA_Client_readNodeIdAttribute( client, parent, res);
+        UA_NodeId_delete(res);
+        if (status_code != UA_STATUSCODE_GOOD) {
+            local_client_ptr->signalDisconnected();
+        }
+        else {
+            status_code = UA_Client_forEachChildNodeCall( client, parent, nodeIterCallback, userdata);
 
-        if ((status_code == UA_STATUSCODE_GOOD) && local_client_ptr->initExternalCommandSubscription()) {
-//            bool res = local_client_ptr->initExternalCommandSubscription();
-//            std::cout << "Monitor initiation result: " << res << std::endl;
-            local_client_ptr->signalConnected();
+            if ((status_code == UA_STATUSCODE_GOOD) && local_client_ptr->initExternalCommandSubscription()) {
+//              bool res = local_client_ptr->initExternalCommandSubscription();
+//              std::cout << "Monitor initiation result: " << res << std::endl;
+                local_client_ptr->signalConnected();
+            }
         }
     }
     else if (local_client_ptr) {
@@ -366,6 +369,12 @@ void
 OpcUaClient::signalConnected()
 {
     emit connected();
+}
+
+void
+OpcUaClient::signalDisconnected()
+{
+    emit disconnected();
 }
 
 void

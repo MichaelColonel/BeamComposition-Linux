@@ -46,6 +46,7 @@ public:
     void disconnect();
 
     void signalConnected();
+    void signalDisconnected();
     void signalExternalCommandChanged( int, const QDateTime&);
 
     bool isConnected() const;

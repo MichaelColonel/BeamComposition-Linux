@@ -54,8 +54,7 @@ SOURCES += main.cpp \
     chargevaluedelegate.cpp \
     rundetailslistwidgetitem.cpp \
     opcuaclientdialog.cpp \
-    opcuaclient.cpp \
-    opcuanodes.c
+    opcuaclient.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -78,8 +77,7 @@ HEADERS  += mainwindow.h \
     chargevaluedelegate.h \
     rundetailslistwidgetitem.h \
     opcuaclientdialog.h \
-    opcuaclient.h \
-    opcuanodes.h
+    opcuaclient.h
 
 FORMS    += mainwindow.ui \
     rootcanvasdialog.ui \

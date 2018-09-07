@@ -53,7 +53,7 @@ public:
     void initiate(int spills = -1);
 
 public slots:
-    void setSystemCurrentStatus(SystemCurrentStatus);
+    void setState(StateType);
 
 protected:
     virtual void run();

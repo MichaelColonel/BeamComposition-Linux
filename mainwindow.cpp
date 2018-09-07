@@ -190,7 +190,7 @@ MainWindow::MainWindow(QWidget *parent)
     settings(new QSettings( "BeamComposition", "configure")),
     flag_background(false),
     flag_write_run(true),
-    sys_status(STATUS_DEVICE_DISCONNECTED),
+    sys_state(STATE_DEVICE_DISCONNECTED),
     opcua_client(new OpcUaClient(this)),
     opcua_dialog(nullptr)
 {
@@ -299,6 +299,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect( profile_thread, SIGNAL(progress(int)), progress_dialog, SLOT(setValue(int)));
     connect( progress_dialog, SIGNAL(canceled()), profile_thread, SLOT(stop()));
 
+    connect( this, SIGNAL(signalStateChanged(StateType)), opcua_client, SLOT(writeStateValue(StateType)));
+    connect( this, SIGNAL(signalBeamSpectrumChanged(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)),
+        opcua_client, SLOT(writeBeamSpectrumValue(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)));
     connect( this, SIGNAL(signalBeamSpectrumChanged(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)),
         opcua_client, SLOT(writeBeamSpectrumValue(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)));
 
@@ -679,15 +682,20 @@ MainWindow::motorItemChanged(int value)
     switch (value) {
     case 0:
         message = QString(tr("Motor stopped"));
+        sys_state = STATE_POSITION_FINISH;
         break;
     case 1:
         message = QString(tr("Hide away"));
+        sys_state = STATE_POSITION_REMOVE;
         break;
     case 2:
     default:
         message = QString(tr("Move out"));
+        sys_state = STATE_POSITION_MOVE;
         break;
     }
+    emit signalStateChanged(sys_state);
+
     statusBar()->showMessage( message, 1000);
 }
 
@@ -1051,16 +1059,20 @@ MainWindow::runTypeChanged(int id)
     flag_background = false;
 
     if (rbutton == ui->backgroundRunRadioButton) {
+        sys_state = STATE_ACQUISITION_BACKGROUND;
         flag_background = true;
         ui->triggersComboBox->setEnabled(false);
         ui->triggersComboBox->setCurrentIndex(4); // "T004"
         process_thread->setBackground(true);
     }
     else if (rbutton == ui->fixedRunRadioButton) {
+        sys_state = STATE_ACQUISITION_FIXED_POSITION;
         ui->triggersComboBox->setEnabled(true);
         ui->triggersComboBox->setCurrentIndex(0);
         process_thread->setBackground(false);
     }
+
+    emit signalStateChanged(sys_state);
 }
 
 void
@@ -1339,6 +1351,9 @@ MainWindow::connectDevices()
 
     FT_STATUS ftStatus = FT_OpenEx( name, FT_OPEN_BY_DESCRIPTION, &channel_a);
     if (!FT_SUCCESS(ftStatus)) {
+        sys_state = STATE_DEVICE_DISCONNECTED;
+        emit signalStateChanged(sys_state);
+
         QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
             tr("Error during connection of FT2232H Channel A. This can fail if the ftdi_sio\n" \
                "driver is loaded, use lsmod to check this and rmmod ftdi_sio\n" \
@@ -1356,6 +1371,9 @@ MainWindow::connectDevices()
 
     ftStatus = FT_OpenEx( name, FT_OPEN_BY_DESCRIPTION, &channel_b);
     if (!FT_SUCCESS(ftStatus)) {
+        sys_state = STATE_DEVICE_DISCONNECTED;
+        emit signalStateChanged(sys_state);
+
         QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
             tr("Error during connection of FT2232H Channel B. This can fail if the ftdi_sio\n" \
                "driver is loaded, use lsmod to check this and rmmod ftdi_sio\n" \
@@ -1403,8 +1421,8 @@ MainWindow::connectDevices()
     int button_id = ui->updateDataButtonGroup->id(ui->dataUpdateAutoRadioButton);
     dataUpdateChanged(button_id);
 
-    sys_status = STATUS_IDLE;
-    emit signalSystemCurrentStatus(sys_status);
+    sys_state = STATE_DEVICE_CONNECTED;
+    emit signalStateChanged(sys_state);
 }
 
 void
@@ -1443,8 +1461,8 @@ MainWindow::disconnectDevices()
     ui->startRunButton->setEnabled(false);
     ui->stopRunButton->setEnabled(false);
 
-    sys_status = STATUS_DEVICE_DISCONNECTED;
-    emit signalSystemCurrentStatus(sys_status);
+    sys_state = STATE_DEVICE_DISCONNECTED;
+    emit signalStateChanged(sys_state);
 }
 
 void
@@ -1729,6 +1747,7 @@ MainWindow::opcUaClientDialog(bool state)
             opcua_dialog, SLOT(setBreamSpectrumValue(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)));
         connect( opcua_client, SIGNAL(externalCommandChanged( int, QDateTime)),
             opcua_dialog, SLOT(setExtCommandValue( int, QDateTime)));
+        connect( this, SIGNAL(signalStateChanged(StateType)), opcua_dialog, SLOT(setState(StateType)));
     }
     if (opcua_dialog)
         opcua_dialog->show();

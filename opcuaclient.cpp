@@ -24,20 +24,14 @@
 #include "opcuaclient.h"
 
 namespace {
+
 const UA_String parent_node_str = UA_STRING_STATIC("RBS.BeamSpectrum.01");
 const UA_String heart_beat_str = UA_STRING_STATIC("HeartBeat");
 const UA_String state_str = UA_STRING_STATIC("State");
 const UA_String value_str = UA_STRING_STATIC("Value");
 const UA_String value_integral_str = UA_STRING_STATIC("ValueIntegral");
 const UA_String command_str = UA_STRING_STATIC("Command");
-/*
-const UA_NodeId NODE_ID_SPECTRUM_SYSTEM = UA_NODEID_STRING( 0, "RBS.BeamPrectrum.01");
-const UA_NodeId NODE_ID_EXTERNAL_COMMAND = UA_NODEID_STRING( 0, "Command");
-const UA_NodeId NODE_ID_CHARGE_VALUE = UA_NODEID_STRING( 0, "Value");
-const UA_NodeId NODE_ID_CHARGE_VALUE_INTEGRAL = UA_NODEID_STRING( 0, "ValueIntegral");
-const UA_NodeId NODE_ID_HEART_BEAT = UA_NODEID_STRING( 0, "HeartBeat");
-const UA_NodeId NODE_ID_STATE = UA_NODEID_STRING( 0, "State");
-*/
+
 OpcUaClient* local_client_ptr = 0;
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS
@@ -244,7 +238,7 @@ OpcUaClient::writeHeartBeatValue( int heart_beat, const QDateTime& datetime)
     uint t = datetime.toTime_t();
     UA_DateTime dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));
 
-    UA_UInt32 value = heart_beat;
+    UA_UInt32 value = static_cast<UA_UInt32>(heart_beat);
 
     UA_WriteRequest wReq;
     UA_WriteRequest_init(&wReq);
@@ -268,6 +262,48 @@ OpcUaClient::writeHeartBeatValue( int heart_beat, const QDateTime& datetime)
 }
 
 bool
+OpcUaClient::writeStateValue(StateType state_type)
+{
+    int state;
+    switch (state_type) {
+    case STATE_NONE:
+        state = 0xFF;
+        break;
+    case STATE_DEVICE_DISCONNECTED:
+        state = 0x00;
+        break;
+    case STATE_DEVICE_CONNECTED:
+        state = 0x01;
+        break;
+    case STATE_ACQUISITION_BACKGROUND:
+        state = 0x02;
+        break;
+    case STATE_ACQUISITION_FIXED_POSITION:
+        state = 0x04;
+        break;
+    case STATE_ACQUISITION_SCANNING:
+        state = 0x08;
+        break;
+    case STATE_ACQUISITION_EXTERNAL_COMMAND:
+        state = 0x10;
+        break;
+    case STATE_POSITION_MOVE:
+        state = 0x20;
+        break;
+    case STATE_POSITION_REMOVE:
+        state = 0x40;
+        break;
+    case STATE_POSITION_FINISH:
+        state = 0x80;
+        break;
+    default:
+        state = -1;
+        break;
+    }
+    return writeCurrentStateValue( state, QDateTime::currentDateTime());
+}
+
+bool
 OpcUaClient::writeCurrentStateValue( int current_state, const QDateTime& datetime)
 {
     if (!isConnected())
@@ -278,7 +314,7 @@ OpcUaClient::writeCurrentStateValue( int current_state, const QDateTime& datetim
     uint t = datetime.toTime_t();
     UA_DateTime dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));
 
-    UA_Int16 value = current_state;
+    UA_Int16 value = static_cast<UA_Int16>(current_state);
 
     UA_WriteRequest wReq;
     UA_WriteRequest_init(&wReq);

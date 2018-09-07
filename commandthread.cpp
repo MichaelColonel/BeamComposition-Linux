@@ -168,7 +168,7 @@ ExternalCommandThread::initiate(int spills)
 }
 
 void
-ExternalCommandThread::setSystemCurrentStatus(SystemCurrentStatus)
+ExternalCommandThread::setState(StateType)
 {
 
 }

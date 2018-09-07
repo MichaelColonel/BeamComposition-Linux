@@ -74,6 +74,7 @@ public slots:
         const RunInfo::BeamSpectrumArray& mean, const QDateTime&);
     bool writeHeartBeatValue( int, const QDateTime& datetime);
     bool writeCurrentStateValue( int, const QDateTime& datetime);
+    bool writeStateValue(StateType);
 
 signals:
     void disconnected();

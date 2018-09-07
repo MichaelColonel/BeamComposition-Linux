@@ -126,6 +126,49 @@ OpcUaClientDialog::setExtCommandValue( int value, const QDateTime& dt)
 }
 
 void
+OpcUaClientDialog::setState(StateType state_type)
+{
+    int state;
+    switch (state_type) {
+    case STATE_NONE:
+        state = 0xFF;
+        break;
+    case STATE_DEVICE_DISCONNECTED:
+        state = 0x00;
+        break;
+    case STATE_DEVICE_CONNECTED:
+        state = 0x01;
+        break;
+    case STATE_ACQUISITION_BACKGROUND:
+        state = 0x02;
+        break;
+    case STATE_ACQUISITION_FIXED_POSITION:
+        state = 0x04;
+        break;
+    case STATE_ACQUISITION_SCANNING:
+        state = 0x08;
+        break;
+    case STATE_ACQUISITION_EXTERNAL_COMMAND:
+        state = 0x10;
+        break;
+    case STATE_POSITION_MOVE:
+        state = 0x20;
+        break;
+    case STATE_POSITION_REMOVE:
+        state = 0x40;
+        break;
+    case STATE_POSITION_FINISH:
+        state = 0x80;
+        break;
+    default:
+        state = -1;
+        break;
+    }
+
+    setStateValue( state, QDateTime::currentDateTime());
+}
+
+void
 OpcUaClientDialog::setStateValue( int value, const QDateTime& dt)
 {
     QString dt_str = dt.toString(Qt::ISODate);

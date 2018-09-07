@@ -69,7 +69,7 @@ protected:
 
 signals:
     void updateDiagram();
-    void signalSystemCurrentStatus(SystemCurrentStatus);
+    void signalStateChanged(StateType);
     void signalBeamSpectrumChanged( const RunInfo::BeamSpectrumArray& batch_array,
         const RunInfo::BeamSpectrumArray& mean_array, const QDateTime& datetime);
 
@@ -164,7 +164,7 @@ private:
 //    bool flag_batch_state; // if "true" then process data, if "false" - do not process them
     SharedFitParameters params;
     RunInfo runinfo;
-    SystemCurrentStatus sys_status;
+    StateType sys_state;
     OpcUaClient* opcua_client;
     OpcUaClientDialog* opcua_dialog;
 };

@@ -45,6 +45,7 @@ public slots:
     void onCancelConnectionClicked();
     void setBeamSpectrumState( int, const QDateTime&);
     void setExtCommandValue( int, const QDateTime&);
+    void setState(StateType);
     void setStateValue( int, const QDateTime&);
     void setHeatBeatValue( int, const QDateTime&);
     void setBreamSpectrumValue( const RunInfo::BeamSpectrumArray&, const RunInfo::BeamSpectrumArray&, const QDateTime&);

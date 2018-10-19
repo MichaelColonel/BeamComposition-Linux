@@ -41,6 +41,7 @@ public:
     ~OpcUaClientDialog();
 
 public slots:
+    void serverPathChanged( const QString& path, int port = -1);
     void onClientConnected();
     void onCancelConnectionClicked();
     void setBeamSpectrumState( int, const QDateTime&);

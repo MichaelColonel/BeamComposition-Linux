@@ -195,6 +195,18 @@ OpcUaClientDialog::setBreamSpectrumValue( const RunInfo::BeamSpectrumArray& batc
 }
 
 void
+OpcUaClientDialog::serverPathChanged( const QString& opcua_path, int opcua_port)
+{
+    QString server_path;
+    if (opcua_port == -1)
+        server_path = opcua_path;
+    else
+        server_path = QString("%1:%2").arg(opcua_path).arg(opcua_port);
+
+    ui->opcUaServerNameLabel->setText(server_path);
+}
+
+void
 OpcUaClientDialog::onClientConnected()
 {
     progress_dialog->hide();

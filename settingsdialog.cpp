@@ -525,7 +525,7 @@ SettingsDialog::applyChanges()
     settings->setValue( "opcua-connect-startup", opcua_startup);
 
     QString opcua_path = ui->opcUaPathLineEdit->text();
-    settings->value( "opcua-server-path", opcua_path);
+    settings->setValue( "opcua-server-path", opcua_path);
 
     int opcua_port = ui->opcUaPortSpinBox->value();
     settings->setValue( "opcua-server-port", opcua_port);

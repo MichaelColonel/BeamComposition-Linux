@@ -143,9 +143,13 @@ OpcUaClient::writeBeamSpectrumValue( const RunInfo::BeamSpectrumArray& batch_arr
 
     bool result = false;
     uint t = datetime.toTime_t();
-    UA_DateTime dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));
-    const float* batch_data = batch_array.data();
-    const float* mean_data = mean_array.data();
+    UA_DateTime dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));    
+    UA_Double batch_data[batch_array.size()], mean_data[batch_array.size()];
+
+    for ( size_t i = 0; i < batch_array.size(); ++i) {
+        batch_data[i] = batch_array[i];
+        mean_data[i] = mean_array[i];
+    }
 
     void* ptr = UA_Array_new( 2, &UA_TYPES[UA_TYPES_WRITEVALUE]);
     UA_WriteValue* values = reinterpret_cast<UA_WriteValue*>(ptr);
@@ -159,19 +163,18 @@ OpcUaClient::writeBeamSpectrumValue( const RunInfo::BeamSpectrumArray& batch_arr
     wReq.nodesToWrite[0].attributeId = UA_ATTRIBUTEID_VALUE;
     wReq.nodesToWrite[0].value.hasValue = true;
     wReq.nodesToWrite[0].value.sourceTimestamp = dt;
-    wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_FLOAT];
+    wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_DOUBLE];
     wReq.nodesToWrite[0].value.value.storageType = UA_VARIANT_DATA_NODELETE;
-    UA_Variant_setArrayCopy( &wReq.nodesToWrite[0].value.value, batch_data, CARBON_Z, &UA_TYPES[UA_TYPES_FLOAT]);
+    UA_Variant_setArrayCopy( &wReq.nodesToWrite[0].value.value, batch_data, CARBON_Z, &UA_TYPES[UA_TYPES_DOUBLE]);
 
     UA_NodeId_copy( &children_nodes[VALUE_INTEGRAL_NODE], &wReq.nodesToWrite[1].nodeId);
 //    wReq.nodesToWrite[1].nodeId = UA_NODEID_STRING_ALLOC( 0, "ValueIntegral");
     wReq.nodesToWrite[1].attributeId = UA_ATTRIBUTEID_VALUE;
     wReq.nodesToWrite[1].value.hasValue = true;
     wReq.nodesToWrite[1].value.sourceTimestamp = dt;
-    wReq.nodesToWrite[1].value.value.type = &UA_TYPES[UA_TYPES_FLOAT];
+    wReq.nodesToWrite[1].value.value.type = &UA_TYPES[UA_TYPES_DOUBLE];
     wReq.nodesToWrite[1].value.value.storageType = UA_VARIANT_DATA_NODELETE;
-    UA_Variant_setArrayCopy( &wReq.nodesToWrite[1].value.value, mean_data, CARBON_Z, &UA_TYPES[UA_TYPES_FLOAT]);
-
+    UA_Variant_setArrayCopy( &wReq.nodesToWrite[1].value.value, mean_data, CARBON_Z, &UA_TYPES[UA_TYPES_DOUBLE]);
 
     UA_WriteResponse wResp = UA_Client_Service_write( client, wReq);
     if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
@@ -238,7 +241,7 @@ OpcUaClient::writeHeartBeatValue( int heart_beat, const QDateTime& datetime)
     uint t = datetime.toTime_t();
     UA_DateTime dt = UA_DateTime_fromUnixTime(static_cast<UA_Int64>(t));
 
-    UA_UInt32 value = static_cast<UA_UInt32>(heart_beat);
+    UA_Int32 value = static_cast<UA_Int32>(heart_beat);
 
     UA_WriteRequest wReq;
     UA_WriteRequest_init(&wReq);
@@ -248,7 +251,7 @@ OpcUaClient::writeHeartBeatValue( int heart_beat, const QDateTime& datetime)
 //    wReq.nodesToWrite[0].nodeId = UA_NODEID_STRING_ALLOC( 0, "HeartBeat");
     wReq.nodesToWrite[0].attributeId = UA_ATTRIBUTEID_VALUE;
     wReq.nodesToWrite[0].value.hasValue = true;
-    wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_UINT32];
+    wReq.nodesToWrite[0].value.value.type = &UA_TYPES[UA_TYPES_INT32];
     wReq.nodesToWrite[0].value.sourceTimestamp = dt;
     wReq.nodesToWrite[0].value.value.storageType = UA_VARIANT_DATA_NODELETE; /* do not free the integer on deletion */
     wReq.nodesToWrite[0].value.value.data = &value;

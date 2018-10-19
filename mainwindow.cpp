@@ -1749,9 +1749,12 @@ MainWindow::opcUaClientDialog(bool state)
             opcua_dialog, SLOT(setExtCommandValue( int, QDateTime)));
         connect( this, SIGNAL(signalStateChanged(StateType)), opcua_dialog, SLOT(setState(StateType)));
     }
-    if (opcua_dialog)
+    if (opcua_dialog) {
+        opcua_dialog->serverPathChanged( opcua_path, opcua_port);
         opcua_dialog->show();
+    }
 }
+
 /*
 void
 MainWindow::opcUaStartUp()

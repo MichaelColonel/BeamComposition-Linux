@@ -373,38 +373,96 @@ OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
 
     local_client_ptr = reinterpret_cast<OpcUaClient*>(userdata);
     if (local_client_ptr && (status_code == UA_STATUSCODE_GOOD)) {
-        /* Browse some objects ( Browsing nodes in objects folder ) */
-        std::cout << "Browsing nodes in objects folder" << std::endl;
+        /* Browsing nodes in objects folder */
+        UA_NodeId* parent = nullptr;
         UA_BrowseRequest bReq;
         UA_BrowseRequest_init(&bReq);
         bReq.requestedMaxReferencesPerNode = 0;
         bReq.nodesToBrowse = UA_BrowseDescription_new();
         bReq.nodesToBrowseSize = 1;
-        bReq.nodesToBrowse[0].nodeId = UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER); // browse objects folder
+        bReq.nodesToBrowse[0].nodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER); // browse objects folder
         bReq.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_ALL; // return everything
         UA_BrowseResponse bResp = UA_Client_Service_browse( client, bReq);
-        printf("%-9s %-16s %-16s %-16s\n", "NAMESPACE", "NODEID", "BROWSE NAME", "DISPLAY NAME");
-        for(size_t i = 0; i < bResp.resultsSize; ++i) {
-            for(size_t j = 0; j < bResp.results[i].referencesSize; ++j) {
+        for ( size_t i = 0; i < bResp.resultsSize; ++i) {
+            for ( size_t j = 0; j < bResp.results[i].referencesSize; ++j) {
                 UA_ReferenceDescription *ref = &(bResp.results[i].references[j]);
-                if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_NUMERIC) {
-                    printf("%-9d %-16d %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
-                           ref->nodeId.nodeId.identifier.numeric, (int)ref->browseName.name.length,
-                           ref->browseName.name.data, (int)ref->displayName.text.length,
-                           ref->displayName.text.data);
-                } else if(ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_STRING) {
-                    printf("%-9d %-16.*s %-16.*s %-16.*s\n", ref->nodeId.nodeId.namespaceIndex,
-                           (int)ref->nodeId.nodeId.identifier.string.length,
-                           ref->nodeId.nodeId.identifier.string.data,
-                           (int)ref->browseName.name.length, ref->browseName.name.data,
-                           (int)ref->displayName.text.length, ref->displayName.text.data);
+                if (ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_NUMERIC) {
+                    if (UA_String_equal( &ref->browseName.name, &parent_node_str)) {
+                        parent = UA_NodeId_new();
+                        UA_NodeId_init(parent);
+                        UA_NodeId_copy( &ref->nodeId.nodeId, parent);
+                     }
                 }
-                /* TODO: distinguish further types */
             }
         }
         UA_BrowseRequest_deleteMembers(&bReq);
         UA_BrowseResponse_deleteMembers(&bResp);
 
+        if (parent) {
+            UA_NodeId* res = UA_NodeId_new();
+            UA_StatusCode status_code = UA_Client_readNodeIdAttribute( client, *parent, res);
+            UA_NodeId_delete(res);
+            if (status_code != UA_STATUSCODE_GOOD) {
+                local_client_ptr->signalDisconnected();
+            }
+            else {
+                UA_BrowseRequest bReq;
+                UA_BrowseRequest_init(&bReq);
+                bReq.requestedMaxReferencesPerNode = 0;
+                bReq.nodesToBrowse = UA_BrowseDescription_new();
+                bReq.nodesToBrowseSize = 1;
+                UA_NodeId_copy( parent, &bReq.nodesToBrowse[0].nodeId); /* browse parent node */
+
+                bReq.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_ALL; /* return everything */
+                UA_BrowseResponse bResp = UA_Client_Service_browse( client, bReq);
+                for ( size_t i = 0; i < bResp.resultsSize; ++i) {
+                    for ( size_t j = 0; j < bResp.results[i].referencesSize; ++j) {
+                        UA_ReferenceDescription *ref = &(bResp.results[i].references[j]);
+                        if (ref->nodeId.nodeId.identifierType == UA_NODEIDTYPE_NUMERIC) {
+//                          if (UA_String_equal( &ref->browseName.name, &heart_beat_str)) {
+//                              printf( "%d, %s\n", ref->nodeId.nodeId.identifier.numeric, ref->browseName.name.data);
+//                          }
+                            if (UA_String_equal( &ref->browseName.name, &heart_beat_str)) {
+                                std::cout << "Heart Beat node ID (numeric): " << ref->nodeId.nodeId.identifier.numeric;
+                                std::cout << ", BROWSE NAME: " << ref->browseName.name.data << std::endl;
+                                std::cout << "Heart Beat Node OK!" << std::endl;
+                                local_client_ptr->setChildNode( ref->nodeId.nodeId, HEART_BEAT_NODE);
+                            }
+                            else if (UA_String_equal( &ref->browseName.name, &state_str)) {
+                                std::cout << "State node ID (numeric): " << ref->nodeId.nodeId.identifier.numeric;
+                                std::cout << ", BROWSE NAME: " << ref->browseName.name.data << std::endl;
+                                std::cout << "State Node OK!" << std::endl;
+                                local_client_ptr->setChildNode( ref->nodeId.nodeId, STATE_NODE);
+                            }
+                            else if (UA_String_equal( &ref->browseName.name, &value_str)) {
+                                std::cout << "Value node ID (numeric): " << ref->nodeId.nodeId.identifier.numeric;
+                                std::cout << ", BROWSE NAME: " << ref->browseName.name.data << std::endl;
+                                std::cout << "Value Node OK!" << std::endl;
+                                local_client_ptr->setChildNode( ref->nodeId.nodeId, VALUE_NODE);
+                            }
+                            else if (UA_String_equal( &ref->browseName.name, &value_integral_str)) {
+                                std::cout << "Value Integral node ID (numeric): " << ref->nodeId.nodeId.identifier.numeric;
+                                std::cout << ", BROWSE NAME: " << ref->browseName.name.data << std::endl;
+                                std::cout << "Value Integral Node OK!" << std::endl;
+                                local_client_ptr->setChildNode( ref->nodeId.nodeId, VALUE_INTEGRAL_NODE);
+                            }
+                            else if (UA_String_equal( &ref->browseName.name, &command_str)) {
+                                std::cout << "Command node ID (numeric): " << ref->nodeId.nodeId.identifier.numeric;
+                                std::cout << ", BROWSE NAME: " << ref->browseName.name.data << std::endl;
+                                std::cout << "Command Node OK!" << std::endl;
+                                local_client_ptr->setChildNode( ref->nodeId.nodeId, COMMAND_NODE);
+                            }
+                        }
+                    }
+                }
+                UA_BrowseRequest_deleteMembers(&bReq);
+                UA_BrowseResponse_deleteMembers(&bResp);
+                bool res = local_client_ptr->initExternalCommandSubscription();
+                std::cout << "Monitor initiation result: " << res << std::endl;
+                local_client_ptr->signalConnected();
+            }
+            UA_NodeId_delete(parent);
+        }
 /*
 //        char* str = reinterpret_cast<char*>(parent_node_str.data);
         UA_NodeId parent = UA_NODEID_STRING( 0, UA_NS0ID_OBJECTSFOLDER);

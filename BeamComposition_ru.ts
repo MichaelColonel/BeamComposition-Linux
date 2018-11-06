@@ -1424,12 +1424,12 @@ Do you want to quit program?</source>
     <message>
         <location filename="opcuaclientdialog.cpp" line="33"/>
         <source>Cancel Connection</source>
-        <translation>Отменить Подлючение</translation>
+        <translation>Отменить Подключение</translation>
     </message>
     <message>
         <location filename="opcuaclientdialog.cpp" line="56"/>
         <source>Connection progress</source>
-        <translation>Прогресс подлючения</translation>
+        <translation>Прогресс подключения</translation>
     </message>
 </context>
 <context>

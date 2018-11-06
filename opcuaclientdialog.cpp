@@ -235,8 +235,9 @@ OpcUaClientDialog::onDisconnectClicked()
     if (opcua_client && opcua_client->isConnected()) {
 
         QDateTime now = QDateTime::currentDateTime();
-        if (opcua_client->writeHeartBeatValue( 0, now)) {
+        if (bool res = opcua_client->writeHeartBeatValue( 0, now)) {
             setHeatBeatValue( 0, now);
+            std::cout << "OPC UA HeartBeat result: " << res << ", value: " << 0 << std::endl;
         }
 
         opcua_client->disconnect();
@@ -245,6 +246,11 @@ OpcUaClientDialog::onDisconnectClicked()
         QTreeWidgetItem* item = ui->opcUaNodesTreeWidget->topLevelItem(0);
         if (item)
             item->setText( 1, tr("Disconnected"));
+
+        if (item_ext_command) {
+            item_ext_command->setText( 1, "");
+            item_ext_command->setText( 2, "");
+        }
     }
 }
 

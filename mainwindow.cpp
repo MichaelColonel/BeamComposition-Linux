@@ -2187,7 +2187,7 @@ MainWindow::onOpcUaTimeout()
         QDateTime now = QDateTime::currentDateTime();
         bool res = opcua_client->writeHeartBeatValue( value, now);
         if (opcua_dialog && res) opcua_dialog->setHeatBeatValue( value, now);
-//        std::cout << "OPC UA HeartBeat result: " << res << ", value: " << value << std::endl;
+        std::cout << "OPC UA HeartBeat result: " << res << ", value: " << value << std::endl;
     }
 }
 

@@ -88,9 +88,39 @@
             <set>AlignHCenter|AlignVCenter|AlignCenter</set>
            </property>
           </column>
+          <column>
+           <property name="text">
+            <string>Numeric ID</string>
+           </property>
+           <property name="textAlignment">
+            <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Display Name</string>
+           </property>
+           <property name="textAlignment">
+            <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Browse Name</string>
+           </property>
+           <property name="textAlignment">
+            <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+           </property>
+          </column>
           <item>
            <property name="text">
             <string notr="true">RBS.BeamSpectrum.01</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="text">
+            <string/>
            </property>
            <item>
             <property name="text">

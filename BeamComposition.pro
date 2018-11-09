@@ -54,7 +54,8 @@ SOURCES += main.cpp \
     chargevaluedelegate.cpp \
     rundetailslistwidgetitem.cpp \
     opcuaclientdialog.cpp \
-    opcuaclient.cpp
+    opcuaclient.cpp \
+    open62541.c
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -77,7 +78,8 @@ HEADERS  += mainwindow.h \
     chargevaluedelegate.h \
     rundetailslistwidgetitem.h \
     opcuaclientdialog.h \
-    opcuaclient.h
+    opcuaclient.h \
+    open62541.h
 
 FORMS    += mainwindow.ui \
     rootcanvasdialog.ui \
@@ -87,8 +89,8 @@ FORMS    += mainwindow.ui \
 
 
 unix {
-    CONFIG += link_pkgconfig
-    PKGCONFIG += open62541
+#    CONFIG += link_pkgconfig
+#    PKGCONFIG += open62541
     LIBS += -lftd2xx
 }
 

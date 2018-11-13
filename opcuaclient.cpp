@@ -381,7 +381,7 @@ OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
         bReq.nodesToBrowse = UA_BrowseDescription_new();
         bReq.nodesToBrowseSize = 1;
         bReq.nodesToBrowse[0].nodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER); // browse objects folder
-        bReq.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_ALL; // return everything
+        bReq.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_BROWSENAME; // return browse name
         UA_BrowseResponse bResp = UA_Client_Service_browse( client, bReq);
         for ( size_t i = 0; i < bResp.resultsSize; ++i) {
             for ( size_t j = 0; j < bResp.results[i].referencesSize; ++j) {
@@ -403,6 +403,7 @@ OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
             UA_StatusCode status_code = UA_Client_readNodeIdAttribute( client, *parent, res);
             UA_NodeId_delete(res);
             if (status_code != UA_STATUSCODE_GOOD) {
+                std::cerr << "Parent node doesn't have any attributes!" << std::endl;
                 local_client_ptr->signalDisconnected();
             }
             else {
@@ -411,9 +412,9 @@ OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
                 bReq.requestedMaxReferencesPerNode = 0;
                 bReq.nodesToBrowse = UA_BrowseDescription_new();
                 bReq.nodesToBrowseSize = 1;
-                UA_NodeId_copy( parent, &bReq.nodesToBrowse[0].nodeId); /* browse parent node */
+                UA_NodeId_copy( parent, &bReq.nodesToBrowse[0].nodeId); // browse objects folder
 
-                bReq.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_ALL; /* return everything */
+                bReq.nodesToBrowse[0].resultMask = UA_BROWSERESULTMASK_BROWSENAME; // return browse name
                 UA_BrowseResponse bResp = UA_Client_Service_browse( client, bReq);
                 for ( size_t i = 0; i < bResp.resultsSize; ++i) {
                     for ( size_t j = 0; j < bResp.results[i].referencesSize; ++j) {
@@ -425,30 +426,35 @@ OpcUaClient::onConnectCallback( UA_Client* client, void* userdata,
                             if (UA_String_equal( &ref->browseName.name, &heart_beat_str)) {
                                 std::cout << "Heart Beat node ID (numeric): " << ref->nodeId.nodeId.identifier.numeric;
                                 std::cout << ", BROWSE NAME: " << ref->browseName.name.data << std::endl;
+//                                std::cout << ", DISPLAY NAME: " << ref->displayName.text.data << std::endl;
                                 std::cout << "Heart Beat Node OK!" << std::endl;
                                 local_client_ptr->setChildNode( ref->nodeId.nodeId, HEART_BEAT_NODE);
                             }
                             else if (UA_String_equal( &ref->browseName.name, &state_str)) {
                                 std::cout << "State node ID (numeric): " << ref->nodeId.nodeId.identifier.numeric;
                                 std::cout << ", BROWSE NAME: " << ref->browseName.name.data << std::endl;
+//                                std::cout << ", DISPLAY NAME: " << ref->displayName.text.data << std::endl;
                                 std::cout << "State Node OK!" << std::endl;
                                 local_client_ptr->setChildNode( ref->nodeId.nodeId, STATE_NODE);
                             }
                             else if (UA_String_equal( &ref->browseName.name, &value_str)) {
                                 std::cout << "Value node ID (numeric): " << ref->nodeId.nodeId.identifier.numeric;
                                 std::cout << ", BROWSE NAME: " << ref->browseName.name.data << std::endl;
+//                                std::cout << ", DISPLAY NAME: " << ref->displayName.text.data << std::endl;
                                 std::cout << "Value Node OK!" << std::endl;
                                 local_client_ptr->setChildNode( ref->nodeId.nodeId, VALUE_NODE);
                             }
                             else if (UA_String_equal( &ref->browseName.name, &value_integral_str)) {
                                 std::cout << "Value Integral node ID (numeric): " << ref->nodeId.nodeId.identifier.numeric;
                                 std::cout << ", BROWSE NAME: " << ref->browseName.name.data << std::endl;
+//                                std::cout << ", DISPLAY NAME: " << ref->displayName.text.data << std::endl;
                                 std::cout << "Value Integral Node OK!" << std::endl;
                                 local_client_ptr->setChildNode( ref->nodeId.nodeId, VALUE_INTEGRAL_NODE);
                             }
                             else if (UA_String_equal( &ref->browseName.name, &command_str)) {
                                 std::cout << "Command node ID (numeric): " << ref->nodeId.nodeId.identifier.numeric;
                                 std::cout << ", BROWSE NAME: " << ref->browseName.name.data << std::endl;
+//                                std::cout << ", DISPLAY NAME: " << ref->displayName.text.data << std::endl;
                                 std::cout << "Command Node OK!" << std::endl;
                                 local_client_ptr->setChildNode( ref->nodeId.nodeId, COMMAND_NODE);
                             }

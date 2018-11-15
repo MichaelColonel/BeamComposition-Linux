@@ -279,7 +279,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( ui->runTypeButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(runTypeChanged(int)));
     connect( ui->updateDataButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(dataUpdateChanged(int)));
 
-    connect( timer, SIGNAL(timeout()), this, SLOT(handle_root_events()));
+    connect( timer, SIGNAL(timeout()), this, SLOT(onRootEventsTimeout())); // iterate ROOT events
     connect( timer_opcua, SIGNAL(timeout()), opcua_client, SLOT(iterate()));
     connect( timer_heartbeat, SIGNAL(timeout()), this, SLOT(onOpcUaTimeout()));
 
@@ -403,8 +403,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+/**
+ * @brief MainWindow::onRootEventsTimeout
+ * Iterate ROOT events
+ */
 void
-MainWindow::handle_root_events()
+MainWindow::onRootEventsTimeout()
 {
     //call the inner loop of ROOT
     gSystem->ProcessEvents();
@@ -446,8 +450,10 @@ MainWindow::treeWidgetItemClicked(QTreeWidgetItem* item, int)
 
         if (type != NONE) {
             RootCanvasDialog* dialog = ditem->canvasDialog();
-            if (dialog && !dialog->isHidden())
-                dialog->raise();
+            if (dialog && dialog->isVisible()) {
+//                dialog->raise();
+                dialog->activateWindow();
+            }
         }
     }
 }
@@ -916,7 +922,7 @@ void
 MainWindow::processFileFinished()
 {
     qDebug() << "GUI: File processing finished";
-    if (!progress_dialog->isHidden()) {
+    if (progress_dialog->isVisible()) {
         progress_dialog->hide();
     }
 
@@ -1808,6 +1814,38 @@ MainWindow::saveSettings(QSettings* set)
 
     QSize wsize = this->size();
     set->setValue( "main-window-size", wsize);
+
+    set->beginGroup("RootDiagrams");
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+    for ( QList<QTreeWidgetItem*>::iterator it = items.begin(); it != items.end(); ++it) {
+        QTreeWidgetItem* item = *it;
+#elif defined(__GNUG__) && (__cplusplus >= 201103L)
+    for ( QTreeWidgetItem* item : items) {
+#endif
+        DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(item);
+        if (ditem) {
+            set->beginGroup(ditem->getDiagramName());
+//            std::cout << "Diagram type: " << ditem->diagramType() << std::endl;
+            RootCanvasDialog* dialog = ditem->canvasDialog();
+            set->setValue( "type", static_cast<int>(ditem->diagramType())); // program diagram type
+            set->setValue( "valid", static_cast<bool>(dialog)); // is dialog valid (dialog and canvas are created)
+            if (dialog) {
+                set->setValue( "size", dialog->size());
+                set->setValue( "pos", dialog->pos());
+                set->setValue( "visible", dialog->isVisible());
+                set->setValue( "fullScreen", dialog->isFullScreen());
+//                std::cout << "Height: " << dialog->size().height() << ", Width: " << dialog->size().width() << " ";
+//                std::cout << "Pos X: " << dialog->pos().x() << ", Pos Y: " << dialog->pos().y() << std::endl;
+            }
+            else {
+            }
+            set->endGroup();
+        }
+        else {
+
+        }
+    }
+    set->endGroup();
 }
 
 void

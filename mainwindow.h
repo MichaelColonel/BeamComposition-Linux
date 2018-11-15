@@ -74,7 +74,7 @@ signals:
         const RunInfo::BeamSpectrumArray& mean_array, const QDateTime& datetime);
 
 private slots:
-    void handle_root_events();
+    void onRootEventsTimeout();
     void treeWidgetItemDoubleClicked( QTreeWidgetItem*, int);
     void treeWidgetItemClicked( QTreeWidgetItem*, int);
     void runDetailsSelectionTriggered(QAction*);

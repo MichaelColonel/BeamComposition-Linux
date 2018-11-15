@@ -45,6 +45,7 @@ public:
     DiagramType diagramType() const { return root_diagram_type; }
     RootCanvasDialog* canvasDialog() const { return root_canvas_dialog; }
     DiagramTuple diagramTyple() const { return root_diagram_tuple; }
+    QString getDiagramName() const;
     void setDiagramTuple(DiagramTuple& tuple) { root_diagram_tuple = tuple; }
     void setCanvasDialog(RootCanvasDialog* dialog) { root_canvas_dialog = dialog; }
     TH1* getTH1() const { return std::get<0>(root_diagram_tuple); }

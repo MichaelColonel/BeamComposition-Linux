@@ -36,3 +36,19 @@ DiagramTreeWidgetItem::~DiagramTreeWidgetItem()
 
 //    qDebug() << "GUI: DiagramTreeWidgetItem Destructor: " << root_diagrams_type;
 }
+
+QString
+DiagramTreeWidgetItem::getDiagramName() const
+{
+    QString dname;
+    if (root_diagram_type != HIST_CHANNELS) {
+        if (TH1* h1 = getTH1())
+            dname = QString(h1->GetName());
+        else if (TH2* h2 = getTH2())
+            dname = QString(h2->GetName());
+    }
+    else {
+        dname = "Channels";
+    }
+    return dname;
+}

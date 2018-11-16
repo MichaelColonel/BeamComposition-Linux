@@ -179,6 +179,13 @@ OpcUaClient::writeBeamSpectrumValue( const RunInfo::BeamSpectrumArray& batch_arr
     UA_WriteResponse wResp = UA_Client_Service_write( client, wReq);
     if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
         result = true;
+        std::cout << "Beam composition spectrum: OPC UA server response OK." << std::endl;
+//        UA_LOG_INFO( logger, UA_LOGCATEGORY_CLIENT, "Beam composition spectrum: OPC UA server response OK.");
+    }
+    else {
+        std::cerr << "Beam composition spectrum: OPC UA server response ERROR!" << std::endl;
+//        UA_LOG_ERROR( logger, UA_LOGCATEGORY_CLIENT, "Beam composition spectrum: OPC UA server response ERROR!");
+        std::cerr << "What: " << UA_StatusCode_name(wResp.responseHeader.serviceResult) << std::endl;
     }
     UA_WriteRequest_deleteMembers(&wReq);
     UA_WriteResponse_deleteMembers(&wResp);
@@ -256,8 +263,15 @@ OpcUaClient::writeHeartBeatValue( int heart_beat, const QDateTime& datetime)
     wReq.nodesToWrite[0].value.value.storageType = UA_VARIANT_DATA_NODELETE; /* do not free the integer on deletion */
     wReq.nodesToWrite[0].value.value.data = &value;
     UA_WriteResponse wResp = UA_Client_Service_write( client, wReq);
-    if (wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
+    if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
         result = true;
+        std::cout << "Heart beat: OPC UA server response OK." << std::endl;
+//        UA_LOG_INFO( logger, UA_LOGCATEGORY_CLIENT, "Heart beat: OPC UA server response OK.");
+    }
+    else {
+        std::cerr << "Heart beat: OPC UA server response ERROR!" << std::endl;
+//        UA_LOG_ERROR( logger, UA_LOGCATEGORY_CLIENT, "Heart beat: OPC UA server response ERROR!");
+        std::cerr << "What: " << UA_StatusCode_name(wResp.responseHeader.serviceResult) << std::endl;
     }
     UA_WriteRequest_deleteMembers(&wReq);
     UA_WriteResponse_deleteMembers(&wResp);
@@ -332,8 +346,15 @@ OpcUaClient::writeCurrentStateValue( int current_state, const QDateTime& datetim
     wReq.nodesToWrite[0].value.value.storageType = UA_VARIANT_DATA_NODELETE; /* do not free the integer on deletion */
     wReq.nodesToWrite[0].value.value.data = &value;
     UA_WriteResponse wResp = UA_Client_Service_write( client, wReq);
-    if (wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
+    if(wResp.responseHeader.serviceResult == UA_STATUSCODE_GOOD) {
         result = true;
+        std::cout << "Current state: OPC UA server response OK." << std::endl;
+//        UA_LOG_INFO( logger, UA_LOGCATEGORY_CLIENT, "Current state: OPC UA server response OK.");
+    }
+    else {
+        std::cerr << "Current state: OPC UA server response ERROR!" << std::endl;
+//        UA_LOG_ERROR( logger, UA_LOGCATEGORY_CLIENT, "Current state: OPC UA server response ERROR!");
+        std::cerr << "What: " << UA_StatusCode_name(wResp.responseHeader.serviceResult) << std::endl;
     }
     UA_WriteRequest_deleteMembers(&wReq);
     UA_WriteResponse_deleteMembers(&wResp);

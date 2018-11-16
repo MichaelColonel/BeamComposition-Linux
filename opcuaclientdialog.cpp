@@ -15,14 +15,30 @@
  *      MA 02110-1301, USA.
  */
 
+#include <QDebug>
 #include <QTimer>
 #include <QDateTime>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 #include "opcuaclient.h"
 
 #include "opcuaclientdialog.h"
 #include "ui_opcuaclientdialog.h"
+
+namespace {
+
+const char* beam_template[CARBON_Z] = {
+    "1:%1% ",
+    "2:%1% ",
+    "3:%1% ",
+    "4:%1% ",
+    "5:%1% ",
+    "6:%1%"
+};
+
+}
 
 OpcUaClientDialog::OpcUaClientDialog( const QString& path, OpcUaClient* client,
     bool connect_at_start, QWidget *parent)
@@ -190,8 +206,24 @@ OpcUaClientDialog::setHeatBeatValue( int value, const QDateTime& dt)
 
 void
 OpcUaClientDialog::setBreamSpectrumValue( const RunInfo::BeamSpectrumArray& batch_array,
-    const RunInfo::BeamSpectrumArray& mean_array, const QDateTime& datetime)
+    const RunInfo::BeamSpectrumArray& mean_array, const QDateTime& dt)
 {
+    QString dt_str = dt.toString(Qt::ISODate);
+    QString batch_text, mean_text;
+
+    for ( int i = 0; i < CARBON_Z; ++i) {
+        batch_text.append(QString(beam_template[i]).arg( batch_array[i], 3, 'f', 1));
+        mean_text.append(QString(beam_template[i]).arg( mean_array[i], 3, 'f', 1));
+    }
+
+    if (item_value) {
+        item_value->setText( 1, batch_text);
+        item_value->setText( 2, dt_str);
+    }
+    if (item_value_int) {
+        item_value_int->setText( 1, mean_text);
+        item_value_int->setText( 2, dt_str);
+    }
 }
 
 void

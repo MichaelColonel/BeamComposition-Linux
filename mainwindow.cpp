@@ -304,7 +304,7 @@ MainWindow::MainWindow(QWidget *parent)
         opcua_client, SLOT(writeBeamSpectrumValue(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)));
 
     connect( opcua_client, SIGNAL(externalCommandChanged( int, QDateTime)),
-        this, SLOT(externalSignalReceived( int, QDateTime)));
+        this, SLOT(externalOpcUaSignalReceived( int, QDateTime)));
     connect( opcua_client, SIGNAL(connected()), this, SLOT(onOpcUaClientConnected()));
     connect( opcua_client, SIGNAL(connected()), timer_heartbeat, SLOT(start()));
     connect( opcua_client, SIGNAL(disconnected()), timer_heartbeat, SLOT(stop()));
@@ -1095,7 +1095,7 @@ MainWindow::dataUpdateChanged(int id)
         qDebug() << "Extraction signal update";
 //        flag_batch_state = false;
         disconnect( timer_data, SIGNAL(timeout()), this, SLOT(processData()));
-        connect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalReceived()));
+        connect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalBeamSignalReceived()));
         connect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
         delay_time = ui->delayTimeComboBox->currentIndex();
         acquisition_time = ui->acquisitionTimeComboBox->currentIndex();
@@ -1105,7 +1105,7 @@ MainWindow::dataUpdateChanged(int id)
         qDebug() << "Automatic timeout update";
 //        flag_batch_state = true;
         connect( timer_data, SIGNAL(timeout()), this, SLOT(processData()));
-        disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalReceived()));
+        disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalBeamSignalReceived()));
         disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
     }
 
@@ -1455,7 +1455,7 @@ MainWindow::disconnectDevices()
         timer_data->stop();
 
     disconnect( timer_data, SIGNAL(timeout()), this, SLOT(processData()));
-    disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalSignalReceived()));
+    disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalBeamSignalReceived()));
     disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
 
     ui->connectButton->setEnabled(true);
@@ -1490,9 +1490,15 @@ MainWindow::acquireDeviceError()
 }
 
 void
-MainWindow::externalSignalReceived( int value, const QDateTime& timestamp)
+MainWindow::externalBeamSignalReceived()
 {
-    qDebug() << "GUI: External signal received: " << value << " timestamp: " << timestamp.toString();
+    qDebug() << "GUI: External beam start signal received: ";
+}
+
+void
+MainWindow::externalOpcUaSignalReceived( int value, const QDateTime& timestamp)
+{
+    qDebug() << "GUI: External OPC UA signal received: " << value << ", timestamp: " << timestamp.toString();
 }
 
 /**

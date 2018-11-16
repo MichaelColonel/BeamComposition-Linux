@@ -196,8 +196,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    loadSettings(settings);
-
     createTreeWidgetItems();
     createRootHistograms();
 
@@ -349,6 +347,8 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     ui->treeWidget->expandAll();
+
+    loadSettings(settings);
 }
 
 MainWindow::~MainWindow()
@@ -1495,8 +1495,10 @@ MainWindow::externalSignalReceived( int value, const QDateTime& timestamp)
     qDebug() << "GUI: External signal received: " << value << " timestamp: " << timestamp.toString();
 }
 
-/// if rising edge (state is high), then process data
-/// else ignore data
+/**
+ * @brief MainWindow::newBatchStateReceived
+ * @param state - if state is high (rising edge), then process data else ignore data
+*/
 void
 MainWindow::newBatchStateReceived(bool state)
 {
@@ -1883,6 +1885,46 @@ MainWindow::loadSettings(QSettings* set)
 
     QSize wsize = set->value( "main-window-size", QSize( 500, 600)).toSize();
     resize(wsize);
+
+    QSize size;
+    QPoint point;
+    bool visible = false;
+    bool fullScreen = false;
+
+    set->beginGroup("RootDiagrams");
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+    for ( QList<QTreeWidgetItem*>::iterator it = items.begin(); it != items.end(); ++it) {
+        QTreeWidgetItem* item = *it;
+#elif defined(__GNUG__) && (__cplusplus >= 201103L)
+    for ( QTreeWidgetItem* item : items) {
+#endif
+        DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(item);
+        if (ditem) {
+            set->beginGroup(ditem->getDiagramName());
+            RootCanvasDialog* dialog = ditem->canvasDialog();
+            DiagramType type = static_cast<DiagramType>(set->value( "type", -1).toInt()); // program diagram type
+            bool valid = set->value( "valid", false).toBool(); // is dialog valid (dialog and canvas are created)
+            if (valid) {
+                size = set->value( "size", QSize( 400, 400)).toSize();
+                point = set->value( "pos", QPoint( 100, 100)).toPoint();
+                visible = set->value( "visible", false).toBool();
+                fullScreen = set->value( "fullScreen", false).toBool();
+
+                if (!dialog && (type != NONE)) {
+                    dialog = createCanvasDialog(ditem);
+                    dialog->resize(size);
+                    dialog->move(point);
+                    dialog->setVisible(visible);
+//                    dialog->updateDiagram();
+                }
+            }
+            set->endGroup();
+        }
+        else {
+
+        }
+    }
+    set->endGroup();
 }
 
 void

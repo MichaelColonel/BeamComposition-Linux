@@ -267,11 +267,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect( ui->processPushButton, SIGNAL(clicked()), this, SLOT(processBatchesClicked()));
 
     connect( ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-             this, SLOT(treeWidgetItemDoubleClicked( QTreeWidgetItem*, int)));
+        this, SLOT(treeWidgetItemDoubleClicked( QTreeWidgetItem*, int)));
     connect( ui->treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
-             this, SLOT(treeWidgetItemClicked( QTreeWidgetItem*, int)));
+        this, SLOT(treeWidgetItemClicked( QTreeWidgetItem*, int)));
     connect( ui->runInfoTableWidget, SIGNAL(cellChanged(int,int)),
-             this, SLOT(backgroundValueChanged(int, int)));
+        this, SLOT(backgroundValueChanged(int, int)));
     connect( ui->runDetailsListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(detailsItemSelectionChanged()));
 
     connect( ui->runTypeButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(runTypeChanged(int)));
@@ -911,7 +911,11 @@ MainWindow::processThreadFinished()
 void
 MainWindow::processFileStarted()
 {
-    qDebug() << "GUI: File processing started";
+    if (!flag_background)
+        qDebug() << "GUI: Run data. File processing started";
+    else
+        qDebug() << "GUI: Background data. File processing started";
+
     progress_dialog->show();
 
 //    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -921,7 +925,11 @@ MainWindow::processFileStarted()
 void
 MainWindow::processFileFinished()
 {
-    qDebug() << "GUI: File processing finished";
+    if (!flag_background)
+        qDebug() << "GUI: Run data. File processing finished";
+    else
+        qDebug() << "GUI: Background data. File processing finished";
+
     if (progress_dialog->isVisible()) {
         progress_dialog->hide();
     }
@@ -2057,9 +2065,12 @@ MainWindow::updateRunInfo()
     for ( int i = 0; i < CARBON_Z; ++i) {
         double charge_z = runinfo.averageComposition(i);
         QTableWidgetItem* item = ui->runInfoTableWidget->item( i + CARBON_Z, 0);
-        if (charge_z >= 0.) {
+        if (!flag_background && (charge_z >= 0.)) {
             charge_z *= 100.;
             item->setText(QString("%1").arg( charge_z,  3, 'f', 1));
+        }
+        else if (flag_background) {
+            item->setText("0.0");
         }
     }
 

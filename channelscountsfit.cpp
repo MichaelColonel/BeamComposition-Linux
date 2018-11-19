@@ -651,6 +651,35 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
         d.channels[3]->Fill(array[3]);
 
         bool skip = false;
+        // if background flag, then clear all diagrams except channels data
+/*
+        if (background_flag) {
+            for ( int i = 0; i < CHANNELS; ++i) {
+                d.fit[i]->Reset();
+                d.rank[i]->Reset();
+            }
+            d.fitall->Reset();
+            d.fit_median->Reset();
+            d.fit_mean->Reset();
+
+            d.z12->Reset();
+            d.z23->Reset();
+            d.z34->Reset();
+            d.z14->Reset();
+            d.z13->Reset();
+            d.z24->Reset();
+
+            d.c12->Reset();
+            d.c23->Reset();
+            d.c34->Reset();
+            d.c14->Reset();
+            d.c13->Reset();
+            d.c24->Reset();
+
+            d.z->Reset();
+            d.z2->Reset();
+        }
+*/
         if (!background_flag) {
             // add correct reference pedestals offset
             for ( int i = 0; i < CHANNELS; ++i) {

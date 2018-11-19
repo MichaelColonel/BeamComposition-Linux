@@ -364,8 +364,9 @@ OpcUaClient::writeCurrentStateValue( int current_state, const QDateTime& datetim
 void
 OpcUaClient::iterate()
 {
+    UA_StatusCode status;
     if (client)
-        UA_Client_run_iterate( client, 0);
+        status = UA_Client_run_iterate( client, 0);
 }
 
 #ifdef UA_ENABLE_SUBSCRIPTIONS

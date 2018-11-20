@@ -1050,18 +1050,20 @@ MainWindow::acquisitionTimingChanged(int value)
         delay_time = value;
     }
 
-    char buf[5] = "A100";
-    buf[2] = delay_time + '0';
+    if (combobox) {
+        char buf[5] = "A100";
+        buf[2] = delay_time + '0';
 
-    if (acquisition_time >= 0 && acquisition_time <= 9)
-        buf[3] = acquisition_time + '0';
-    else if (acquisition_time >= 10 && acquisition_time <= 15)
-        buf[3] = (acquisition_time - 10) + 'A';
-    else
-        buf[3] = '5';
+        if (acquisition_time >= 0 && acquisition_time <= 9)
+            buf[3] = acquisition_time + '0';
+        else if (acquisition_time >= 10 && acquisition_time <= 15)
+            buf[3] = (acquisition_time - 10) + 'A';
+        else
+            buf[3] = '5';
 
-    command_thread->writeCommand( buf, towrite);
-    statusBar()->showMessage( tr("Extraction signal update"), 1000);
+        command_thread->writeCommand( buf, towrite);
+        statusBar()->showMessage( tr("Extraction signal update"), 1000);
+    }
 }
 
 void
@@ -1086,7 +1088,8 @@ MainWindow::runTypeChanged(int id)
         process_thread->setBackground(false);
     }
 
-    emit signalStateChanged(sys_state);
+    if (rbutton)
+        emit signalStateChanged(sys_state);
 }
 
 void
@@ -1117,25 +1120,27 @@ MainWindow::dataUpdateChanged(int id)
         disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
     }
 
-    ui->acquisitionTimeComboBox->setEnabled(state);
-    ui->delayTimeComboBox->setEnabled(state);
+    if (rbutton) {
+        ui->acquisitionTimeComboBox->setEnabled(state);
+        ui->delayTimeComboBox->setEnabled(state);
 
-    char buf[5] = "A000";
-    buf[1] = state + '0';
-    buf[2] = delay_time + '0';
+        char buf[5] = "A000";
+        buf[1] = state + '0';
+        buf[2] = delay_time + '0';
 
-    if (acquisition_time >= 0 && acquisition_time <= 9)
-        buf[3] = acquisition_time + '0';
-    else if (acquisition_time >= 10 && acquisition_time <= 15)
-        buf[3] = (acquisition_time - 10) + 'A';
-    else
-        buf[3] = '5';
+        if (acquisition_time >= 0 && acquisition_time <= 9)
+            buf[3] = acquisition_time + '0';
+        else if (acquisition_time >= 10 && acquisition_time <= 15)
+            buf[3] = (acquisition_time - 10) + 'A';
+        else
+            buf[3] = '5';
 
-    command_thread->writeCommand( buf, towrite);
-    if (state)
-        statusBar()->showMessage( tr("Extraction signal update"), 1000);
-    else
-        statusBar()->showMessage( tr("Automatic timeout update"), 1000);
+        command_thread->writeCommand( buf, towrite);
+        if (state)
+            statusBar()->showMessage( tr("Extraction signal update"), 1000);
+        else
+            statusBar()->showMessage( tr("Automatic timeout update"), 1000);
+    }
 }
 
 void
@@ -1511,7 +1516,8 @@ MainWindow::externalOpcUaSignalReceived( int value, const QDateTime& timestamp)
 
 /**
  * @brief MainWindow::newBatchStateReceived
- * @param state - if state is high (rising edge), then process data else ignore data
+ * @param state - if state is high "1" (rising edge), then process the data
+ * if state is low "0" else ignore data
 */
 void
 MainWindow::newBatchStateReceived(bool state)

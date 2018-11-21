@@ -33,6 +33,7 @@ class TH2;
 typedef std::tuple< TH1*, TH2* > DiagramTuple;
 typedef std::tuple< TH1**, TH2** > DiagramsTuple;
 typedef std::array< unsigned short, CHANNELS > CountsArray;
+typedef std::array< double, CHANNELS > FittedCountsArray;
 
 typedef std::list< CountsArray > CountsList;
 typedef std::list< unsigned char > DataList;

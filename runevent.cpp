@@ -16,3 +16,11 @@
  */
 
 #include "runevent.h"
+
+SignalArray RunEvent::background_data;
+
+void
+RunEvent::setBackground(const SignalArray& pedestals)
+{
+    background_data = pedestals;
+}

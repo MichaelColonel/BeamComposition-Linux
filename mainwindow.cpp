@@ -56,6 +56,7 @@
 #include "settingsdialog.h"
 #include "opcuaclientdialog.h"
 
+#include "runevent.h"
 #include "backgroundvaluedelegate.h"
 #include "signalvaluedelegate.h"
 
@@ -213,6 +214,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // background
     const SignalArray& back = params->background();
+    RunEvent::setBackground(back);
+
     for ( int i = 0; i < CHANNELS; ++i) {
         const SignalPair& p = back[i];
         QString str = SignalValueDelegate::form_text(p);

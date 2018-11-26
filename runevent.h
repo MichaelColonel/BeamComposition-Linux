@@ -34,5 +34,37 @@ private:
     CountsArray adc_data;
     FittedCountsArray adc_fitted_data;
     int charge;
+public:
     static SignalArray background_data;
 };
+
+inline
+RunEvent::RunEvent( const CountsArray& adc, const FittedCountsArray& fitted, int particle_charge)
+    :
+    adc_data(adc),
+    adc_fitted_data(fitted),
+    charge(particle_charge)
+{
+
+}
+
+inline
+RunEvent::RunEvent(const RunEvent& src)
+    :
+    TObject(src),
+    adc_data(src.adc_data),
+    adc_fitted_data(src.adc_fitted_data),
+    charge(src.charge)
+{
+
+}
+
+inline
+RunEvent&
+RunEvent::operator=(const RunEvent& src)
+{
+    this->adc_data = src.adc_data;
+    this->adc_fitted_data = src.adc_fitted_data;
+    this->charge = src.charge;
+    return *this;
+}

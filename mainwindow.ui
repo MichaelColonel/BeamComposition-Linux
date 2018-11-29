@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>308</width>
-    <height>776</height>
+    <width>289</width>
+    <height>621</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -60,8 +60,8 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
-         <width>277</width>
+         <y>-362</y>
+         <width>258</width>
          <height>787</height>
         </rect>
        </property>
@@ -182,6 +182,9 @@
                  <property name="text">
                   <string>Constant Timeout</string>
                  </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
                  <attribute name="buttonGroup">
                   <string notr="true">updateDataButtonGroup</string>
                  </attribute>
@@ -191,6 +194,9 @@
                 <widget class="QRadioButton" name="dataUpdateStartRadioButton">
                  <property name="text">
                   <string>External Start Signal</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
                  </property>
                  <attribute name="buttonGroup">
                   <string notr="true">updateDataButtonGroup</string>
@@ -367,6 +373,9 @@
               <widget class="QSpinBox" name="delaySpinBox">
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="suffix">
+                <string> ns</string>
                </property>
                <property name="maximum">
                 <number>255</number>
@@ -843,7 +852,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>308</width>
+     <width>289</width>
      <height>26</height>
     </rect>
    </property>

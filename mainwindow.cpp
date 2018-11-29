@@ -1438,9 +1438,15 @@ MainWindow::connectDevices()
     int delay = ui->delaySpinBox->value();
     setDelayChanged(delay);
 
-    // set automatic update
-    ui->dataUpdateAutoRadioButton->setChecked(true);
-    int button_id = ui->updateDataButtonGroup->id(ui->dataUpdateAutoRadioButton);
+    // set automatic or external signal update
+    int button_id = -1;
+    if (ui->dataUpdateAutoRadioButton->isChecked())
+        button_id = ui->updateDataButtonGroup->id(ui->dataUpdateAutoRadioButton);
+    else if (ui->dataUpdateStartRadioButton->isChecked())
+        button_id = ui->updateDataButtonGroup->id(ui->dataUpdateStartRadioButton);
+
+//    ui->dataUpdateAutoRadioButton->setChecked(true);
+//    int button_id = ui->updateDataButtonGroup->id(ui->dataUpdateAutoRadioButton);
     dataUpdateChanged(button_id);
 
     sys_state = STATE_DEVICE_CONNECTED;
@@ -1485,6 +1491,11 @@ MainWindow::disconnectDevices()
 
     sys_state = STATE_DEVICE_DISCONNECTED;
     emit signalStateChanged(sys_state);
+
+    channel_a = nullptr;
+    channel_b = nullptr;
+    acquire_thread->setDeviceHandle(nullptr);
+    command_thread->setDeviceHandle(nullptr);
 }
 
 void
@@ -1525,7 +1536,7 @@ MainWindow::externalOpcUaSignalReceived( int value, const QDateTime& timestamp)
 void
 MainWindow::newBatchStateReceived(bool state)
 {
-    qDebug() << "GUI: Batch signal state -- " << state;
+    qDebug() << "GUI: Batch signal state --" << state;
     if (process_thread->isRunning() && state) {
 //        statusBar()->showMessage( tr("New batch signal"), 1000);
         processData();
@@ -1655,7 +1666,7 @@ MainWindow::processData()
         batch_data_offset, ui->runDetailsListWidget);
 */
     RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( datetime, \
-        (batch_counts + 1), datalist.size(),
+        (batch_counts + 1), datalist.size(), \
         batch_info.counted(), batch_info.processed(), \
         batch_data_offset, ui->runDetailsListWidget);
 
@@ -1830,7 +1841,32 @@ MainWindow::saveSettings(QSettings* set)
         set->endGroup();
         ++i;
     }
+
+    // Run parameters
     set->setValue( "current-run", ui->runNumberSpinBox->value());
+    if (ui->dataUpdateAutoRadioButton->isChecked())
+        set->setValue( "run-update-button", 0); // auto update
+    else if (ui->dataUpdateStartRadioButton->isChecked())
+        set->setValue( "run-update-button", 1); // external start signal update
+    else
+        set->setValue( "run-update-button", -1);
+
+    set->setValue( "run-update-id", ui->updateDataButtonGroup->checkedId());
+    set->setValue( "delay-acquisition-index", ui->delayTimeComboBox->currentIndex());
+    set->setValue( "acquisition-time-index", ui->acquisitionTimeComboBox->currentIndex());
+
+    if (ui->backgroundRunRadioButton->isChecked())
+        set->setValue( "run-type-button", 0); // background (pedestals)
+    else if (ui->fixedRunRadioButton->isChecked())
+        set->setValue( "run-type-button", 1); // fixed position
+    else if (ui->extCommandRadioButton->isChecked())
+        set->setValue( "run-type-button", 2); // external signal
+    else if (ui->scanningRunRadioButton->isChecked())
+        set->setValue( "run-type-button", 3); // scanning
+    else
+        set->setValue( "run-type-button", -1);
+
+    set->setValue( "run-type-id", ui->runTypeButtonGroup->checkedId());
 
     set->setValue( "run-directory", rundir);
     set->setValue( "delay", ui->delaySpinBox->value());
@@ -1840,6 +1876,7 @@ MainWindow::saveSettings(QSettings* set)
     QSize wsize = this->size();
     set->setValue( "main-window-size", wsize);
 
+    // ROOT diagrams parameters
     set->beginGroup("RootDiagrams");
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
     for ( QList<QTreeWidgetItem*>::iterator it = items.begin(); it != items.end(); ++it) {
@@ -1903,6 +1940,54 @@ MainWindow::loadSettings(QSettings* set)
     rundir = set->value( "run-directory", "/home").toString();
     int delay = set->value( "delay", 0).toInt();
     ui->delaySpinBox->setValue(delay);
+
+    int update_id = set->value( "run-update-button", -1).toInt();
+    int id = set->value( "run-update-id", 0).toInt();
+//    qDebug() << "Id: " << id << " " << " update id: " << update_id;
+
+    switch (update_id) {
+    case 0:
+        ui->dataUpdateAutoRadioButton->setChecked(true);
+        break;
+    case 1:
+        ui->dataUpdateStartRadioButton->setChecked(true);
+        break;
+    case -1:
+    default:
+        update_id = -1;
+        break;
+    }
+    if (update_id != -1)
+        dataUpdateChanged(id);
+
+    int index = set->value( "delay-acquisition-index", 2).toInt();
+    ui->delayTimeComboBox->setCurrentIndex(index);
+
+    index = set->value( "acquisition-time-index", 5).toInt();
+    ui->acquisitionTimeComboBox->setCurrentIndex(index);
+
+    int type_id = set->value( "run-type-button", -1).toInt();
+    id = set->value( "run-type-id", 0).toInt();
+    switch (type_id) {
+    case 0:
+        ui->backgroundRunRadioButton->setChecked(true);
+        break;
+    case 1:
+        ui->fixedRunRadioButton->setChecked(true);
+        break;
+    case 2:
+        ui->extCommandRadioButton->setChecked(true);
+        break;
+    case 3:
+        ui->scanningRunRadioButton->setChecked(true);
+        break;
+    case -1:
+    default:
+        type_id = -1;
+        break;
+    }
+    if (type_id != -1)
+        runTypeChanged(id);
 
     flag_write_run = settings->value( "write-run", true).toBool();
 

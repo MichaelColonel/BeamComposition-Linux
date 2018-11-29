@@ -87,6 +87,7 @@ AcquireThread::AcquireThread(QObject* parent)
 
 AcquireThread::~AcquireThread()
 {
+    device = nullptr;
 }
 
 void

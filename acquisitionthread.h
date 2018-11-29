@@ -105,7 +105,7 @@ private:
     // Batch of raw buffer data transforms into counts array
     class BufferData {
     public:
-        BufferData(const DataVector& v) : d(v) {}
+        explicit BufferData(const DataVector& v) : d(v) {}
         CountsArray array() const {
             CountsArray channel;
             channel[0] = Count::value( d[4], d[5]); // channel-1 / index 4-5

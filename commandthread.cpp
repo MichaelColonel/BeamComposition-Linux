@@ -52,7 +52,11 @@ CommandThread::writeCommand( const char* cmd, size_t cmd_size)
 {
     QMutexLocker locker(mutex);
 
-    commands.push(std::string( cmd, cmd + cmd_size));
+    if (device) {
+        std::string command( cmd, cmd + cmd_size);
+        commands.push(command);
+        qDebug() << "New device command added: " << QString::fromStdString(command);
+    }
 }
 
 void

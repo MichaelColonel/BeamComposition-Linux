@@ -39,7 +39,7 @@
 #include <QDebug>
 
 #include <cstdio>
-
+#include <sstream>
 #include <typeinfo>
 
 #if defined(Q_OS_WIN32) && defined(__MINGW32__)
@@ -1447,7 +1447,8 @@ MainWindow::connectDevices()
 
 //    ui->dataUpdateAutoRadioButton->setChecked(true);
 //    int button_id = ui->updateDataButtonGroup->id(ui->dataUpdateAutoRadioButton);
-    dataUpdateChanged(button_id);
+    if (button_id != -1)
+        dataUpdateChanged(button_id);
 
     sys_state = STATE_DEVICE_CONNECTED;
     emit signalStateChanged(sys_state);
@@ -2070,10 +2071,15 @@ MainWindow::resetAlteraClicked()
 void
 MainWindow::setDelayChanged(int delay)
 {
+/*
     char buf[5] = "DXXX";
     local_itoa( delay, buf + 1);
 
     command_thread->writeCommand( buf, towrite);
+*/
+    std::stringstream com_stream;
+    com_stream << "D" << std::setfill('0') << std::setw(3) << delay;
+    command_thread->writeCommand(com_stream.str());
     statusBar()->showMessage( tr("Delay %1").arg(delay), 1000);
 }
 

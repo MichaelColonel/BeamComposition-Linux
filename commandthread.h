@@ -30,7 +30,7 @@ public:
     virtual ~CommandThread();
     void initiate(int delay);
     void writeCommand( const char* cmd, size_t cmd_size = COMMAND_SIZE);
-
+    void writeCommand(const std::string& cmd);
 signals:
     void signalExternalSignal();
     void signalMovementFinished();

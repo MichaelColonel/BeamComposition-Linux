@@ -1445,10 +1445,23 @@ MainWindow::connectDevices()
     else if (ui->dataUpdateStartRadioButton->isChecked())
         button_id = ui->updateDataButtonGroup->id(ui->dataUpdateStartRadioButton);
 
-//    ui->dataUpdateAutoRadioButton->setChecked(true);
-//    int button_id = ui->updateDataButtonGroup->id(ui->dataUpdateAutoRadioButton);
+//    ui->dataUpdateStartRadioButton->setChecked(true);
+//    int button_id = ui->updateDataButtonGroup->id(ui->dataUpdateStartRadioButton);
     if (button_id != -1)
         dataUpdateChanged(button_id);
+
+    // set run type
+    button_id = -1;
+    if (ui->backgroundRunRadioButton->isChecked())
+        button_id = ui->runTypeButtonGroup->id(ui->backgroundRunRadioButton);
+    else if (ui->fixedRunRadioButton->isChecked())
+        button_id = ui->runTypeButtonGroup->id(ui->fixedRunRadioButton);
+    else if (ui->extCommandRunRadioButton->isChecked())
+        button_id = ui->runTypeButtonGroup->id(ui->extCommandRunRadioButton);
+    else if (ui->scanningRunRadioButton->isChecked())
+        button_id = ui->runTypeButtonGroup->id(ui->scanningRunRadioButton);
+    if (button_id != -1)
+        runTypeChanged(button_id);
 
     sys_state = STATE_DEVICE_CONNECTED;
     emit signalStateChanged(sys_state);
@@ -1860,7 +1873,7 @@ MainWindow::saveSettings(QSettings* set)
         set->setValue( "run-type-button", 0); // background (pedestals)
     else if (ui->fixedRunRadioButton->isChecked())
         set->setValue( "run-type-button", 1); // fixed position
-    else if (ui->extCommandRadioButton->isChecked())
+    else if (ui->extCommandRunRadioButton->isChecked())
         set->setValue( "run-type-button", 2); // external signal
     else if (ui->scanningRunRadioButton->isChecked())
         set->setValue( "run-type-button", 3); // scanning
@@ -1958,9 +1971,9 @@ MainWindow::loadSettings(QSettings* set)
         update_id = -1;
         break;
     }
-    if (update_id != -1)
+/*    if (update_id != -1)
         dataUpdateChanged(id);
-
+*/
     int index = set->value( "delay-acquisition-index", 2).toInt();
     ui->delayTimeComboBox->setCurrentIndex(index);
 
@@ -1977,7 +1990,7 @@ MainWindow::loadSettings(QSettings* set)
         ui->fixedRunRadioButton->setChecked(true);
         break;
     case 2:
-        ui->extCommandRadioButton->setChecked(true);
+        ui->extCommandRunRadioButton->setChecked(true);
         break;
     case 3:
         ui->scanningRunRadioButton->setChecked(true);
@@ -1987,9 +2000,9 @@ MainWindow::loadSettings(QSettings* set)
         type_id = -1;
         break;
     }
-    if (type_id != -1)
+/*    if (type_id != -1)
         runTypeChanged(id);
-
+*/
     flag_write_run = settings->value( "write-run", true).toBool();
 
     QSize wsize = set->value( "main-window-size", QSize( 500, 600)).toSize();

@@ -60,7 +60,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-362</y>
+         <y>-240</y>
          <width>258</width>
          <height>787</height>
         </rect>
@@ -423,7 +423,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QRadioButton" name="extCommandRadioButton">
+                   <widget class="QRadioButton" name="extCommandRunRadioButton">
                     <property name="text">
                      <string>External Command</string>
                     </property>
@@ -591,8 +591,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>141</width>
-         <height>133</height>
+         <width>271</width>
+         <height>425</height>
         </rect>
        </property>
        <attribute name="label">
@@ -638,8 +638,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>229</width>
-         <height>291</height>
+         <width>271</width>
+         <height>425</height>
         </rect>
        </property>
        <property name="sizePolicy">

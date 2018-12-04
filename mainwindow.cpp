@@ -1190,7 +1190,7 @@ MainWindow::openFile(bool background_data)
     }
 /*
     QString fileName = QFileDialog::getOpenFileName( this,
-        tr("Open File"), rundir, tr("Run Files *.dat (*.dat);;Run Files *.txt (*.txt)"));
+        tr("Open File"), rundir, tr("Run Files *.raw (*.raw);;Run Files *.txt (*.txt);;Run Files *.dat (*.dat)"));
 
     if (fileName.isEmpty())
         return;
@@ -1206,13 +1206,13 @@ MainWindow::openFile(bool background_data)
 
 #if QT_VERSION >= 0x050000
     QStringList filters;
-    filters << tr("Run Files *.txt (*.txt)") \
-            << tr("Run Files *.dat (*.dat)") \
-            << tr("Run Files *.raw (*.raw)");
+    filters << tr("Run Files *.raw (*.raw)") \
+            << tr("Run Files *.txt (*.txt)") \
+            << tr("Run Files *.dat (*.dat)");
 
     dialog->setNameFilters(filters);
 #elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
-    dialog->setFilter(tr("Run Files *.txt (*.txt);;Run Files *.dat (*.dat);;Run Files *.raw (*.raw)"));
+    dialog->setFilter(tr("Run Files *.raw (*.raw);;Run Files *.txt (*.txt);;Run Files *.dat (*.dat)"));
 #endif
 
     dialog->setDirectory(rundir);

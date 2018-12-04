@@ -744,12 +744,20 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
                 charge_event++; // increase a number of proccessed events for particular charge
                 events_processed++; // increase a number of all proccessed events
 
-                ChannelsArray tmp(charge);
-                std::sort( tmp.begin(), tmp.end());
+//                ChannelsArray tmp(charge);
+//                std::sort( tmp.begin(), tmp.end());
 
-                double charge_rank2 = (tmp[1] + tmp[2]) / 2.;
-                d.z->Fill(charge_rank2); // rank 2
-                d.z2->Fill(charge_rank2 * charge_rank2);
+//                double charge_rank2 = (tmp[1] + tmp[2]) / 2.;
+//                d.z->Fill(charge_rank2); // rank 2
+//                d.z2->Fill(charge_rank2 * charge_rank2);
+
+//                double mean_change = (charge[1] + charge[2]) / 2.;
+//                d.z->Fill(mean_change); // mean change
+//                d.z2->Fill(mean_change * mean_change);
+
+                double mean_change = std::accumulate( charge.begin(), charge.end(), 0.0) / double(CHANNELS);
+                d.z->Fill(mean_change); // mean change
+                d.z2->Fill(mean_change * mean_change);
             }
         }
     }
@@ -932,7 +940,7 @@ Parameters::counts_to_charge( const ChannelsArray& values, ChannelsArray& charge
             charges[i] = -1.0;
     }
 
-    int res = (charge_detect >= CHANNELS - 2) ? majority_scheme(charges) : -1;
+    int res = (charge_detect >= CHANNELS - 1) ? majority_scheme(charges) : -1;
 
     return res;
 }

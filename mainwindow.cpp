@@ -197,6 +197,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    loadSettings(settings);
+
     createTreeWidgetItems();
     createRootHistograms();
 
@@ -350,8 +352,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     ui->treeWidget->expandAll();
-
-    loadSettings(settings);
 }
 
 MainWindow::~MainWindow()
@@ -1695,6 +1695,13 @@ MainWindow::processData()
     RunInfo::BeamSpectrumArray mean_array = runinfo.averageComposition();
 
     emit signalBeamSpectrumChanged( batch_array, mean_array, datetime);
+
+    int list_size = ui->runDetailsListWidget->count();
+    if (list_size > 0) {
+        ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::NoSelection);
+        ui->runDetailsListWidget->setCurrentRow(list_size - 1);
+        ui->runDetailsListWidget->setSelectionMode(QAbstractItemView::ContiguousSelection);
+    }
 
     if (ui->dataUpdateAutoRadioButton->isChecked()) {
         qDebug() << "GUI: data timer is started";

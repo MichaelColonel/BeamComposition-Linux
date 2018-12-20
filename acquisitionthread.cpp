@@ -116,12 +116,12 @@ AcquireThread::run()
             if (stopped)
                 break;
         }
-        if (FT_SUCCESS(status) && rx_bytes > mask_vector.size()) {
+        if (FT_SUCCESS(status) && rx_bytes >= mask_vector.size()) {
 
             toread = (rx_bytes > BUFFER_SIZE) ? BUFFER_SIZE : rx_bytes;
 
             status = FT_Read( device, buffer, toread, &nread);
-            if (FT_SUCCESS(status) && nread > mask_vector.size()) {
+            if (FT_SUCCESS(status) && nread >= mask_vector.size()) {
                 // put available data in the queue
                 // acquire condition signal for processing thread
                 DataVector localdata( buffer, buffer + nread);

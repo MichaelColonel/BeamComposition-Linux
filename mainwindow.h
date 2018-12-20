@@ -132,6 +132,7 @@ private:
     RunInfo batchCountsReceived(const CountsList& list);
     void saveSettings(QSettings* set);
     void loadSettings(QSettings* set);
+    void loadRootHistogramsSettings(QSettings* set);
     void deviceError( FT_HANDLE, FT_STATUS);
 
     void createTreeWidgetItems();

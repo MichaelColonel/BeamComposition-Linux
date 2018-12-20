@@ -197,7 +197,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    loadSettings(settings);
+    loadRootHistogramsSettings(settings);
 
     createTreeWidgetItems();
     createRootHistograms();
@@ -352,6 +352,8 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     ui->treeWidget->expandAll();
+
+    loadSettings(settings);
 }
 
 MainWindow::~MainWindow()
@@ -1841,6 +1843,7 @@ MainWindow::opcUaStartUp()
 void
 MainWindow::saveSettings(QSettings* set)
 {
+    // ROOT histograms
     int i = 0;
     while (hist1params[i].type != NONE) {
         set->beginGroup(QString(hist1params[i].name));
@@ -1894,10 +1897,7 @@ MainWindow::saveSettings(QSettings* set)
 
     params->save(set);
 
-    QSize wsize = this->size();
-    set->setValue( "main-window-size", wsize);
-
-    // ROOT diagrams parameters
+    // ROOT diagrams parameters (dialog windows)
     set->beginGroup("RootDiagrams");
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
     for ( QList<QTreeWidgetItem*>::iterator it = items.begin(); it != items.end(); ++it) {
@@ -1916,7 +1916,7 @@ MainWindow::saveSettings(QSettings* set)
                 set->setValue( "size", dialog->size());
                 set->setValue( "pos", dialog->pos());
                 set->setValue( "visible", dialog->isVisible());
-                set->setValue( "fullScreen", dialog->isFullScreen());
+//                set->setValue( "fullScreen", dialog->isFullScreen());
 //                std::cout << "Height: " << dialog->size().height() << ", Width: " << dialog->size().width() << " ";
 //                std::cout << "Pos X: " << dialog->pos().x() << ", Pos Y: " << dialog->pos().y() << std::endl;
             }
@@ -1929,10 +1929,13 @@ MainWindow::saveSettings(QSettings* set)
         }
     }
     set->endGroup();
+
+    QSize wsize = this->size();
+    set->setValue( "main-window-size", wsize);
 }
 
 void
-MainWindow::loadSettings(QSettings* set)
+MainWindow::loadRootHistogramsSettings(QSettings* set)
 {
     int i = 0;
     while (hist1params[i].type != NONE) {
@@ -1955,6 +1958,11 @@ MainWindow::loadSettings(QSettings* set)
         set->endGroup();
         ++i;
     }
+}
+
+void
+MainWindow::loadSettings(QSettings* set)
+{
     int value = set->value( "current-run", 0).toInt();
     ui->runNumberSpinBox->setValue(value);
 
@@ -1963,7 +1971,7 @@ MainWindow::loadSettings(QSettings* set)
     ui->delaySpinBox->setValue(delay);
 
     int update_id = set->value( "run-update-button", -1).toInt();
-    int id = set->value( "run-update-id", 0).toInt();
+//    int id = set->value( "run-update-id", 0).toInt();
 //    qDebug() << "Id: " << id << " " << " update id: " << update_id;
 
     switch (update_id) {
@@ -1988,7 +1996,7 @@ MainWindow::loadSettings(QSettings* set)
     ui->acquisitionTimeComboBox->setCurrentIndex(index);
 
     int type_id = set->value( "run-type-button", -1).toInt();
-    id = set->value( "run-type-id", 0).toInt();
+//    id = set->value( "run-type-id", 0).toInt();
     switch (type_id) {
     case 0:
         ui->backgroundRunRadioButton->setChecked(true);
@@ -2010,15 +2018,11 @@ MainWindow::loadSettings(QSettings* set)
 /*    if (type_id != -1)
         runTypeChanged(id);
 */
-    flag_write_run = settings->value( "write-run", true).toBool();
 
-    QSize wsize = set->value( "main-window-size", QSize( 500, 600)).toSize();
-    resize(wsize);
-
-    QSize size;
+    QSize wsize;
     QPoint point;
     bool visible = false;
-    bool fullScreen = false;
+//    bool fullScreen = false;
 
     set->beginGroup("RootDiagrams");
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
@@ -2034,14 +2038,14 @@ MainWindow::loadSettings(QSettings* set)
             DiagramType type = static_cast<DiagramType>(set->value( "type", -1).toInt()); // program diagram type
             bool valid = set->value( "valid", false).toBool(); // is dialog valid (dialog and canvas are created)
             if (valid) {
-                size = set->value( "size", QSize( 400, 400)).toSize();
+                wsize = set->value( "size", QSize( 400, 400)).toSize();
                 point = set->value( "pos", QPoint( 100, 100)).toPoint();
                 visible = set->value( "visible", false).toBool();
-                fullScreen = set->value( "fullScreen", false).toBool();
+//                fullScreen = set->value( "fullScreen", false).toBool();
 
                 if (!dialog && (type != NONE)) {
                     dialog = createCanvasDialog(ditem);
-                    dialog->resize(size);
+                    dialog->resize(wsize);
                     dialog->move(point);
                     dialog->setVisible(visible);
 //                    dialog->updateDiagram();
@@ -2054,6 +2058,11 @@ MainWindow::loadSettings(QSettings* set)
         }
     }
     set->endGroup();
+
+    flag_write_run = settings->value( "write-run", true).toBool();
+
+    wsize = set->value( "main-window-size", QSize( 500, 600)).toSize();
+    resize(wsize);
 }
 
 void

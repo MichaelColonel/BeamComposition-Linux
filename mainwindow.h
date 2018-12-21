@@ -126,7 +126,7 @@ private slots:
     void onOpcUaClientDisconnected();
 
 private:
-    QString processTextFile( QFile* runfile, QList<QListWidgetItem*>& items);
+//    QString processTextFile( QFile* runfile, QList<QListWidgetItem*>& items);
     bool processRawFile( QFile* runfile, QList<QListWidgetItem*>& items);
     void batchDataReceived( const DataList& list, const QDateTime&);
     RunInfo batchCountsReceived(const CountsList& list);
@@ -149,7 +149,7 @@ private:
     FT_HANDLE channel_a;
     FT_HANDLE channel_b;
     QFile* filerun;
-    QFile* filetxt;
+//    QFile* filetxt;
     QFile* filedat;
 
     CommandThread* command_thread;

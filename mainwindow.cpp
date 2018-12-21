@@ -183,7 +183,7 @@ MainWindow::MainWindow(QWidget *parent)
     channel_a(nullptr),
     channel_b(nullptr),
     filerun(nullptr),
-    filetxt(nullptr),
+//    filetxt(nullptr),
     filedat(nullptr),
     command_thread(new CommandThread(this)),
     acquire_thread(new AcquireThread(this)),
@@ -390,13 +390,13 @@ MainWindow::~MainWindow()
         filerun->close();
         delete filerun;
     }
-
+/*
     if (filetxt) {
         filetxt->flush();
         filetxt->close();
         delete filetxt;
     }
-
+*/
     if (filedat) {
         filedat->flush();
         filedat->close();
@@ -816,18 +816,18 @@ MainWindow::processThreadStarted()
 
     if (flag_background) {
         namerun = QString("Run%1_back_%2.dat").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
-        nametxt = QString("Run%1_back_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+//        nametxt = QString("Run%1_back_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
         nameraw = QString("Run%1_back_%2.raw").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
     }
     else {
         namerun = QString("Run%1_data_%2.dat").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
-        nametxt = QString("Run%1_data_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+//        nametxt = QString("Run%1_data_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
         nameraw = QString("Run%1_data_%2.raw").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
     }
 
     QDir* dir = new QDir(rundir);
     QString filenamedat = dir->filePath(namerun);
-    QString filenametxt = dir->filePath(nametxt);
+//    QString filenametxt = dir->filePath(nametxt);
     QString filenameraw = dir->filePath(nameraw);
     delete dir;
 
@@ -836,24 +836,24 @@ MainWindow::processThreadStarted()
 
     if (flag_write_run) {
         filerun = new QFile(filenamedat);
-        filetxt = new QFile(filenametxt);
+//        filetxt = new QFile(filenametxt);
         filedat = new QFile(filenameraw);
         filerun->open(QFile::WriteOnly);
-        filetxt->open(QFile::WriteOnly);
+//        filetxt->open(QFile::WriteOnly);
         filedat->open(QFile::WriteOnly);
 
         // write pedestals flag
         QDataStream out(filedat);
         out << quint8(flag_background);
     }
-
+/*
     if (filetxt && filetxt->isOpen()) {
         // write data file name and pedestals flag
         QTextStream out(filetxt);
         QString text = QString("Run%1").arg( int(n), int(4), int(10), QLatin1Char('0'));
         out << text << " " << int(flag_background) << endl;
     }
-
+*/
     // clear diagrams and update canvas
 
     runinfo.clear();
@@ -885,12 +885,12 @@ MainWindow::processThreadFinished()
         filerun->close();
         delete filerun;
         filerun = nullptr;
-
+/*
         filetxt->flush();
         filetxt->close();
         delete filetxt;
         filetxt = nullptr;
-
+*/
         filedat->flush();
         filedat->close();
         delete filedat;
@@ -1249,13 +1249,16 @@ MainWindow::openFile(bool background_data)
 
 #if QT_VERSION >= 0x050000
     QStringList filters;
-    filters << tr("Run Files *.raw (*.raw)") \
-            << tr("Run Files *.txt (*.txt)") \
-            << tr("Run Files *.dat (*.dat)");
+//    filters << tr("Run Files *.raw (*.raw)") \
+//            << tr("Run Files *.txt (*.txt)") \
+//            << tr("Run Files *.dat (*.dat)");
+
+    filters << tr("Run Files *.raw (*.raw)") << tr("Run Files *.dat (*.dat)");
 
     dialog->setNameFilters(filters);
 #elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
-    dialog->setFilter(tr("Run Files *.raw (*.raw);;Run Files *.txt (*.txt);;Run Files *.dat (*.dat)"));
+    dialog->setFilter(tr("Run Files *.raw (*.raw);;Run Files *.dat (*.dat)"));
+//    dialog->setFilter(tr("Run Files *.raw (*.raw);;Run Files *.txt (*.txt);;Run Files *.dat (*.dat)"));
 #endif
 
     dialog->setDirectory(rundir);
@@ -1318,6 +1321,7 @@ MainWindow::openFile(bool background_data)
         }
         delete runfile;
     }
+/*
     else if (filter == tr("Run Files *.txt (*.txt)")) {
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         ui->runDetailsListWidget->clear();
@@ -1364,6 +1368,7 @@ MainWindow::openFile(bool background_data)
         }
         delete runfile;
     }
+*/
     else if (filter == tr("Run Files *.raw (*.raw)")) {
 //        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         ui->runDetailsListWidget->clear();
@@ -1617,7 +1622,7 @@ MainWindow::movementFinished()
     msgBox.setText(tr("Movement has been finished"));
     msgBox.exec();
 }
-
+/*
 QString
 MainWindow::processTextFile( QFile* runfile, QList<QListWidgetItem *>& items)
 {
@@ -1651,7 +1656,7 @@ MainWindow::processTextFile( QFile* runfile, QList<QListWidgetItem *>& items)
     }
     return run_number;
 }
-
+*/
 bool
 MainWindow::processRawFile( QFile* runfile, QList<QListWidgetItem*>& items)
 {
@@ -1726,12 +1731,13 @@ MainWindow::processData()
         (batch_counts + 1), datalist.size(), \
         batch_info.counted(), batch_info.processed(), \
         batch_data_offset, ui->runDetailsListWidget);
-
+/*
     if (filetxt && filetxt->isOpen()) {
 //        qDebug() << item->batch_offset() << " " << item->batch_bytes() << " " << item->batch_events();
         QTextStream out(filetxt);
         out << item->file_string() << endl;
     }
+*/
     updateRunInfo();
 
     RunInfo::BeamSpectrumArray batch_array = batch_info.averageComposition();

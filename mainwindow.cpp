@@ -132,6 +132,8 @@ struct Hist2Parameters& z14hp = hist2params[9];
 struct Hist2Parameters& z13hp = hist2params[10];
 struct Hist2Parameters& z24hp = hist2params[11];
 */
+
+/*
 void
 local_reverse(char* s)
 {
@@ -155,6 +157,7 @@ local_itoa( int n, char* s, size_t digits = 3)
     s[i] = '\0';
     local_reverse(s);
 }
+*/
 
 // charge colors
 const Color_t ccolors[] = { kBlack, kRed, kBlue, kCyan, kOrange, kMagenta + 10, kViolet };
@@ -165,7 +168,7 @@ const int gparams = 3;
 const char* description_channel_a = "FT2232H_MM A";
 const char* description_channel_b = "FT2232H_MM B";
 
-const size_t towrite = COMMAND_SIZE;
+// const size_t towrite = COMMAND_SIZE;
 
 } // namespace
 
@@ -197,6 +200,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Load histograms settings before histogram creation
     loadRootHistogramsSettings(settings);
 
     createTreeWidgetItems();
@@ -672,10 +676,15 @@ MainWindow::createTreeWidgetItems()
 void
 MainWindow::triggersItemChanged(int value)
 {
+/*
     char buf[5] = "T000";
     buf[3] += value;
 
     command_thread->writeCommand( buf, towrite);
+*/
+    std::stringstream com_stream;
+    com_stream << "T00" << char(value + '0');
+    command_thread->writeCommand(com_stream.str());
     QString message = (value) ? tr("Triggers activated") : tr("Triggers diactivated");
     statusBar()->showMessage( message, 1000);
 }
@@ -683,12 +692,20 @@ MainWindow::triggersItemChanged(int value)
 void
 MainWindow::motorItemChanged(int value)
 {
+/*
     char buf[5] = "M000";
     buf[1] += value;
     int steps = ui->scanningStepSpinBox->value();
     local_itoa( steps, buf + 2, 2);
 
     command_thread->writeCommand( buf, towrite);
+*/
+
+    int steps = ui->scanningStepSpinBox->value();
+    std::stringstream com_stream;
+    com_stream << "M" << char(value + '0') << std::setfill('0') << std::setw(2) << steps;
+    command_thread->writeCommand(com_stream.str());
+
     QString message;
     switch (value) {
     case 0:
@@ -1044,7 +1061,7 @@ MainWindow::acquisitionTimingChanged(int value)
     QComboBox* combobox = qobject_cast<QComboBox*>(sender());
 
     int acquisition_time = 5; // 600 ms
-    int delay_time = 2; // 100 ms
+    int delay_time = 2; // 200 ms
 
     if (combobox == ui->acquisitionTimeComboBox) {
         acquisition_time = value;
@@ -1056,6 +1073,7 @@ MainWindow::acquisitionTimingChanged(int value)
     }
 
     if (combobox) {
+/*
         char buf[5] = "A100";
         buf[2] = delay_time + '0';
 
@@ -1067,6 +1085,17 @@ MainWindow::acquisitionTimingChanged(int value)
             buf[3] = '5';
 
         command_thread->writeCommand( buf, towrite);
+*/
+        char acquition_code = '5'; // default '5' = 600 ms
+        if (acquisition_time >= 0 && acquisition_time <= 9)
+            acquition_code = acquisition_time + '0';
+        else if (acquisition_time >= 10 && acquisition_time <= 15)
+            acquition_code = (acquisition_time - 10) + 'A';
+
+        std::stringstream com_stream;
+        com_stream << "A1" << char(delay_time + '0') << acquition_code;
+        command_thread->writeCommand(com_stream.str());
+
         statusBar()->showMessage( tr("Extraction signal update"), 1000);
     }
 }
@@ -1128,7 +1157,7 @@ MainWindow::dataUpdateChanged(int id)
     if (rbutton) {
         ui->acquisitionTimeComboBox->setEnabled(state);
         ui->delayTimeComboBox->setEnabled(state);
-
+/*
         char buf[5] = "A000";
         buf[1] = state + '0';
         buf[2] = delay_time + '0';
@@ -1141,6 +1170,18 @@ MainWindow::dataUpdateChanged(int id)
             buf[3] = '5';
 
         command_thread->writeCommand( buf, towrite);
+*/
+
+        char acquition_code = '5'; // default '5' = 600 ms
+        if (acquisition_time >= 0 && acquisition_time <= 9)
+            acquition_code = acquisition_time + '0';
+        else if (acquisition_time >= 10 && acquisition_time <= 15)
+            acquition_code = (acquisition_time - 10) + 'A';
+
+        std::stringstream com_stream;
+        com_stream << "A" << char(state + '0') << char(delay_time + '0') << acquition_code;
+        command_thread->writeCommand(com_stream.str());
+
         if (state)
             statusBar()->showMessage( tr("Extraction signal update"), 1000);
         else
@@ -2092,8 +2133,9 @@ MainWindow::closeEvent(QCloseEvent* event)
 void
 MainWindow::resetAlteraClicked()
 {
-    char buf[5] = "R000";
-    command_thread->writeCommand( buf, towrite);
+//    char buf[5] = "R000";
+//    command_thread->writeCommand( buf, towrite);
+    command_thread->writeCommand(std::string("R000"));
     statusBar()->showMessage( tr("reset ALTERA"), 1000);
 }
 

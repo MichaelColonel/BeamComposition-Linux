@@ -180,6 +180,7 @@ MainWindow::MainWindow(QWidget *parent)
     timer_data(new QTimer(this)),
     timer_opcua(new QTimer(this)),
     timer_heartbeat(new QTimer(this)),
+    timer_test(new QTimer(this)), // test
     channel_a(nullptr),
     channel_b(nullptr),
     filerun(nullptr),
@@ -196,7 +197,8 @@ MainWindow::MainWindow(QWidget *parent)
     flag_write_run(true),
     sys_state(STATE_DEVICE_DISCONNECTED),
     opcua_client(new OpcUaClient(this)),
-    opcua_dialog(nullptr)
+    opcua_dialog(nullptr),
+    test_state(false) // test
 {
     ui->setupUi(this);
 
@@ -262,6 +264,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( selectionGroup, SIGNAL(triggered(QAction*)), this, SLOT(runDetailsSelectionTriggered(QAction*)));
 
     connect( ui->startRunButton, SIGNAL(clicked()), this, SLOT(startRun()));
+    connect( ui->startTestRunButton, SIGNAL(clicked()), this, SLOT(startTestRun()));
     connect( ui->stopRunButton, SIGNAL(clicked()), this, SLOT(stopRun()));
     connect( ui->connectButton, SIGNAL(clicked()), this, SLOT(connectDevices()));
     connect( ui->disconnectButton, SIGNAL(clicked()), this, SLOT(disconnectDevices()));
@@ -289,6 +292,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( timer, SIGNAL(timeout()), this, SLOT(onRootEventsTimeout())); // iterate ROOT events
     connect( timer_opcua, SIGNAL(timeout()), opcua_client, SLOT(iterate()));
     connect( timer_heartbeat, SIGNAL(timeout()), this, SLOT(onOpcUaTimeout()));
+    connect( timer_test, SIGNAL(timeout()), this, SLOT(onTestTimeout()));
 
     connect( command_thread, SIGNAL(started()), this, SLOT(commandThreadStarted()));
     connect( command_thread, SIGNAL(finished()), this, SLOT(commandThreadFinished()));
@@ -340,6 +344,7 @@ MainWindow::MainWindow(QWidget *parent)
     progress_dialog->setWindowModality(Qt::WindowModal);
     progress_dialog->setWindowTitle(tr("Progress"));
 
+    timer_test->setInterval(5000.);
     timer->start(20);
 
     int update_period = settings->value( "update-timeout", 3).toInt() * 1000;
@@ -864,6 +869,7 @@ MainWindow::processThreadStarted()
     ui->actionSettings->setEnabled(false);
 
     ui->startRunButton->setEnabled(false);
+    ui->startTestRunButton->setEnabled(false);
     ui->stopRunButton->setEnabled(true);
     ui->runNumberSpinBox->setEnabled(false);
     ui->runTypeGroupBox->setEnabled(false);
@@ -921,6 +927,7 @@ MainWindow::processThreadFinished()
     ui->actionSettings->setEnabled(true);
 
     ui->startRunButton->setEnabled(true);
+    ui->startTestRunButton->setEnabled(true);
     ui->stopRunButton->setEnabled(false);
     ui->runNumberSpinBox->setEnabled(true);
     int run = ui->runNumberSpinBox->value();
@@ -1005,6 +1012,33 @@ MainWindow::startRun()
 
     if (ui->dataUpdateAutoRadioButton->isChecked())
         timer_data->start();
+
+    acquire_thread->start();
+    process_thread->start();
+}
+
+void
+MainWindow::startTestRun()
+{
+    test_list.clear();
+    for( float v = 0.001; v <= 0.2; v += 0.010) {
+        test_list.push_back(-1.0f * v);
+    }
+
+    if (acquire_thread->isRunning()) {
+        QMessageBox::warning( this, tr("Error"),
+            tr("Acquisition thread is still running."), QMessageBox::Ok | QMessageBox::Default);
+        return;
+    }
+
+    if (process_thread->isRunning()) {
+        QMessageBox::warning( this, tr("Error"),
+            tr("Processing thread is still running."), QMessageBox::Ok | QMessageBox::Default);
+        return;
+    }
+
+    test_state = false;
+    timer_test->start();
 
     acquire_thread->start();
     process_thread->start();
@@ -2462,6 +2496,33 @@ MainWindow::onOpcUaTimeout()
         bool res = opcua_client->writeHeartBeatValue( value, now);
         if (opcua_dialog && res) opcua_dialog->setHeatBeatValue( value, now);
         std::cout << "OPC UA HeartBeat result: " << res << ", value: " << value << std::endl;
+    }
+}
+
+void
+MainWindow::onTestTimeout()
+{
+    qDebug() << "GUI: Test batch signal state --" << test_state;
+    if (process_thread->isRunning() && test_state) {
+        test_state = false;
+//        statusBar()->showMessage( tr("New batch signal"), 1000);
+        processData();
+//        QTimer::singleShot( 2000, this, SLOT(processData()));
+        float v = test_list.front();
+        test_list.pop_front();
+        if (test_list.size()) {
+            // set new voltage
+        }
+        else {
+            stopRun();
+        }
+    }
+    else if (process_thread->isRunning() && !test_state) {
+        test_state = true;
+        // get any processed data (just to delete any of them)
+        CountsList countslist;
+        DataList datalist;
+        process_thread->getProcessedData( datalist, countslist);
     }
 }
 

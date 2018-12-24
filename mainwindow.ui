@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>289</width>
-    <height>621</height>
+    <width>295</width>
+    <height>726</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -60,9 +60,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
-         <width>258</width>
-         <height>787</height>
+         <y>-343</y>
+         <width>273</width>
+         <height>851</height>
         </rect>
        </property>
        <attribute name="label">
@@ -571,6 +571,17 @@
                 </widget>
                </item>
                <item>
+                <widget class="QPushButton" name="startTestRunButton">
+                 <property name="text">
+                  <string>Run Test Acquisition</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="BeamComposition.qrc">
+                   <normaloff>:/icons/start.png</normaloff>:/icons/start.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <widget class="QPushButton" name="stopRunButton">
                  <property name="enabled">
                   <bool>false</bool>
@@ -621,8 +632,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>141</width>
-         <height>133</height>
+         <width>277</width>
+         <height>521</height>
         </rect>
        </property>
        <attribute name="label">
@@ -668,8 +679,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>229</width>
-         <height>291</height>
+         <width>277</width>
+         <height>521</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -882,8 +893,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>289</width>
-     <height>26</height>
+     <width>295</width>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

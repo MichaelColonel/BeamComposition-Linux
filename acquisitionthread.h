@@ -91,15 +91,18 @@ private:
     class Count {
     public:
         explicit Count( unsigned char hi, unsigned char lo) : high(hi), low(lo) {}
+#if !defined(__GNUG__) && (__cplusplus >= 201103L)
 #define BO 6 // high byte bits offset
 #define MO 2 // mask bits offset
+#endif
         unsigned short value() const { return (high >> MO) << BO | low >> MO; }
-        static unsigned short value( unsigned char high, unsigned char low) {
-            return (high >> MO) << BO | low >> MO;
-        }
     private:
         unsigned char high;
         unsigned char low;
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
+        static constexpr int BO = 6; // high byte bits offset
+        static constexpr int MO = 2; // mask bits offset
+#endif
     };
 
     // Batch of raw buffer data transforms into counts array
@@ -108,12 +111,13 @@ private:
         explicit BufferData(const DataVector& v) : d(v) {}
         CountsArray array() const {
             CountsArray channel;
-            channel[0] = Count::value( d[4], d[5]); // channel-1 / index 4-5
-            channel[1] = Count::value( d[2], d[3]); // channel-2 / index 2-3
-            channel[2] = Count::value( d[6], d[7]); // channel-3 / index 6-7
-            channel[3] = Count::value( d[0], d[1]); // channel-4 / index 0-1
+            channel[0] = Count( d[4], d[5]).value(); // channel-1 / index 4-5
+            channel[1] = Count( d[2], d[3]).value(); // channel-2 / index 2-3
+            channel[2] = Count( d[6], d[7]).value(); // channel-3 / index 6-7
+            channel[3] = Count( d[0], d[1]).value(); // channel-4 / index 0-1
             return channel;
         }
+
     private:
         const DataVector& d;
     };

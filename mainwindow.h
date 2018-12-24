@@ -96,6 +96,7 @@ private slots:
     void connectDevices();
     void disconnectDevices();
     void startRun();
+    void startTestRun();
     void stopRun();
     void saveRun();
     void openRun();
@@ -124,6 +125,7 @@ private slots:
     void onOpcUaTimeout();
     void onOpcUaClientConnected();
     void onOpcUaClientDisconnected();
+    void onTestTimeout();
 
 private:
 //    QString processTextFile( QFile* runfile, QList<QListWidgetItem*>& items);
@@ -145,6 +147,7 @@ private:
     QTimer* timer_data; // data update timer
     QTimer* timer_opcua; // OPC UA iterate timer
     QTimer* timer_heartbeat; // OPC UA heartbeat timer
+    QTimer* timer_test; // test timer for ADC calibration
 
     FT_HANDLE channel_a;
     FT_HANDLE channel_b;
@@ -169,4 +172,6 @@ private:
     StateType sys_state;
     OpcUaClient* opcua_client;
     OpcUaClientDialog* opcua_dialog;
+    std::list<float> test_list;
+    bool test_state;
 };

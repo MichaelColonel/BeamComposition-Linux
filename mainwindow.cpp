@@ -198,7 +198,8 @@ MainWindow::MainWindow(QWidget *parent)
     sys_state(STATE_DEVICE_DISCONNECTED),
     opcua_client(new OpcUaClient(this)),
     opcua_dialog(nullptr),
-    test_state(false) // test
+    test_state(false), // test state
+    test_port(new QSerialPort( "/dev/ttyUSB0", this)) // test serial port
 {
     ui->setupUi(this);
 
@@ -322,6 +323,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect( opcua_client, SIGNAL(connected()), timer_heartbeat, SLOT(start()));
     connect( opcua_client, SIGNAL(disconnected()), timer_heartbeat, SLOT(stop()));
 
+    // test serial
+    connect( test_port, SIGNAL(readyRead()), this, SLOT(serialPortDataReady()));
+    connect( test_port, SIGNAL(bytesWritten(qint64)), this, SLOT(serialPortBytesWritten(qint64)));
+    connect( test_port, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(serialPortError(QSerialPort::SerialPortError)));
+
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectAll);
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectNone);
 
@@ -344,7 +350,7 @@ MainWindow::MainWindow(QWidget *parent)
     progress_dialog->setWindowModality(Qt::WindowModal);
     progress_dialog->setWindowTitle(tr("Progress"));
 
-    timer_test->setInterval(5000.);
+    timer_test->setInterval(4000.);
     timer->start(20);
 
     int update_period = settings->value( "update-timeout", 3).toInt() * 1000;
@@ -1020,9 +1026,19 @@ MainWindow::startRun()
 void
 MainWindow::startTestRun()
 {
+    // set zero offset
+    QString text = QString("VOLT:OFFS %1\n").arg( 0., int(6), 'g', 4);
+    QByteArray offset_command;
+    offset_command.append(text);
+
+    if (test_port && test_port->isOpen()) {
+        test_port->write(offset_command);
+    }
+
     test_list.clear();
-    for( float v = 0.001; v <= 0.2; v += 0.010) {
-        test_list.push_back(-1.0f * v);
+    for( float v = 0.005; v <= 0.2; v += 0.010) {
+        qDebug() << "Voltage offset: " << -v;
+        test_list.push_back(-v);
     }
 
     if (acquire_thread->isRunning()) {
@@ -1547,11 +1563,22 @@ MainWindow::connectDevices()
 
     sys_state = STATE_DEVICE_CONNECTED;
     emit signalStateChanged(sys_state);
+
+    // test serial
+    if (test_port && test_port->open(QIODevice::ReadWrite)) {
+        test_port->setBaudRate(QSerialPort::Baud9600);
+        test_port->setDataBits(QSerialPort::Data8);
+        test_port->setParity(QSerialPort::NoParity);
+        test_port->setStopBits(QSerialPort::OneStop);
+        test_port->setFlowControl(QSerialPort::NoFlowControl);
+
+        test_port->flush();
+    }
 }
 
 void
 MainWindow::disconnectDevices()
-{
+{    
     bool process_state = process_thread->isRunning();
     bool acquire_state = acquire_thread->isRunning();
     if (process_state && acquire_state)
@@ -1592,6 +1619,12 @@ MainWindow::disconnectDevices()
     channel_b = nullptr;
     acquire_thread->setDeviceHandle(nullptr);
     command_thread->setDeviceHandle(nullptr);
+
+    // test serial port
+    if (test_port && test_port->isOpen()) {
+        test_port->flush();
+        test_port->close();
+    }
 }
 
 void
@@ -2502,31 +2535,82 @@ MainWindow::onOpcUaTimeout()
 void
 MainWindow::onTestTimeout()
 {
-    qDebug() << "GUI: Test batch signal state --" << test_state;
     if (process_thread->isRunning() && test_state) {
         test_state = false;
-//        statusBar()->showMessage( tr("New batch signal"), 1000);
-        processData();
-//        QTimer::singleShot( 2000, this, SLOT(processData()));
-        float v = test_list.front();
-        test_list.pop_front();
-        if (test_list.size()) {
-            // set new voltage
-        }
-        else {
-            stopRun();
-        }
-    }
-    else if (process_thread->isRunning() && !test_state) {
-        test_state = true;
+
+        qDebug() << "GUI: Test batch signal skip.";
         // get any processed data (just to delete any of them)
         CountsList countslist;
         DataList datalist;
         process_thread->getProcessedData( datalist, countslist);
+        qDebug() << "Events received:" << datalist.size() << " " << countslist.size();
+    }
+    else if (process_thread->isRunning() && !test_state) {
+		timer_test->stop();
+        test_state = true;
+        qDebug() << "GUI: Test batch process.";
+
+//        statusBar()->showMessage( tr("New batch signal"), 1000);
+        processData();
+//        QTimer::singleShot( 2000, this, SLOT(processData()));
+        if (test_list.size()) {
+            // set new voltage offset
+
+            float v = test_list.front();
+            test_list.pop_front();
+
+            QString text = QString("VOLT:OFFS %1\n").arg( double(v), int(6), 'g', 4);
+            QByteArray offset_command;
+            offset_command.append(text);
+
+            if (test_port && test_port->isOpen()) {
+                test_port->write(offset_command);
+            }
+            qDebug() << "GUI: Test batch new voltage offset:" << QString("%1").arg( double(v), int(6), 'g', 4);
+            timer_test->start();
+        }
+        else {
+
+            // set zero offset
+            QString text = QString("VOLT:OFFS %1\n").arg( 0., int(6), 'g', 4);
+            QByteArray offset_command;
+            offset_command.append(text);
+
+            if (test_port && test_port->isOpen()) {
+                test_port->write(offset_command);
+            }
+
+            timer_test->stop();
+            stopRun();
+        }
     }
 }
 
 void
 MainWindow::onOpcUaClientDisconnected()
 {
+}
+
+void
+MainWindow::serialPortBytesWritten(qint64 bytes)
+{
+    std::cout << "Bytes written: " << bytes << std::endl;
+}
+
+void
+MainWindow::serialPortDataReady()
+{
+    QTextStream output(stdout);
+    QByteArray bytes_array = test_port->readAll();
+    output << bytes_array;
+}
+
+void
+MainWindow::serialPortError(QSerialPort::SerialPortError error)
+{
+    QTextStream output(stderr);
+
+    if (error == QSerialPort::ReadError) {
+        output << QObject::tr("An I/O error occurred while reading the data from port %1, error: %2").arg(test_port->portName()).arg(test_port->errorString()) << endl;
+    }
 }

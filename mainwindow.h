@@ -18,6 +18,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QSerialPort> // test serial port
 
 
 #if defined(Q_OS_WIN32) && defined(__MINGW32__)
@@ -44,8 +45,6 @@ class QCloseEvent;
 class QProgressDialog;
 class QSettings;
 class QDateTime;
-class QStateMachine;
-class QState;
 
 class CommandThread;
 class AcquireThread;
@@ -126,6 +125,9 @@ private slots:
     void onOpcUaClientConnected();
     void onOpcUaClientDisconnected();
     void onTestTimeout();
+    void serialPortBytesWritten(qint64 bytes);
+    void serialPortDataReady();
+    void serialPortError(QSerialPort::SerialPortError error);
 
 private:
 //    QString processTextFile( QFile* runfile, QList<QListWidgetItem*>& items);
@@ -174,4 +176,5 @@ private:
     OpcUaClientDialog* opcua_dialog;
     std::list<float> test_list;
     bool test_state;
+    QSerialPort* test_port;
 };

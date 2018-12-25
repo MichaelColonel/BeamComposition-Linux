@@ -25,10 +25,11 @@ exists ($(ROOTSYS)/include/rootcint.pri) {
 
 # With C++11 support
 greaterThan( QT_MAJOR_VERSION, 4) {
-    QT += widgets
+    QT += widgets serialport
     CONFIG += c++11
 } else {
     QMAKE_CXXFLAGS += -std=c++11
+    CONFIG += serialport
 }
 
 TARGET = BeamComposition

@@ -350,7 +350,7 @@ MainWindow::MainWindow(QWidget *parent)
     progress_dialog->setWindowModality(Qt::WindowModal);
     progress_dialog->setWindowTitle(tr("Progress"));
 
-    timer_test->setInterval(4000.);
+    timer_test->setInterval(1000.);
     timer->start(20);
 
     int update_period = settings->value( "update-timeout", 3).toInt() * 1000;
@@ -1162,7 +1162,7 @@ MainWindow::runTypeChanged(int id)
         sys_state = STATE_ACQUISITION_BACKGROUND;
         flag_background = true;
         ui->triggersComboBox->setEnabled(false);
-        ui->triggersComboBox->setCurrentIndex(4); // "T004"
+        ui->triggersComboBox->setCurrentIndex(6); // "T006"
         process_thread->setBackground(true);
     }
     else if (rbutton == ui->fixedRunRadioButton) {
@@ -2546,7 +2546,7 @@ MainWindow::onTestTimeout()
         qDebug() << "Events received:" << datalist.size() << " " << countslist.size();
     }
     else if (process_thread->isRunning() && !test_state) {
-		timer_test->stop();
+        timer_test->stop();
         test_state = true;
         qDebug() << "GUI: Test batch process.";
 

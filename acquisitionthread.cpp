@@ -33,7 +33,7 @@
 
 #define MASK_SIZE 8
 #define MASK_BITS 0x03 // mask
-#define BUFFER_SIZE 0x100000 // 1 Megabyte
+#define BUFFER_SIZE 0x1000000 // 16 Megabyte
 
 namespace {
 

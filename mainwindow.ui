@@ -60,9 +60,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-343</y>
-         <width>273</width>
-         <height>851</height>
+         <y>0</y>
+         <width>264</width>
+         <height>825</height>
         </rect>
        </property>
        <attribute name="label">
@@ -509,47 +509,32 @@
                </item>
                <item>
                 <property name="text">
-                 <string>3906 Hz</string>
+                 <string>1 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1953 Hz</string>
+                 <string>10 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>1302 Hz</string>
+                 <string>100 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>976 Hz</string>
+                 <string>1000 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>781 Hz</string>
+                 <string>5000 Hz</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>651 Hz</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>558 Hz</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>488 Hz</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>434 Hz</string>
+                 <string>10000 Hz</string>
                 </property>
                </item>
               </widget>
@@ -632,8 +617,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>277</width>
-         <height>521</height>
+         <width>141</width>
+         <height>133</height>
         </rect>
        </property>
        <attribute name="label">
@@ -679,8 +664,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>277</width>
-         <height>521</height>
+         <width>229</width>
+         <height>291</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -894,7 +879,7 @@
      <x>0</x>
      <y>0</y>
      <width>295</width>
-     <height>28</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

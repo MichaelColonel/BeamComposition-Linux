@@ -356,7 +356,7 @@ MainWindow::MainWindow(QWidget *parent)
     int update_period = settings->value( "update-timeout", 3).toInt() * 1000;
     timer_data->setInterval(update_period);
 
-    update_period = settings->value( "opcua-update-timeout", 2).toInt() * 1000;    
+    update_period = settings->value( "opcua-update-timeout", 2).toInt() * 1000;
     timer_opcua->setInterval(update_period);
     timer_heartbeat->setInterval(update_period);
     timer_opcua->start();
@@ -978,6 +978,7 @@ MainWindow::processFileFinished()
             QTableWidgetItem* item = ui->runInfoTableWidget->item( i + 1, 0);
             QString str = SignalValueDelegate::form_text(pair);
             item->setText(str);
+            std::cout << std::setw(4) << pair.first << "\t" << pair.second << std::endl;
         }
 
         statusBar()->showMessage( tr("Background data loaded"), 2000);
@@ -1036,7 +1037,7 @@ MainWindow::startTestRun()
     }
 
     test_list.clear();
-    for( float v = 0.005; v <= 0.2; v += 0.010) {
+    for( float v = 0.005; v <= 0.2; v += 0.005) {
         qDebug() << "Voltage offset: " << -v;
         test_list.push_back(-v);
     }
@@ -1432,7 +1433,9 @@ MainWindow::openFile(bool background_data)
             flag_background = processRawFile( runfile, details_items);
             QApplication::restoreOverrideCursor();
         }
-
+////////////////
+        flag_background = true;
+////////////////
         delete runfile;
 
         // clear diagrams
@@ -1794,7 +1797,7 @@ MainWindow::processData()
         (batch_counts + 1), datalist.size(), countslist.size(), \
         batch_data_offset, ui->runDetailsListWidget);
 */
-    RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( datetime, \
+    /* RunDetailsListWidgetItem* item = */ new RunDetailsListWidgetItem( datetime, \
         (batch_counts + 1), datalist.size(), \
         batch_info.counted(), batch_info.processed(), \
         batch_data_offset, ui->runDetailsListWidget);

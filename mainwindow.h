@@ -154,7 +154,7 @@ private:
     FT_HANDLE channel_a;
     FT_HANDLE channel_b;
     QFile* filerun;
-//    QFile* filetxt;
+    QFile* filetxt;
     QFile* filedat;
 
     CommandThread* command_thread;

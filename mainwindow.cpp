@@ -49,6 +49,11 @@
 
 #include <ftd2xx.h>
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/moment.hpp>
+
 #include "acquisitionthread.h"
 #include "commandthread.h"
 #include "writeprocess.h"
@@ -170,6 +175,14 @@ const char* description_channel_b = "FT2232H_MM B";
 
 // const size_t towrite = COMMAND_SIZE;
 
+typedef boost::accumulators::accumulator_set< \
+	double, \
+    boost::accumulators::stats< \
+		boost::accumulators::tag::mean, \
+		boost::accumulators::tag::moment<2> \
+	> \
+> MeanDispAccumType;
+         
 } // namespace
 
 MainWindow::MainWindow(QWidget *parent)
@@ -184,7 +197,7 @@ MainWindow::MainWindow(QWidget *parent)
     channel_a(nullptr),
     channel_b(nullptr),
     filerun(nullptr),
-//    filetxt(nullptr),
+    filetxt(nullptr),
     filedat(nullptr),
     command_thread(new CommandThread(this)),
     acquire_thread(new AcquireThread(this)),
@@ -401,13 +414,13 @@ MainWindow::~MainWindow()
         filerun->close();
         delete filerun;
     }
-/*
+
     if (filetxt) {
         filetxt->flush();
         filetxt->close();
         delete filetxt;
     }
-*/
+
     if (filedat) {
         filedat->flush();
         filedat->close();
@@ -827,18 +840,18 @@ MainWindow::processThreadStarted()
 
     if (flag_background) {
         namerun = QString("Run%1_back_%2.dat").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
-//        nametxt = QString("Run%1_back_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+        nametxt = QString("Run%1_back_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
         nameraw = QString("Run%1_back_%2.raw").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
     }
     else {
         namerun = QString("Run%1_data_%2.dat").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
-//        nametxt = QString("Run%1_data_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+        nametxt = QString("Run%1_data_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
         nameraw = QString("Run%1_data_%2.raw").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
     }
 
     QDir* dir = new QDir(rundir);
     QString filenamedat = dir->filePath(namerun);
-//    QString filenametxt = dir->filePath(nametxt);
+    QString filenametxt = dir->filePath(nametxt);
     QString filenameraw = dir->filePath(nameraw);
     delete dir;
 
@@ -847,10 +860,10 @@ MainWindow::processThreadStarted()
 
     if (flag_write_run) {
         filerun = new QFile(filenamedat);
-//        filetxt = new QFile(filenametxt);
+        filetxt = new QFile(filenametxt);
         filedat = new QFile(filenameraw);
         filerun->open(QFile::WriteOnly);
-//        filetxt->open(QFile::WriteOnly);
+        filetxt->open(QFile::WriteOnly);
         filedat->open(QFile::WriteOnly);
 
         // write pedestals flag
@@ -897,12 +910,12 @@ MainWindow::processThreadFinished()
         filerun->close();
         delete filerun;
         filerun = nullptr;
-/*
+
         filetxt->flush();
         filetxt->close();
         delete filetxt;
         filetxt = nullptr;
-*/
+
         filedat->flush();
         filedat->close();
         delete filedat;
@@ -973,13 +986,19 @@ MainWindow::processFileFinished()
     if (profile_thread->isBackground()) {
         const SignalArray& back = params->background();
 
+//        QTextStream out(filetxt);
+
         for ( int i = 0; i < CHANNELS; ++i) {
             const SignalPair& pair = back[i];
             QTableWidgetItem* item = ui->runInfoTableWidget->item( i + 1, 0);
             QString str = SignalValueDelegate::form_text(pair);
             item->setText(str);
             std::cout << std::setw(4) << pair.first << "\t" << pair.second << std::endl;
+
+//            out << "\t" << QString("%1").arg( double(pair.first), int(6), 'g', 2);
+//            out << "\t" << QString("%1").arg( double(pair.second), int(6), 'g', 2);
         }
+//        out << endl;
 
         statusBar()->showMessage( tr("Background data loaded"), 2000);
 
@@ -1801,13 +1820,30 @@ MainWindow::processData()
         (batch_counts + 1), datalist.size(), \
         batch_info.counted(), batch_info.processed(), \
         batch_data_offset, ui->runDetailsListWidget);
-/*
+
     if (filetxt && filetxt->isOpen()) {
 //        qDebug() << item->batch_offset() << " " << item->batch_bytes() << " " << item->batch_events();
         QTextStream out(filetxt);
-        out << item->file_string() << endl;
+//        out << item->file_string() << endl;
+        MeanDispAccumType acc[CHANNELS];
+
+        for ( const CountsArray& array : countslist) {
+            for ( int i = 0; i < CHANNELS; ++i) {
+                (acc[i])(double(array[i]));
+            }
+        }
+
+        for ( int i = 0; i < CHANNELS; ++i) {
+            double mean = boost::accumulators::mean(acc[i]);
+            double moment2 = boost::accumulators::moment<2>(acc[i]);
+            double disp = moment2 - mean * mean;
+            QString mnstr = QString("\t%1").arg( mean, int(6), 'd', 2);
+            QString sgstr = QString("\t%1").arg( sqrt(disp), int(6), 'd', 2);
+            out << mnstr << sgstr;
+        }
+        out << endl;
     }
-*/
+
     updateRunInfo();
 
     RunInfo::BeamSpectrumArray batch_array = batch_info.averageComposition();

@@ -110,6 +110,7 @@ protected:
     int projectile_charge;
     double charge_radius[CARBON_Z];
     double charge_beta[CARBON_Z];
+    bool flag_process_data;
 
 private:
     typedef std::array< double, CHANNELS> ChannelsArray;

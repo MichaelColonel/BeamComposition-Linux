@@ -176,13 +176,14 @@ const char* description_channel_b = "FT2232H_MM B";
 // const size_t towrite = COMMAND_SIZE;
 
 typedef boost::accumulators::accumulator_set< \
-	double, \
+    double, \
     boost::accumulators::stats< \
-		boost::accumulators::tag::mean, \
-		boost::accumulators::tag::moment<2> \
-	> \
+        boost::accumulators::tag::count, \
+        boost::accumulators::tag::mean, \
+        boost::accumulators::tag::moment<2> \
+    > \
 > MeanDispAccumType;
-         
+
 } // namespace
 
 MainWindow::MainWindow(QWidget *parent)
@@ -363,7 +364,7 @@ MainWindow::MainWindow(QWidget *parent)
     progress_dialog->setWindowModality(Qt::WindowModal);
     progress_dialog->setWindowTitle(tr("Progress"));
 
-    timer_test->setInterval(1000.);
+    timer_test->setInterval(2000.);
     timer->start(20);
 
     int update_period = settings->value( "update-timeout", 3).toInt() * 1000;
@@ -1056,7 +1057,7 @@ MainWindow::startTestRun()
     }
 
     test_list.clear();
-    for( float v = 0.005; v <= 0.2; v += 0.005) {
+    for( float v = 0.000; v <= 0.2; v += 0.005) {
         qDebug() << "Voltage offset: " << -v;
         test_list.push_back(-v);
     }
@@ -1073,7 +1074,7 @@ MainWindow::startTestRun()
         return;
     }
 
-    test_state = false;
+    test_state = true;
     timer_test->start();
 
     acquire_thread->start();
@@ -1835,8 +1836,8 @@ MainWindow::processData()
 
         for ( int i = 0; i < CHANNELS; ++i) {
             double mean = boost::accumulators::mean(acc[i]);
-            double moment2 = boost::accumulators::moment<2>(acc[i]);
-            double disp = moment2 - mean * mean;
+            double mom2 = boost::accumulators::moment<2>(acc[i]);
+            double disp = mom2 - mean * mean;
             QString mnstr = QString("\t%1").arg( mean, int(6), 'd', 2);
             QString sgstr = QString("\t%1").arg( sqrt(disp), int(6), 'd', 2);
             out << mnstr << sgstr;
@@ -2575,6 +2576,7 @@ void
 MainWindow::onTestTimeout()
 {
     if (process_thread->isRunning() && test_state) {
+        timer_test->stop();
         test_state = false;
 
         qDebug() << "GUI: Test batch signal skip.";
@@ -2583,6 +2585,8 @@ MainWindow::onTestTimeout()
         DataList datalist;
         process_thread->getProcessedData( datalist, countslist);
         qDebug() << "Events received:" << datalist.size() << " " << countslist.size();
+        timer_test->setInterval(500.);
+        timer_test->start();
     }
     else if (process_thread->isRunning() && !test_state) {
         timer_test->stop();
@@ -2606,6 +2610,7 @@ MainWindow::onTestTimeout()
                 test_port->write(offset_command);
             }
             qDebug() << "GUI: Test batch new voltage offset:" << QString("%1").arg( double(v), int(6), 'g', 4);
+            timer_test->setInterval(2000.);
             timer_test->start();
         }
         else {

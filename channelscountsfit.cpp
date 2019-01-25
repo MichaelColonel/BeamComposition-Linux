@@ -301,7 +301,8 @@ Parameters::Parameters(QSettings* settings)
     k(0.5),
     K(1.0),
     reference_charge(1),
-    projectile_charge(CARBON_Z)
+    projectile_charge(CARBON_Z),
+    flag_process_data(true)
 {
     std::fill( charge_radius, charge_radius + CARBON_Z, 0.7);
     std::fill( charge_beta, charge_beta + CARBON_Z, 0.739);
@@ -601,7 +602,7 @@ Parameters::recalculate()
 }
 
 RunInfo
-Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
+Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
 {
     size_t n = reference_counts_signals.size();
     int fitn = n - 1;
@@ -635,134 +636,135 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool background_flag)
     double beta = charge_beta[reference_charge - 1];
     double kpower = 1 / k;
 
+    if (flag_process_data) {
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
-    for ( CountsList::const_iterator it = list.begin(); it != list.end(); ++it) {
-        const CountsArray& array = *it;
+        for ( CountsList::const_iterator it = list.begin(); it != list.end(); ++it) {
+            const CountsArray& array = *it;
 #elif defined(__GNUG__) && (__cplusplus >= 201103L)
-    for ( const CountsArray& array : list) {
+        for ( const CountsArray& array : list) {
 #endif
-        ChannelsArray values;
+            ChannelsArray values;
 
-        std::copy( array.begin(), array.end(), values.begin());
+            std::copy( array.begin(), array.end(), values.begin());
 
-        d.channels[0]->Fill(array[0]);
-        d.channels[1]->Fill(array[1]);
-        d.channels[2]->Fill(array[2]);
-        d.channels[3]->Fill(array[3]);
+            d.channels[0]->Fill(array[0]);
+            d.channels[1]->Fill(array[1]);
+            d.channels[2]->Fill(array[2]);
+            d.channels[3]->Fill(array[3]);
 
-        bool skip = false;
-        // if background flag, then clear all diagrams except channels data
+            bool skip = false;
+            // if background flag, then clear all diagrams except channels data
 /*
-        if (background_flag) {
-            for ( int i = 0; i < CHANNELS; ++i) {
-                d.fit[i]->Reset();
-                d.rank[i]->Reset();
+            if (flag_background) {
+                for ( int i = 0; i < CHANNELS; ++i) {
+                    d.fit[i]->Reset();
+                    d.rank[i]->Reset();
+                }
+                d.fitall->Reset();
+                d.fit_median->Reset();
+                d.fit_mean->Reset();
+
+                d.z12->Reset();
+                d.z23->Reset();
+                d.z34->Reset();
+                d.z14->Reset();
+                d.z13->Reset();
+                d.z24->Reset();
+
+                d.c12->Reset();
+                d.c23->Reset();
+                d.c34->Reset();
+                d.c14->Reset();
+                d.c13->Reset();
+                d.c24->Reset();
+
+                d.z->Reset();
+                d.z2->Reset();
             }
-            d.fitall->Reset();
-            d.fit_median->Reset();
-            d.fit_mean->Reset();
-
-            d.z12->Reset();
-            d.z23->Reset();
-            d.z34->Reset();
-            d.z14->Reset();
-            d.z13->Reset();
-            d.z24->Reset();
-
-            d.c12->Reset();
-            d.c23->Reset();
-            d.c34->Reset();
-            d.c14->Reset();
-            d.c13->Reset();
-            d.c24->Reset();
-
-            d.z->Reset();
-            d.z2->Reset();
-        }
 */
-        if (!background_flag) {
-            // add correct reference pedestals offset
-            for ( int i = 0; i < CHANNELS; ++i) {
-                values[i] -= back[i].first;
-                if (values[i] <= 0.)
-                    skip = true;
-            }
-            if (skip)
-                continue;
+            if (!flag_background) {
+                // add correct reference pedestals offset
+                for ( int i = 0; i < CHANNELS; ++i) {
+                    values[i] -= back[i].first;
+                    if (values[i] <= 0.)
+                        skip = true;
+                }
+                if (skip)
+                    continue;
 
-            skip = false;
-            for ( int i = 0; i < CHANNELS; ++i) {
-                values[i] = channel_amp[i] * ccmath_splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
-//                values[i] = splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
-                if (values[i] <= 0.)
-                    skip = true;
-            }
-            if (skip)
-                continue;
-        }
-
-        // if it's not a background measurement and signals in channels
-        // are higher than background then calculate the charge
-        if (!background_flag) {
-
-            ChannelsArray charge;
-            int z = counts_to_charge( values, charge, signal, beta, kpower);
-
-            for ( int i = 0; i < CHANNELS; ++i) {
-                d.fit[i]->Fill(values[i]);
-                d.fitall->Fill(values[i]);
+                skip = false;
+                for ( int i = 0; i < CHANNELS; ++i) {
+                    values[i] = channel_amp[i] * ccmath_splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
+//                    values[i] = splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
+                    if (values[i] <= 0.)
+                        skip = true;
+                }
+                if (skip)
+                    continue;
             }
 
-            ChannelsArray rank(values);
-            std::sort( rank.begin(), rank.end());
-            double mean = std::accumulate( values.begin(), values.end(), 0.) / CHANNELS;
-            double median = (rank[1] + rank[2]) / 2.;
+            // if it's not a background measurement and signals in channels
+            // are higher than background then calculate the charge
+            if (!flag_background) {
 
-            for ( int i = 0; i < CHANNELS; ++i) {
-                d.rank[i]->Fill(values[i]);
+                ChannelsArray charge;
+                int z = counts_to_charge( values, charge, signal, beta, kpower);
+
+                for ( int i = 0; i < CHANNELS; ++i) {
+                    d.fit[i]->Fill(values[i]);
+                    d.fitall->Fill(values[i]);
+                }
+
+                ChannelsArray rank(values);
+                std::sort( rank.begin(), rank.end());
+                double mean = std::accumulate( values.begin(), values.end(), 0.) / CHANNELS;
+                double median = (rank[1] + rank[2]) / 2.;
+
+                for ( int i = 0; i < CHANNELS; ++i) {
+                    d.rank[i]->Fill(values[i]);
+                }
+
+                d.fit_median->Fill(median);
+                d.fit_mean->Fill(mean);
+
+                if (z > 0) {
+                    size_t& charge_event = charge_events[z - 1];
+                    d.z12->Fill( charge[0], charge[1]);
+                    d.z23->Fill( charge[1], charge[2]);
+                    d.z34->Fill( charge[2], charge[3]);
+                    d.z14->Fill( charge[0], charge[3]);
+                    d.z13->Fill( charge[0], charge[2]);
+                    d.z24->Fill( charge[1], charge[3]);
+
+                    d.c12->Fill( values[0], values[1]);
+                    d.c23->Fill( values[1], values[2]);
+                    d.c34->Fill( values[2], values[3]);
+                    d.c14->Fill( values[0], values[3]);
+                    d.c13->Fill( values[0], values[2]);
+                    d.c24->Fill( values[1], values[3]);
+
+                    charge_event++; // increase a number of proccessed events for particular charge
+                    events_processed++; // increase a number of all proccessed events
+
+                    ChannelsArray tmp(charge);
+                    std::sort( tmp.begin(), tmp.end());
+
+                    double charge_rank2 = (tmp[1] + tmp[2]) / 2.;
+                    d.z->Fill(charge_rank2); // rank 2
+                    d.z2->Fill(charge_rank2 * charge_rank2);
+
+//                   double mean_change = (charge[1] + charge[2]) / 2.;
+//                   d.z->Fill(mean_change); // mean change
+//                   d.z2->Fill(mean_change * mean_change);
+
+//                   double mean_change = std::accumulate( charge.begin(), charge.end(), 0.0) / double(CHANNELS);
+//                   d.z->Fill(mean_change); // mean change
+//                   d.z2->Fill(mean_change * mean_change);
+
+                }
             }
-
-            d.fit_median->Fill(median);
-            d.fit_mean->Fill(mean);
-
-//            if (z > 0) {
-                size_t& charge_event = charge_events[z - 1];
-                d.z12->Fill( charge[0], charge[1]);
-                d.z23->Fill( charge[1], charge[2]);
-                d.z34->Fill( charge[2], charge[3]);
-                d.z14->Fill( charge[0], charge[3]);
-                d.z13->Fill( charge[0], charge[2]);
-                d.z24->Fill( charge[1], charge[3]);
-
-                d.c12->Fill( values[0], values[1]);
-                d.c23->Fill( values[1], values[2]);
-                d.c34->Fill( values[2], values[3]);
-                d.c14->Fill( values[0], values[3]);
-                d.c13->Fill( values[0], values[2]);
-                d.c24->Fill( values[1], values[3]);
-
-                charge_event++; // increase a number of proccessed events for particular charge
-                events_processed++; // increase a number of all proccessed events
-
-                ChannelsArray tmp(charge);
-                std::sort( tmp.begin(), tmp.end());
-
-                double charge_rank2 = (tmp[1] + tmp[2]) / 2.;
-                d.z->Fill(charge_rank2); // rank 2
-                d.z2->Fill(charge_rank2 * charge_rank2);
-
-//                double mean_change = (charge[1] + charge[2]) / 2.;
-//                d.z->Fill(mean_change); // mean change
-//                d.z2->Fill(mean_change * mean_change);
-
-//                double mean_change = std::accumulate( charge.begin(), charge.end(), 0.0) / double(CHANNELS);
-//                d.z->Fill(mean_change); // mean change
-//                d.z2->Fill(mean_change * mean_change);
-
-//            }
         }
     }
-
     return RunInfo( events_counted, events_processed, charge_events);
 }
 

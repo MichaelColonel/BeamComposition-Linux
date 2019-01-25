@@ -57,7 +57,8 @@ SOURCES += main.cpp \
     opcuaclientdialog.cpp \
     opcuaclient.cpp \
     open62541.c \
-    runevent.cpp
+    runevent.cpp \
+    rundetailsdialog.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -82,13 +83,15 @@ HEADERS  += mainwindow.h \
     opcuaclientdialog.h \
     opcuaclient.h \
     open62541.h \
-    runevent.h
+    runevent.h \
+    rundetailsdialog.h
 
 FORMS    += mainwindow.ui \
     rootcanvasdialog.ui \
     settingsdialog.ui \
     signalvaluedialog.ui \
-    opcuaclientdialog.ui
+    opcuaclientdialog.ui \
+    rundetailsdialog.ui
 
 
 unix {

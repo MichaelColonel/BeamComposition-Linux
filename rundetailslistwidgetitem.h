@@ -38,9 +38,11 @@ public:
         events = new_events;
         processed_events = proc_events;
     }
+    int run_batch() const { return batch_number; }
     size_t batch_bytes() const { return bytes; }
     size_t batch_events() const { return events; }
     size_t batch_offset() const { return offset; }
+    QDateTime batch_date_time() const { return date_time; }
     void update_text();
 private:
     QDateTime date_time;

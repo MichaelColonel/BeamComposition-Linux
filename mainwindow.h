@@ -18,16 +18,7 @@
 #pragma once
 
 #include <QMainWindow>
-#include <QSerialPort> // test serial port
 
-
-#if defined(Q_OS_WIN32) && defined(__MINGW32__)
-#include <windef.h>
-#include <winbase.h>
-#endif
-
-
-#include <ftd2xx.h>
 #include "channelscountsfit.h"
 
 #include "runinfo.h"
@@ -36,6 +27,11 @@
 namespace Ui {
 class MainWindow;
 }
+
+// for ftdi_sio kernel module
+// serial device support
+class QSerialPort;
+class QTcpSocket;
 
 class QFile;
 class QTimer;
@@ -95,7 +91,6 @@ private slots:
     void connectDevices();
     void disconnectDevices();
     void startRun();
-    void startTestRun();
     void stopRun();
     void saveRun();
     void openRun();
@@ -124,20 +119,14 @@ private slots:
     void onOpcUaTimeout();
     void onOpcUaClientConnected();
     void onOpcUaClientDisconnected();
-    void onTestTimeout();
-    void serialPortBytesWritten(qint64 bytes);
-    void serialPortDataReady();
-    void serialPortError(QSerialPort::SerialPortError error);
 
 private:
-//    QString processTextFile( QFile* runfile, QList<QListWidgetItem*>& items);
     bool processRawFile( QFile* runfile, QList<QListWidgetItem*>& items);
     void batchDataReceived( const DataList& list, const QDateTime&);
     RunInfo batchCountsReceived(const CountsList& list);
     void saveSettings(QSettings* set);
     void loadSettings(QSettings* set);
     void loadRootHistogramsSettings(QSettings* set);
-    void deviceError( FT_HANDLE, FT_STATUS);
 
     void createTreeWidgetItems();
     void createRootHistograms();
@@ -151,10 +140,15 @@ private:
     QTimer* timer_heartbeat; // OPC UA heartbeat timer
     QTimer* timer_test; // test timer for ADC calibration
 
-    FT_HANDLE channel_a;
-    FT_HANDLE channel_b;
+#if defined(QT_VERSION >= 0x050100)
+    QSerialPort* channel_a;
+#else
+    QTcpSocket* channel_a;
+#endif
+
+    int channen_b; // file discriptor
+
     QFile* filerun;
-    QFile* filetxt;
     QFile* filedat;
 
     CommandThread* command_thread;
@@ -168,13 +162,9 @@ private:
     QSettings* settings;
     bool flag_background;
     bool flag_write_run;
-//    bool flag_batch_state; // if "true" then process data, if "false" - do not process them
     SharedFitParameters params;
     RunInfo runinfo;
     StateType sys_state;
     OpcUaClient* opcua_client;
     OpcUaClientDialog* opcua_dialog;
-    std::list<float> test_list;
-    bool test_state;
-    QSerialPort* test_port;
 };

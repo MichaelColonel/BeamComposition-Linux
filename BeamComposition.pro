@@ -13,23 +13,14 @@ CONFIG += qt warn_on thread
 }
 exists ($(ROOTSYS)/include/rootcint.pri) {
     include ($(ROOTSYS)/include/rootcint.pri)
-#    CREATE_ROOT_DICT_FOR_CLASSES  = ${HEADERS} MyParticle.h MyDetector.h MyEvent.h ShowerMain.h
-#    CREATE_ROOT_DICT_FOR_CLASSES *= ${HEADERS} RSLinkDef.h
 }
-
-#INCLUDEPATH += /usr/local/GATE/include/root
-
-#LIBS += -L/usr/local/GATE/lib/root -lCore -lCint -lRIO -lNet -lHist \
-#        -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix \
-#        -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic
 
 # With C++11 support
 greaterThan( QT_MAJOR_VERSION, 4) {
-    QT += widgets serialport
+    QT += widgets
     CONFIG += c++11
 } else {
     QMAKE_CXXFLAGS += -std=c++11
-    CONFIG += serialport
 }
 
 TARGET = BeamComposition
@@ -58,7 +49,8 @@ SOURCES += main.cpp \
     opcuaclient.cpp \
     open62541.c \
     runevent.cpp \
-    rundetailsdialog.cpp
+    rundetailsdialog.cpp \
+    port.c
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -84,7 +76,8 @@ HEADERS  += mainwindow.h \
     opcuaclient.h \
     open62541.h \
     runevent.h \
-    rundetailsdialog.h
+    rundetailsdialog.h \
+    port.h
 
 FORMS    += mainwindow.ui \
     rootcanvasdialog.ui \
@@ -95,18 +88,24 @@ FORMS    += mainwindow.ui \
 
 
 unix {
-#    CONFIG += link_pkgconfig
-#    PKGCONFIG += open62541
-    LIBS += -lftd2xx
+    # Add QTcpSocket and QSerialPort
+    # to write and read data from FT2232H chip
+    # via ftdi_sio kernel module
+    greaterThan( QT_MAJOR_VERSION, 4) {
+        QT += network serialport
+    }
+    else {
+        QT += network
+        CONFIG += serialport
+    }
 }
 
 win32 {
     LIBS += -L$$PWD/../FTDI_DriverNew/i386/ -lftd2xx
-    INCLUDEPATH += C:\root\include
+    INCLUDEPATH += C:/root/include
     INCLUDEPATH += $$PWD/../FTDI_DriverNew
 }
 
 RESOURCES += BeamComposition.qrc
 
 TRANSLATIONS += BeamComposition_ru.ts
-

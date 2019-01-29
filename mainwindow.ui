@@ -60,9 +60,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
+         <y>-257</y>
          <width>264</width>
-         <height>825</height>
+         <height>787</height>
         </rect>
        </property>
        <attribute name="label">
@@ -556,17 +556,6 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="startTestRunButton">
-                 <property name="text">
-                  <string>Run Test Acquisition</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="BeamComposition.qrc">
-                   <normaloff>:/icons/start.png</normaloff>:/icons/start.png</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item>
                 <widget class="QPushButton" name="stopRunButton">
                  <property name="enabled">
                   <bool>false</bool>
@@ -617,8 +606,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>141</width>
-         <height>133</height>
+         <width>277</width>
+         <height>530</height>
         </rect>
        </property>
        <attribute name="label">
@@ -664,8 +653,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>229</width>
-         <height>291</height>
+         <width>277</width>
+         <height>530</height>
         </rect>
        </property>
        <property name="sizePolicy">

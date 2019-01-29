@@ -25,6 +25,12 @@
 #include <TF1.h>
 #include <TLegend.h>
 
+#if defined(QT_VERSION >= 0x050100)
+#include <QSerialPort>
+#else
+#include <QTcpSocket>
+#endif
+
 #include <QActionGroup>
 #include <QSettings>
 #include <QTimer>
@@ -41,18 +47,6 @@
 #include <cstdio>
 #include <sstream>
 #include <typeinfo>
-
-#if defined(Q_OS_WIN32) && defined(__MINGW32__)
-#include <windef.h>
-#include <winbase.h>
-#endif
-
-#include <ftd2xx.h>
-
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/moment.hpp>
 
 #include "acquisitionthread.h"
 #include "commandthread.h"
@@ -73,6 +67,7 @@
 #include "channelschargefit.h"
 
 #include "opcuaclient.h"
+#include "port.h"
 
 #include "ui_mainwindow.h"
 #include "mainwindow.h"
@@ -138,51 +133,11 @@ struct Hist2Parameters& z13hp = hist2params[10];
 struct Hist2Parameters& z24hp = hist2params[11];
 */
 
-/*
-void
-local_reverse(char* s)
-{
-    for ( size_t i = 0, j = strlen(s) - 1; i < j; i++, j--) {
-        char c = s[i];
-        s[i] = s[j];
-        s[j] = c;
-    }
-}
-
-/// transform value "n" to string "s"
-void
-local_itoa( int n, char* s, size_t digits = 3)
-{
-    size_t i = 0;
-    for ( ; i < digits; ) { // generate digits in reverse order
-        s[i++] = n % 10 + '0'; // get next digit
-        n /= 10; // delete it
-    };
-
-    s[i] = '\0';
-    local_reverse(s);
-}
-*/
-
 // charge colors
 const Color_t ccolors[] = { kBlack, kRed, kBlue, kCyan, kOrange, kMagenta + 10, kViolet };
 
 // number of Gaus parameters
 const int gparams = 3;
-
-const char* description_channel_a = "FT2232H_MM A";
-const char* description_channel_b = "FT2232H_MM B";
-
-// const size_t towrite = COMMAND_SIZE;
-
-typedef boost::accumulators::accumulator_set< \
-    double, \
-    boost::accumulators::stats< \
-        boost::accumulators::tag::count, \
-        boost::accumulators::tag::mean, \
-        boost::accumulators::tag::moment<2> \
-    > \
-> MeanDispAccumType;
 
 } // namespace
 
@@ -195,10 +150,13 @@ MainWindow::MainWindow(QWidget *parent)
     timer_opcua(new QTimer(this)),
     timer_heartbeat(new QTimer(this)),
     timer_test(new QTimer(this)), // test
-    channel_a(nullptr),
-    channel_b(nullptr),
+#if defined(QT_VERSION >= 0x050100)
+    channel_a(new QSerialPort(this)),
+#else
+    channel_a(new QTcpSocket(this)),
+#endif
+    channel_b_fd(-1),
     filerun(nullptr),
-    filetxt(nullptr),
     filedat(nullptr),
     command_thread(new CommandThread(this)),
     acquire_thread(new AcquireThread(this)),
@@ -211,9 +169,7 @@ MainWindow::MainWindow(QWidget *parent)
     flag_write_run(true),
     sys_state(STATE_DEVICE_DISCONNECTED),
     opcua_client(new OpcUaClient(this)),
-    opcua_dialog(nullptr),
-    test_state(false), // test state
-    test_port(new QSerialPort( "/dev/ttyUSB0", this)) // test serial port
+    opcua_dialog(nullptr)
 {
     ui->setupUi(this);
 
@@ -279,7 +235,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect( selectionGroup, SIGNAL(triggered(QAction*)), this, SLOT(runDetailsSelectionTriggered(QAction*)));
 
     connect( ui->startRunButton, SIGNAL(clicked()), this, SLOT(startRun()));
-    connect( ui->startTestRunButton, SIGNAL(clicked()), this, SLOT(startTestRun()));
     connect( ui->stopRunButton, SIGNAL(clicked()), this, SLOT(stopRun()));
     connect( ui->connectButton, SIGNAL(clicked()), this, SLOT(connectDevices()));
     connect( ui->disconnectButton, SIGNAL(clicked()), this, SLOT(disconnectDevices()));
@@ -336,11 +291,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect( opcua_client, SIGNAL(connected()), this, SLOT(onOpcUaClientConnected()));
     connect( opcua_client, SIGNAL(connected()), timer_heartbeat, SLOT(start()));
     connect( opcua_client, SIGNAL(disconnected()), timer_heartbeat, SLOT(stop()));
-
-    // test serial
-    connect( test_port, SIGNAL(readyRead()), this, SLOT(serialPortDataReady()));
-    connect( test_port, SIGNAL(bytesWritten(qint64)), this, SLOT(serialPortBytesWritten(qint64)));
-    connect( test_port, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(serialPortError(QSerialPort::SerialPortError)));
 
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectAll);
     ui->runDetailsListWidget->addAction(ui->actionDetailsSelectNone);
@@ -414,12 +364,6 @@ MainWindow::~MainWindow()
         filerun->flush();
         filerun->close();
         delete filerun;
-    }
-
-    if (filetxt) {
-        filetxt->flush();
-        filetxt->close();
-        delete filetxt;
     }
 
     if (filedat) {
@@ -837,22 +781,19 @@ MainWindow::processThreadStarted()
 
     QDateTime dt = QDateTime::currentDateTime();
     QString dt_string = dt.toString("ddMMyyyy_hhmmss");
-    QString namerun, nametxt, nameraw;
+    QString namerun, nameraw;
 
     if (flag_background) {
         namerun = QString("Run%1_back_%2.dat").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
-        nametxt = QString("Run%1_back_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
         nameraw = QString("Run%1_back_%2.raw").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
     }
     else {
         namerun = QString("Run%1_data_%2.dat").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
-        nametxt = QString("Run%1_data_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
         nameraw = QString("Run%1_data_%2.raw").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
     }
 
     QDir* dir = new QDir(rundir);
     QString filenamedat = dir->filePath(namerun);
-    QString filenametxt = dir->filePath(nametxt);
     QString filenameraw = dir->filePath(nameraw);
     delete dir;
 
@@ -861,24 +802,14 @@ MainWindow::processThreadStarted()
 
     if (flag_write_run) {
         filerun = new QFile(filenamedat);
-        filetxt = new QFile(filenametxt);
         filedat = new QFile(filenameraw);
         filerun->open(QFile::WriteOnly);
-        filetxt->open(QFile::WriteOnly);
         filedat->open(QFile::WriteOnly);
 
         // write pedestals flag
         QDataStream out(filedat);
         out << quint8(flag_background);
     }
-/*
-    if (filetxt && filetxt->isOpen()) {
-        // write data file name and pedestals flag
-        QTextStream out(filetxt);
-        QString text = QString("Run%1").arg( int(n), int(4), int(10), QLatin1Char('0'));
-        out << text << " " << int(flag_background) << endl;
-    }
-*/
     // clear diagrams and update canvas
 
     runinfo.clear();
@@ -987,19 +918,12 @@ MainWindow::processFileFinished()
     if (profile_thread->isBackground()) {
         const SignalArray& back = params->background();
 
-//        QTextStream out(filetxt);
-
         for ( int i = 0; i < CHANNELS; ++i) {
             const SignalPair& pair = back[i];
             QTableWidgetItem* item = ui->runInfoTableWidget->item( i + 1, 0);
             QString str = SignalValueDelegate::form_text(pair);
             item->setText(str);
-            std::cout << std::setw(4) << pair.first << "\t" << pair.second << std::endl;
-
-//            out << "\t" << QString("%1").arg( double(pair.first), int(6), 'g', 2);
-//            out << "\t" << QString("%1").arg( double(pair.second), int(6), 'g', 2);
         }
-//        out << endl;
 
         statusBar()->showMessage( tr("Background data loaded"), 2000);
 
@@ -1039,43 +963,6 @@ MainWindow::startRun()
 
     if (ui->dataUpdateAutoRadioButton->isChecked())
         timer_data->start();
-
-    acquire_thread->start();
-    process_thread->start();
-}
-
-void
-MainWindow::startTestRun()
-{
-    // set zero offset
-    QString text = QString("VOLT:OFFS %1\n").arg( 0., int(6), 'g', 4);
-    QByteArray offset_command;
-    offset_command.append(text);
-
-    if (test_port && test_port->isOpen()) {
-        test_port->write(offset_command);
-    }
-
-    test_list.clear();
-    for( float v = 0.000; v <= 0.2; v += 0.005) {
-        qDebug() << "Voltage offset: " << -v;
-        test_list.push_back(-v);
-    }
-
-    if (acquire_thread->isRunning()) {
-        QMessageBox::warning( this, tr("Error"),
-            tr("Acquisition thread is still running."), QMessageBox::Ok | QMessageBox::Default);
-        return;
-    }
-
-    if (process_thread->isRunning()) {
-        QMessageBox::warning( this, tr("Error"),
-            tr("Processing thread is still running."), QMessageBox::Ok | QMessageBox::Default);
-        return;
-    }
-
-    test_state = true;
-    timer_test->start();
 
     acquire_thread->start();
     process_thread->start();
@@ -1304,7 +1191,7 @@ MainWindow::openFile(bool background_data)
     }
 /*
     QString fileName = QFileDialog::getOpenFileName( this,
-        tr("Open File"), rundir, tr("Run Files *.raw (*.raw);;Run Files *.txt (*.txt);;Run Files *.dat (*.dat)"));
+        tr("Open File"), rundir, tr("Run Files *.raw (*.raw);;Run Files *.dat (*.dat)"));
 
     if (fileName.isEmpty())
         return;
@@ -1320,16 +1207,10 @@ MainWindow::openFile(bool background_data)
 
 #if QT_VERSION >= 0x050000
     QStringList filters;
-//    filters << tr("Run Files *.raw (*.raw)") \
-//            << tr("Run Files *.txt (*.txt)") \
-//            << tr("Run Files *.dat (*.dat)");
-
     filters << tr("Run Files *.raw (*.raw)") << tr("Run Files *.dat (*.dat)");
-
     dialog->setNameFilters(filters);
 #elif (QT_VERSION >= 0x040000 && QT_VERSION < 0x050000)
     dialog->setFilter(tr("Run Files *.raw (*.raw);;Run Files *.dat (*.dat)"));
-//    dialog->setFilter(tr("Run Files *.raw (*.raw);;Run Files *.txt (*.txt);;Run Files *.dat (*.dat)"));
 #endif
 
     dialog->setDirectory(rundir);
@@ -1392,54 +1273,6 @@ MainWindow::openFile(bool background_data)
         }
         delete runfile;
     }
-/*
-    else if (filter == tr("Run Files *.txt (*.txt)")) {
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        ui->runDetailsListWidget->clear();
-
-        QList<QListWidgetItem*> details_items;
-        QFile* runfile = new QFile(fileName);
-        QString runnumber;
-        runfile->open(QFile::ReadOnly);
-        if (runfile->isOpen()) {
-            QApplication::setOverrideCursor(Qt::WaitCursor);
-            runnumber = processTextFile( runfile, details_items);
-            QApplication::restoreOverrideCursor();
-        }
-
-        QFileInfo info( QDir(rundir), runnumber + ".dat");
-        if (info.exists()) {
-            QString fname = info.absoluteFilePath();
-
-            qDebug() << "file OK: " << fname;
-
-            // clear diagrams
-            QTreeWidgetItemIterator iter(ui->treeWidget);
-            while (*iter) {
-                DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(*iter);
-                if (ditem) {
-                    TH1* h1 = ditem->getTH1();
-                    TH2* h2 = ditem->getTH2();
-                    if (h1) h1->Reset();
-                    if (h2) h2->Reset();
-                }
-                ++iter;
-            }
-
-            progress_dialog->setRange( 0, details_items.size());
-
-            profile_thread->setBatches( fname, details_items, flag_background);
-//          updateDiagrams(background_data);
-            profile_thread->start();
-        }
-        else {
-            QMessageBox::warning( this, tr("Error"),
-                tr("Data file is absent!"),
-                QMessageBox::Ok | QMessageBox::Default);
-        }
-        delete runfile;
-    }
-*/
     else if (filter == tr("Run Files *.raw (*.raw)")) {
 //        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         ui->runDetailsListWidget->clear();
@@ -1453,9 +1286,6 @@ MainWindow::openFile(bool background_data)
             flag_background = processRawFile( runfile, details_items);
             QApplication::restoreOverrideCursor();
         }
-////////////////
-        flag_background = true;
-////////////////
         delete runfile;
 
         // clear diagrams
@@ -1712,41 +1542,7 @@ MainWindow::movementFinished()
     msgBox.setText(tr("Movement has been finished"));
     msgBox.exec();
 }
-/*
-QString
-MainWindow::processTextFile( QFile* runfile, QList<QListWidgetItem *>& items)
-{
-    QTextStream in(runfile);
-    QString line;
-    QString run_number, datestring, timestring;
-    int background_data, batchoffset, bytes, events;
 
-    in >> run_number >> background_data;
-    flag_background = bool(background_data);
-
-//    qDebug() << run_number << " " << background_data;
-
-    int offset = 0;
-    int batchnumber = 1;
-    while (!in.atEnd()) {
-        line = in.readLine();
-        if (!line.isEmpty()) {
-            QTextStream sline( &line, QIODevice::ReadOnly);
-            sline >> datestring >> timestring >> batchoffset >> bytes >> events;
-            QDate date = QDate::fromString( datestring, "dd.MM.yyyy");
-            QTime time = QTime::fromString( timestring, "hh:mm:ss");
-//            qDebug() << datestring << " " << timestring << " " << bytes << " " << events;
-            QDateTime dtime( date, time);
-            QListWidgetItem *item = new RunDetailsListWidgetItem( dtime,
-                batchnumber, bytes, events, 0, offset, ui->runDetailsListWidget);
-            offset += bytes;
-            batchnumber++;
-            items.append(item);
-        }
-    }
-    return run_number;
-}
-*/
 bool
 MainWindow::processRawFile( QFile* runfile, QList<QListWidgetItem*>& items)
 {
@@ -2573,88 +2369,6 @@ MainWindow::onOpcUaTimeout()
 }
 
 void
-MainWindow::onTestTimeout()
-{
-    if (process_thread->isRunning() && test_state) {
-        timer_test->stop();
-        test_state = false;
-
-        qDebug() << "GUI: Test batch signal skip.";
-        // get any processed data (just to delete any of them)
-        CountsList countslist;
-        DataList datalist;
-        process_thread->getProcessedData( datalist, countslist);
-        qDebug() << "Events received:" << datalist.size() << " " << countslist.size();
-        timer_test->setInterval(500.);
-        timer_test->start();
-    }
-    else if (process_thread->isRunning() && !test_state) {
-        timer_test->stop();
-        test_state = true;
-        qDebug() << "GUI: Test batch process.";
-
-//        statusBar()->showMessage( tr("New batch signal"), 1000);
-        processData();
-//        QTimer::singleShot( 2000, this, SLOT(processData()));
-        if (test_list.size()) {
-            // set new voltage offset
-
-            float v = test_list.front();
-            test_list.pop_front();
-
-            QString text = QString("VOLT:OFFS %1\n").arg( double(v), int(6), 'g', 4);
-            QByteArray offset_command;
-            offset_command.append(text);
-
-            if (test_port && test_port->isOpen()) {
-                test_port->write(offset_command);
-            }
-            qDebug() << "GUI: Test batch new voltage offset:" << QString("%1").arg( double(v), int(6), 'g', 4);
-            timer_test->setInterval(2000.);
-            timer_test->start();
-        }
-        else {
-
-            // set zero offset
-            QString text = QString("VOLT:OFFS %1\n").arg( 0., int(6), 'g', 4);
-            QByteArray offset_command;
-            offset_command.append(text);
-
-            if (test_port && test_port->isOpen()) {
-                test_port->write(offset_command);
-            }
-
-            timer_test->stop();
-            stopRun();
-        }
-    }
-}
-
-void
 MainWindow::onOpcUaClientDisconnected()
 {
-}
-
-void
-MainWindow::serialPortBytesWritten(qint64 bytes)
-{
-    std::cout << "Bytes written: " << bytes << std::endl;
-}
-
-void
-MainWindow::serialPortDataReady()
-{
-    QTextStream output(stdout);
-    QByteArray bytes_array = test_port->readAll();
-    output << bytes_array;
-}
-
-void
-MainWindow::serialPortError(QSerialPort::SerialPortError error)
-{
-    QTextStream output(stderr);
-
-    if (error == QSerialPort::ReadError) {
-        output << QObject::tr("An I/O error occurred while reading the data from port %1, error: %2").arg(test_port->portName()).arg(test_port->errorString()) << endl;
-    }
 }

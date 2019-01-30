@@ -28,6 +28,7 @@
 #include "port.h"
 
 static struct termios newio, oldio;
+static int check(int fd);
 
 int
 port_init(const char *device)
@@ -92,8 +93,8 @@ port_init(const char *device)
     // ignore input parity
     newio.c_iflag |= IGNPAR;
     // 1 character output, timeout 0 sec
-//    newio.c_cc[VMIN] = 1;
-//    newio.c_cc[VTIME] = 5;
+    newio.c_cc[VMIN] = 1;
+    newio.c_cc[VTIME] = 1;
 
     // set the new options for the port
     if (tcsetattr( fd, TCSANOW, &newio) == -1) {
@@ -120,6 +121,77 @@ port_close(int fd)
 
     if (close(fd) == -1) {
         fprintf( stderr, "error closing device: %s\n", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
+int
+port_flush(int fd)
+{
+    if (tcflush( fd, TCIOFLUSH) == -1) {
+        fprintf( stderr, "error flushing device: %s\n", strerror(errno));
+        return -1;
+    }
+}
+
+size_t
+port_readn( int fd, char* buf, size_t count, int* err)
+{
+    size_t nleft = count, bytes_read = 0;
+    char* ptr = buf;
+
+    ssize_t nread;
+
+    *err = 0;
+    while (nleft > 0) {
+        if (!check(fd)) {
+            if ((nread = read( fd, ptr, nleft)) > 0) {
+                bytes_read += nread;
+                nleft -= nread;
+                ptr += nread;
+            }
+            else if (nread == -1) {
+                err = errno;
+                printf( "%s.\n", strerror(errno));
+                break;
+            }
+        }
+        else
+            break;
+    }
+
+    return bytes_read;
+}
+
+int
+check(int fd)
+{
+    fd_set rfds;
+    struct timeval tv;
+    int retval;
+
+    /* Watch fd to see when it has input. */
+    FD_ZERO(&rfds);
+    FD_SET( fd, &rfds);
+
+    /* Wait up to five seconds. */
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
+
+    retval = select( fd + 1, &rfds, NULL, NULL, &tv);
+    /* Don't rely on the value of tv now! */
+
+    if (retval == -1) {
+        perror("select()");
+    }
+    else if (retval) {
+        printf("Data is available now.\n");
+        /* FD_ISSET(0, &rfds) will be true. */
+        return 0;
+    }
+    else {
+        printf("No data within five seconds.\n");
         return -1;
     }
     return 0;

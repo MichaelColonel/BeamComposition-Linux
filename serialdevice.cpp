@@ -15,33 +15,35 @@
  *      MA 02110-1301, USA.
  */
 
-#pragma once
+#include "serialdevice.h"
 
-#include <QDialog>
-#include <QDateTime>
-
-#include "rundetailslistwidgetitem.h"
-#include "runinfo.h"
-
-namespace Ui {
-class RunDetailsDialog;
+SerialDevice::SerialDevice(QObject *parent)
+    :
+    QTcpSocket(parent)
+{
+    connect( this, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    connect( this, SIGNAL(bytesWritten(qint64)), this, SLOT(onBytesWritten(qint64)));
+    connect( this, SIGNAL(readChannelFinished()), this, SLOT(onReadFinished()));
 }
 
-class RunDetailsDialog : public QDialog
+SerialDevice::~SerialDevice()
 {
-    Q_OBJECT
-    
-public:
-    explicit RunDetailsDialog( int, const QList<QListWidgetItem*>&, QWidget *parent = 0);
-    ~RunDetailsDialog();
+}
 
-public slots:
-    void addRunDetailsInfo( const RunDetailsListWidgetItem*, const RunInfo::BeamSpectrumArray&);
-private slots:
-    void onSelectAllClicked();
-    void onSelectNoneClicked();
-    void onProcessSelectedClicked();
+void
+SerialDevice::onReadyRead()
+{
 
-private:
-    Ui::RunDetailsDialog *ui;
-};
+}
+
+void
+SerialDevice::onBytesWritten(qint64)
+{
+
+}
+
+void
+SerialDevice::onReadFinished()
+{
+
+}

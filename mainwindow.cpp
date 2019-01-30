@@ -25,12 +25,6 @@
 #include <TF1.h>
 #include <TLegend.h>
 
-#if defined(QT_VERSION >= 0x050100)
-#include <QSerialPort>
-#else
-#include <QTcpSocket>
-#endif
-
 #include <QActionGroup>
 #include <QSettings>
 #include <QTimer>
@@ -49,7 +43,6 @@
 #include <typeinfo>
 
 #include "acquisitionthread.h"
-#include "commandthread.h"
 #include "writeprocess.h"
 #include "rootcanvasdialog.h"
 #include "settingsdialog.h"
@@ -67,7 +60,9 @@
 #include "channelschargefit.h"
 
 #include "opcuaclient.h"
+
 #include "port.h"
+#include "serialdevice.h"
 
 #include "ui_mainwindow.h"
 #include "mainwindow.h"
@@ -149,16 +144,10 @@ MainWindow::MainWindow(QWidget *parent)
     timer_data(new QTimer(this)),
     timer_opcua(new QTimer(this)),
     timer_heartbeat(new QTimer(this)),
-    timer_test(new QTimer(this)), // test
-#if defined(QT_VERSION >= 0x050100)
-    channel_a(new QSerialPort(this)),
-#else
-    channel_a(new QTcpSocket(this)),
-#endif
+    channel_a(new SerialDevice(this)),
     channel_b_fd(-1),
     filerun(nullptr),
     filedat(nullptr),
-    command_thread(new CommandThread(this)),
     acquire_thread(new AcquireThread(this)),
     process_thread(new ProcessThread(this)),
     profile_thread(new ProcessFileThread(this)),
@@ -262,12 +251,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect( timer, SIGNAL(timeout()), this, SLOT(onRootEventsTimeout())); // iterate ROOT events
     connect( timer_opcua, SIGNAL(timeout()), opcua_client, SLOT(iterate()));
     connect( timer_heartbeat, SIGNAL(timeout()), this, SLOT(onOpcUaTimeout()));
-    connect( timer_test, SIGNAL(timeout()), this, SLOT(onTestTimeout()));
-
-    connect( command_thread, SIGNAL(started()), this, SLOT(commandThreadStarted()));
-    connect( command_thread, SIGNAL(finished()), this, SLOT(commandThreadFinished()));
-    connect( command_thread, SIGNAL(signalMovementFinished()), this, SLOT(movementFinished()));
-    connect( command_thread, SIGNAL(signalDeviceError()), this, SLOT(commandDeviceError()));
 
     connect( process_thread, SIGNAL(started()), this, SLOT(processThreadStarted()));
     connect( process_thread, SIGNAL(finished()), this, SLOT(processThreadFinished()));
@@ -279,6 +262,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect( profile_thread, SIGNAL(finished()), this, SLOT(processFileFinished()));
     connect( profile_thread, SIGNAL(progress(int)), progress_dialog, SLOT(setValue(int)));
     connect( progress_dialog, SIGNAL(canceled()), profile_thread, SLOT(stop()));
+
+    connect( channel_a, SIGNAL(signalExternalSignal()), this, SLOT(externalBeamSignalReceived()));
+    connect( channel_a, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
+    connect( channel_a, SIGNAL(signalMovementFinished()), this, SLOT(movementFinished()));
+    connect( channel_a, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(commandDeviceError(QSerialPort::SerialPortError)));
 
     connect( this, SIGNAL(signalStateChanged(StateType)), opcua_client, SLOT(writeStateValue(StateType)));
     connect( this, SIGNAL(signalBeamSpectrumChanged(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)),
@@ -314,7 +302,6 @@ MainWindow::MainWindow(QWidget *parent)
     progress_dialog->setWindowModality(Qt::WindowModal);
     progress_dialog->setWindowTitle(tr("Progress"));
 
-    timer_test->setInterval(2000.);
     timer->start(20);
 
     int update_period = settings->value( "update-timeout", 3).toInt() * 1000;
@@ -843,11 +830,6 @@ MainWindow::processThreadFinished()
         delete filerun;
         filerun = nullptr;
 
-        filetxt->flush();
-        filetxt->close();
-        delete filetxt;
-        filetxt = nullptr;
-
         filedat->flush();
         filedat->close();
         delete filedat;
@@ -1316,14 +1298,14 @@ MainWindow::openFile(bool background_data)
 void
 MainWindow::connectDevices()
 {
-#ifdef Q_OS_LINUX
-    FT_SetVIDPID( 0x0403, 0x6010);
-#endif
+    if (channel_a->isOpen()) {
+        channel_a->flush();
+        channel_a->close();
+    }
+    int fdb = port_init("/dev/ft2232h_mm_1");
 
-    char* name = const_cast<char*>(description_channel_a);
-
-    FT_STATUS ftStatus = FT_OpenEx( name, FT_OPEN_BY_DESCRIPTION, &channel_a);
-    if (!FT_SUCCESS(ftStatus)) {
+    channel_a->setPortName("/dev/ft2232h_mm_0");
+    if (!channel_a->open(QSerialPort::ReadWrite) || fdb == -1) {
         sys_state = STATE_DEVICE_DISCONNECTED;
         emit signalStateChanged(sys_state);
 
@@ -1334,35 +1316,9 @@ MainWindow::connectDevices()
         statusBar()->showMessage( tr("Channel A connection canceled"), 2000);
         return;
     }
-    ftStatus = FT_SetTimeouts( channel_a, 8000, 8000);
-    if (!FT_SUCCESS(ftStatus)) {
-        deviceError( channel_a, ftStatus);
-        return;
-    }
 
-    name = const_cast<char*>(description_channel_b);
-
-    ftStatus = FT_OpenEx( name, FT_OPEN_BY_DESCRIPTION, &channel_b);
-    if (!FT_SUCCESS(ftStatus)) {
-        sys_state = STATE_DEVICE_DISCONNECTED;
-        emit signalStateChanged(sys_state);
-
-        QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
-            tr("Error during connection of FT2232H Channel B. This can fail if the ftdi_sio\n" \
-               "driver is loaded, use lsmod to check this and rmmod ftdi_sio\n" \
-               "to remove also rmmod usbserial."));
-        statusBar()->showMessage( tr("Channel B connection canceled"), 2000);
-        return;
-    }
-    ftStatus = FT_SetTimeouts( channel_b, 8000, 8000);
-    if (!FT_SUCCESS(ftStatus)) {
-        deviceError( channel_b, ftStatus);
-        return;
-    }
-    command_thread->setDeviceHandle(channel_a);
-    acquire_thread->setDeviceHandle(channel_b);
-
-    command_thread->start();
+    channel_b_fd = fdb;
+    acquire_thread->setDeviceHandle(channel_b_fd);
 
     ui->connectButton->setEnabled(false);
     ui->disconnectButton->setEnabled(true);
@@ -1416,17 +1372,6 @@ MainWindow::connectDevices()
 
     sys_state = STATE_DEVICE_CONNECTED;
     emit signalStateChanged(sys_state);
-
-    // test serial
-    if (test_port && test_port->open(QIODevice::ReadWrite)) {
-        test_port->setBaudRate(QSerialPort::Baud9600);
-        test_port->setDataBits(QSerialPort::Data8);
-        test_port->setParity(QSerialPort::NoParity);
-        test_port->setStopBits(QSerialPort::OneStop);
-        test_port->setFlowControl(QSerialPort::NoFlowControl);
-
-        test_port->flush();
-    }
 }
 
 void
@@ -1437,24 +1382,22 @@ MainWindow::disconnectDevices()
     if (process_state && acquire_state)
         stopRun();
 
-    if (command_thread->isRunning())
-        command_thread->stop();
-
-    FT_STATUS ftStatus = FT_Close(channel_a);
-    if (!FT_SUCCESS(ftStatus)) {
-        std::cerr << "FT2232H Channel A close error." << std::endl;
+    if (channel_a->isOpen()) {
+        channel_a->flush();
+        channel_a->close();
     }
-    ftStatus = FT_Close(channel_b);
-    if (!FT_SUCCESS(ftStatus)) {
+
+    int res = port_close(channel_b_fd);
+    if (res == -1) {
         std::cerr << "FT2232H Channel B close error." << std::endl;
     }
+    channel_b_fd = -1;
+    acquire_thread->setFileDescriptor(-1);
 
     if (timer_data->isActive())
         timer_data->stop();
 
     disconnect( timer_data, SIGNAL(timeout()), this, SLOT(processData()));
-    disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalBeamSignalReceived()));
-    disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
 
     ui->connectButton->setEnabled(true);
     ui->disconnectButton->setEnabled(false);
@@ -1467,32 +1410,19 @@ MainWindow::disconnectDevices()
 
     sys_state = STATE_DEVICE_DISCONNECTED;
     emit signalStateChanged(sys_state);
-
-    channel_a = nullptr;
-    channel_b = nullptr;
-    acquire_thread->setDeviceHandle(nullptr);
-    command_thread->setDeviceHandle(nullptr);
-
-    // test serial port
-    if (test_port && test_port->isOpen()) {
-        test_port->flush();
-        test_port->close();
-    }
 }
 
 void
 MainWindow::commandDeviceError()
 {
-    FT_STATUS ftState = command_thread->deviceStatus();
-    deviceError( channel_a, ftState);
+    deviceError();
     statusBar()->showMessage(tr("FT2232H Channel A error"));
 }
 
 void
 MainWindow::acquireDeviceError()
 {
-    FT_STATUS ftState = acquire_thread->deviceStatus();
-    deviceError( channel_b, ftState);
+    deviceError();
     statusBar()->showMessage(tr("FT2232H Channel B error"));
 
     stopRun();
@@ -1613,33 +1543,11 @@ MainWindow::processData()
         (batch_counts + 1), datalist.size(), countslist.size(), \
         batch_data_offset, ui->runDetailsListWidget);
 */
-    /* RunDetailsListWidgetItem* item = */ new RunDetailsListWidgetItem( datetime, \
+    RunDetailsListWidgetItem* item = new RunDetailsListWidgetItem( datetime, \
         (batch_counts + 1), datalist.size(), \
         batch_info.counted(), batch_info.processed(), \
         batch_data_offset, ui->runDetailsListWidget);
-
-    if (filetxt && filetxt->isOpen()) {
-//        qDebug() << item->batch_offset() << " " << item->batch_bytes() << " " << item->batch_events();
-        QTextStream out(filetxt);
-//        out << item->file_string() << endl;
-        MeanDispAccumType acc[CHANNELS];
-
-        for ( const CountsArray& array : countslist) {
-            for ( int i = 0; i < CHANNELS; ++i) {
-                (acc[i])(double(array[i]));
-            }
-        }
-
-        for ( int i = 0; i < CHANNELS; ++i) {
-            double mean = boost::accumulators::mean(acc[i]);
-            double mom2 = boost::accumulators::moment<2>(acc[i]);
-            double disp = mom2 - mean * mean;
-            QString mnstr = QString("\t%1").arg( mean, int(6), 'd', 2);
-            QString sgstr = QString("\t%1").arg( sqrt(disp), int(6), 'd', 2);
-            out << mnstr << sgstr;
-        }
-        out << endl;
-    }
+    Q_UNUSED(item);
 
     updateRunInfo();
 
@@ -1662,7 +1570,7 @@ MainWindow::processData()
 }
 
 void
-MainWindow::deviceError( FT_HANDLE dev, FT_STATUS ftStatus)
+MainWindow::deviceError()
 {
     disconnectDevices();
 
@@ -2372,3 +2280,29 @@ void
 MainWindow::onOpcUaClientDisconnected()
 {
 }
+
+void
+MainWindow::onCommandDeviceReadyRead()
+{
+    QTextStream output(stdout);
+    QByteArray bytes_array = channel_a->readAll();
+    output << bytes_array << endl;
+}
+
+void
+MainWindow::onCommandDeviceReadFinished()
+{
+}
+
+void
+MainWindow::onCommandDeviceBytesWritten(qint64)
+{
+}
+
+#if defined(QT_VERSION >= 0x050100)
+void
+MainWindow::onCommandDeviceError(QSerialPort::SerialPortError)
+{
+
+}
+#endif

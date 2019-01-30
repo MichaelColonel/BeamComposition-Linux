@@ -16,11 +16,15 @@ exists ($(ROOTSYS)/include/rootcint.pri) {
 }
 
 # With C++11 support
+# Add QTcpSocket and QSerialPort
+# to write and read data from FT2232H chip
+# via ftdi_sio kernel module
 greaterThan( QT_MAJOR_VERSION, 4) {
-    QT += widgets
+    QT += widgets serialport
     CONFIG += c++11
 } else {
     QMAKE_CXXFLAGS += -std=c++11
+    CONFIG += serialport
 }
 
 TARGET = BeamComposition
@@ -50,7 +54,8 @@ SOURCES += main.cpp \
     open62541.c \
     runevent.cpp \
     rundetailsdialog.cpp \
-    port.c
+    port.c \
+    serialdevice.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -77,7 +82,8 @@ HEADERS  += mainwindow.h \
     open62541.h \
     runevent.h \
     rundetailsdialog.h \
-    port.h
+    port.h \
+    serialdevice.h
 
 FORMS    += mainwindow.ui \
     rootcanvasdialog.ui \
@@ -85,20 +91,6 @@ FORMS    += mainwindow.ui \
     signalvaluedialog.ui \
     opcuaclientdialog.ui \
     rundetailsdialog.ui
-
-
-unix {
-    # Add QTcpSocket and QSerialPort
-    # to write and read data from FT2232H chip
-    # via ftdi_sio kernel module
-    greaterThan( QT_MAJOR_VERSION, 4) {
-        QT += network serialport
-    }
-    else {
-        QT += network
-        CONFIG += serialport
-    }
-}
 
 win32 {
     LIBS += -L$$PWD/../FTDI_DriverNew/i386/ -lftd2xx

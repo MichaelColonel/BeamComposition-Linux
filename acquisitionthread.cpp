@@ -81,13 +81,13 @@ AcquireThread::AcquireThread(QObject* parent)
     :
     QThread(parent),
     stopped(false),
-    device(nullptr)
+    channel_b_fd(-1)
 {
 }
 
 AcquireThread::~AcquireThread()
 {
-    device = nullptr;
+    channel_b_fd = -1;
 }
 
 void
@@ -100,14 +100,7 @@ AcquireThread::stop()
 void
 AcquireThread::run()
 {
-    DWORD rx_bytes, nread, toread;
-
-    status = FT_Purge( device, FT_PURGE_TX | FT_PURGE_RX);
-    if (!FT_SUCCESS(status)) {
-        qDebug() << "Data Acquisition Thread Error: unable to purge device buffers";
-        emit signalDeviceError();
-        return;
-    }
+    size_t rx_bytes, nread, toread;
 
     while (true) {
         status = FT_GetQueueStatus( device, &rx_bytes);
@@ -429,7 +422,6 @@ ProcessFileThread::processFileData()
 #else
     std::string std_filename = filename.toStdString();
     std::ifstream file( std_filename.c_str(), std::ifstream::binary);
-//    std::ifstream file( filename.toAscii(), std::ifstream::binary);
 #endif
     runinfo.clear();
 

@@ -17,31 +17,25 @@
 
 #pragma once
 
-#include <QDialog>
-#include <QDateTime>
+#include <QSerialPort>
 
-#include "rundetailslistwidgetitem.h"
-#include "runinfo.h"
-
-namespace Ui {
-class RunDetailsDialog;
-}
-
-class RunDetailsDialog : public QDialog
+class SerialDevice : public QSerialPort
 {
     Q_OBJECT
-    
 public:
-    explicit RunDetailsDialog( int, const QList<QListWidgetItem*>&, QWidget *parent = 0);
-    ~RunDetailsDialog();
+    explicit SerialDevice(QObject *parent = 0);
+    virtual ~SerialDevice();
 
-public slots:
-    void addRunDetailsInfo( const RunDetailsListWidgetItem*, const RunInfo::BeamSpectrumArray&);
+signals:
+    void signalExternalSignal();
+    void signalMovementFinished();
+    void signalNewBatchState(bool);
+    void signalStatusBarMessage(QString);
+    void signalDeviceAnswer(QString);
+
 private slots:
-    void onSelectAllClicked();
-    void onSelectNoneClicked();
-    void onProcessSelectedClicked();
-
-private:
-    Ui::RunDetailsDialog *ui;
+    void onReadyRead();
+    void onReadFinished();
+    void onBytesWritten(qint64);
+    void onAboutToClose();
 };

@@ -23,6 +23,8 @@ extern "C" {
 
 int port_init(const char *device);
 int port_close(int fd);
+size_t port_readn( int fd, char* buf, size_t count, int* err);
+int port_flush(int fd);
 
 #ifdef __cplusplus
 }

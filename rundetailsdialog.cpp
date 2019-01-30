@@ -26,6 +26,7 @@ RunDetailsDialog::RunDetailsDialog( int run_number,
     ui(new Ui::RunDetailsDialog)
 {
     ui->setupUi(this);
+    setModal(true);
 }
 
 RunDetailsDialog::~RunDetailsDialog()
@@ -36,6 +37,24 @@ RunDetailsDialog::~RunDetailsDialog()
 void
 RunDetailsDialog::addRunDetailsInfo( const RunDetailsListWidgetItem* cycle_info,
     const RunInfo::BeamSpectrumArray& beamcomp_info)
+{
+
+}
+
+void
+RunDetailsDialog::onSelectAllClicked()
+{
+
+}
+
+void
+RunDetailsDialog::onSelectNoneClicked()
+{
+
+}
+
+void
+RunDetailsDialog::onProcessSelectedClicked()
 {
 
 }

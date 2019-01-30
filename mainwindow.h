@@ -20,7 +20,7 @@
 #include <QMainWindow>
 
 #include "channelscountsfit.h"
-
+#include "serialdevice.h"
 #include "runinfo.h"
 #include "typedefs.h"
 
@@ -28,10 +28,7 @@ namespace Ui {
 class MainWindow;
 }
 
-// for ftdi_sio kernel module
-// serial device support
-class QSerialPort;
-class QTcpSocket;
+class SerialDevice;
 
 class QFile;
 class QTimer;
@@ -42,7 +39,6 @@ class QProgressDialog;
 class QSettings;
 class QDateTime;
 
-class CommandThread;
 class AcquireThread;
 class ProcessThread;
 class ProcessFileThread;
@@ -86,8 +82,9 @@ private slots:
     void processFileFinished();
     void processThreadStarted();
     void processThreadFinished();
-    void acquireDeviceError();
-    void commandDeviceError();
+    void deviceError();
+    void acquireDeviceError(int);
+    void commandDeviceError(QSerialPort::SerialPortError);
     void connectDevices();
     void disconnectDevices();
     void startRun();
@@ -138,20 +135,10 @@ private:
     QTimer* timer_data; // data update timer
     QTimer* timer_opcua; // OPC UA iterate timer
     QTimer* timer_heartbeat; // OPC UA heartbeat timer
-    QTimer* timer_test; // test timer for ADC calibration
-
-#if defined(QT_VERSION >= 0x050100)
-    QSerialPort* channel_a;
-#else
-    QTcpSocket* channel_a;
-#endif
-
-    int channen_b; // file discriptor
-
+    SerialDevice* channel_a;
+    int channel_b_fd; // file discriptor
     QFile* filerun;
     QFile* filedat;
-
-    CommandThread* command_thread;
     AcquireThread* acquire_thread;
     ProcessThread* process_thread;
     ProcessFileThread* profile_thread;

@@ -19,14 +19,6 @@
 
 #include <QThread>
 
-
-#if defined(Q_OS_WIN32) && defined(__MINGW32__)
-#include <windef.h>
-#include <winbase.h>
-#endif
-
-
-#include <ftd2xx.h>
 #include "runinfo.h"
 #include "typedefs.h"
 
@@ -40,22 +32,19 @@ class AcquireThread : public QThread {
 public:
     explicit AcquireThread(QObject* parent = 0);
     virtual ~AcquireThread();
-    void setDeviceHandle(FT_HANDLE dev) { device = dev; }
-    FT_HANDLE& deviceHandle() { return device; }
-    FT_STATUS deviceStatus() const { return status; }
+    void setFileDescriptor(int fd) { channel_b_fd = fd; }
 
 public slots:
     void stop();
 
 signals:
-    void signalDeviceError();
+    void signalDeviceError(int);
 
 protected:
     virtual void run();
 
     bool stopped;
-    FT_HANDLE device;
-    FT_STATUS status;
+    int channel_b_fd;
 };
 
 /**

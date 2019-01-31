@@ -29,6 +29,7 @@
 #include "channelscountsfit.h"
 #include "diagramtreewidgetaction.h"
 #include "rundetailslistwidgetitem.h"
+#include "port.h"
 #include "acquisitionthread.h"
 
 #define MASK_SIZE 8
@@ -81,13 +82,13 @@ AcquireThread::AcquireThread(QObject* parent)
     :
     QThread(parent),
     stopped(false),
-    channel_b_fd(-1)
+    fd(-1)
 {
 }
 
 AcquireThread::~AcquireThread()
 {
-    channel_b_fd = -1;
+    fd = -1;
 }
 
 void
@@ -103,38 +104,23 @@ AcquireThread::run()
     size_t rx_bytes, nread, toread;
 
     while (true) {
-        status = FT_GetQueueStatus( device, &rx_bytes);
+        int error_res;
+        rx_bytes = port_readn( fd, buffer, MASK_SIZE, &error_res);
         {
             QMutexLocker locker(mutex);
             if (stopped)
                 break;
         }
-        if (FT_SUCCESS(status) && rx_bytes >= mask_vector.size()) {
-
-            toread = (rx_bytes > BUFFER_SIZE) ? BUFFER_SIZE : rx_bytes;
-
-            status = FT_Read( device, buffer, toread, &nread);
-            if (FT_SUCCESS(status) && nread >= mask_vector.size()) {
-                // put available data in the queue
-                // acquire condition signal for processing thread
-                DataVector localdata( buffer, buffer + nread);
-                {
-//                    qDebug() << "Data Acquisition Thread: signal data is ready";
-                    QMutexLocker locker(mutex);
-                    queue.push(std::move(localdata));
-                    cond_acquire.wakeOne();
-                }
+        if (rx_bytes >= mask_vector.size()) {
+            // put available data in the queue
+            // acquire condition signal for processing thread
+            DataVector localdata( buffer, buffer + nread);
+            {
+//                qDebug() << "Data Acquisition Thread: signal data is ready";
+                QMutexLocker locker(mutex);
+                queue.push(std::move(localdata));
+                cond_acquire.wakeOne();
             }
-            else if (!FT_SUCCESS(status)) {
-                qDebug() << "failed device status";
-                emit signalDeviceError();
-                break;
-            }
-        }
-        else if (!FT_SUCCESS(status)) {
-            qDebug() << "failed device status";
-            emit signalDeviceError();
-            break;
         }
     }
     stopped = false;

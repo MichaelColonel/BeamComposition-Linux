@@ -32,7 +32,7 @@ class AcquireThread : public QThread {
 public:
     explicit AcquireThread(QObject* parent = 0);
     virtual ~AcquireThread();
-    void setFileDescriptor(int fd) { channel_b_fd = fd; }
+    void setFileDescriptor(int device_fd) { fd = device_fd; }
 
 public slots:
     void stop();
@@ -44,7 +44,7 @@ protected:
     virtual void run();
 
     bool stopped;
-    int channel_b_fd;
+    int fd;
 };
 
 /**

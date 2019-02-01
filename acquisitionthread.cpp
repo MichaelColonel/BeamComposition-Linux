@@ -109,22 +109,21 @@ AcquireThread::run()
 {
     while (true) {
         int error_res = 0;
-//        size_t nread;
-        ssize_t res = ::read( fd, buffer, MASK_SIZE);
-        if (res == -1)
-            error_res = -1;
-//        nread = port_readn( fd, buffer, MASK_SIZE, &error_res);
+        size_t nread;
+//        ssize_t res = ::read( fd, buffer, MASK_SIZE);
+//        if (res == -1)
+//            error_res = -1;
+        nread = port_readn( fd, buffer, MASK_SIZE, &error_res);
         {
             QMutexLocker locker(mutex);
             if (stopped)
                 break;
         }
-        if (res >= mask_vector.size() && !error_res) {
-            std::cout << "Acquisition" << " " << res << std::endl;
+        if (nread >= mask_vector.size() && !error_res) {
             // put available data in the queue
             // acquire condition signal for processing thread
 
-            DataVector localdata( buffer, buffer + res);
+            DataVector localdata( buffer, buffer + nread);
             {
 //                qDebug() << "Data Acquisition Thread: signal data is ready";
                 QMutexLocker locker(mutex);
@@ -132,9 +131,12 @@ AcquireThread::run()
                 cond_acquire.wakeOne();
             }
         }
-        else if (error_res != 0) {
+        else if (error_res < 0) {
             emit signalDeviceError(error_res);
             break;
+        }
+        else if (error_res == 1) {
+            std::cerr << "No data within timeout interval" << std::endl;
         }
     }
     stopped = false;

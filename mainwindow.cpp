@@ -1270,9 +1270,9 @@ MainWindow::connectDevices()
         channel_a->flush();
         channel_a->close();
     }
-    int fd = port_init("/dev/ft2232h_mm_2");
+    int fd = port_init("/dev/ft2232h_mm_1");
 
-    channel_a->setPortName("/dev/ft2232h_mm_1");
+    channel_a->setPortName("/dev/ft2232h_mm_0");
     if (!channel_a->open(QSerialPort::ReadWrite) || fd == -1) {
         sys_state = STATE_DEVICE_DISCONNECTED;
         emit signalStateChanged(sys_state);

@@ -35,7 +35,7 @@ port_init(const char *device)
 {
     int fd = -1;
 
-    fd = open( device, O_RDWR | O_NOCTTY | O_NDELAY);
+    fd = open( device, O_RDWR | O_NOCTTY);
 
     if (fd == -1) {
         printf("unable to open device: %s\n", device);
@@ -189,7 +189,7 @@ check(int fd)
         perror("select()");
     }
     else if (retval) {
-        printf("Data is available now.\n");
+        /* printf("Data is available now.\n"); */
         /* FD_ISSET(0, &rfds) will be true. */
         return 0;
     }

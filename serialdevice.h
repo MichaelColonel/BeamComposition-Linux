@@ -25,6 +25,7 @@ class SerialDevice : public QSerialPort
 public:
     explicit SerialDevice(QObject *parent = 0);
     bool write_command(const QString& com);
+    bool responseOK() const { return response_ok; }
     virtual ~SerialDevice();
 
 signals:
@@ -39,6 +40,7 @@ private slots:
     void onReadFinished();
     void onBytesWritten(qint64);
     void onAboutToClose();
+
 private:
     QByteArray command;
     QByteArray response;

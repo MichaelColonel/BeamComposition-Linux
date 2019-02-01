@@ -17,11 +17,11 @@
 
 #include <QWaitCondition>
 #include <QMutex>
-#include <QDebug>
 
 #include <TH1.h>
 #include <TH2.h>
 
+#include <iostream>
 #include <functional>
 #include <fstream>
 
@@ -73,7 +73,7 @@ const std::array< unsigned char, MASK_SIZE > mask_vector{
 
 QWaitCondition cond_acquire;
 QMutex* mutex = new QMutex;
-unsigned char* buffer = new unsigned char[BUFFER_SIZE];
+char* buffer = new char[BUFFER_SIZE];
 DataQueue queue;
 
 } // namespace
@@ -99,28 +99,42 @@ AcquireThread::stop()
 }
 
 void
+AcquireThread::setFileDescriptor(int fd_)
+{
+    fd = fd_;
+}
+
+void
 AcquireThread::run()
 {
-    size_t rx_bytes, nread, toread;
-
     while (true) {
-        int error_res;
-        rx_bytes = port_readn( fd, buffer, MASK_SIZE, &error_res);
+        int error_res = 0;
+//        size_t nread;
+        ssize_t res = ::read( fd, buffer, MASK_SIZE);
+        if (res == -1)
+            error_res = -1;
+//        nread = port_readn( fd, buffer, MASK_SIZE, &error_res);
         {
             QMutexLocker locker(mutex);
             if (stopped)
                 break;
         }
-        if (rx_bytes >= mask_vector.size()) {
+        if (res >= mask_vector.size() && !error_res) {
+            std::cout << "Acquisition" << " " << res << std::endl;
             // put available data in the queue
             // acquire condition signal for processing thread
-            DataVector localdata( buffer, buffer + nread);
+
+            DataVector localdata( buffer, buffer + res);
             {
 //                qDebug() << "Data Acquisition Thread: signal data is ready";
                 QMutexLocker locker(mutex);
                 queue.push(std::move(localdata));
                 cond_acquire.wakeOne();
             }
+        }
+        else if (error_res != 0) {
+            emit signalDeviceError(error_res);
+            break;
         }
     }
     stopped = false;
@@ -444,7 +458,7 @@ ProcessFileThread::processFileData()
             total += nread;
 
             if (!file.eof() && nread != pos) {
-                qDebug() << "File Processing Thread: current seekg changed " << int(pos - nread);
+//                qDebug() << "File Processing Thread: current seekg changed " << int(pos - nread);
                 file.seekg( int(pos - nread), file.cur);
                 total += int(pos - nread);
             }

@@ -16,9 +16,8 @@ exists ($(ROOTSYS)/include/rootcint.pri) {
 }
 
 # With C++11 support
-# Add QTcpSocket and QSerialPort
-# to write and read data from FT2232H chip
-# via ftdi_sio kernel module
+# Add QSerialPort to write and read data from FT2232H chip
+# via ftdi_sio kernel module as serial port
 greaterThan( QT_MAJOR_VERSION, 4) {
     QT += widgets serialport
     CONFIG += c++11
@@ -46,7 +45,6 @@ SOURCES += main.cpp \
     backgroundvaluedelegate.cpp \
     signalvaluedialog.cpp \
     channelschargefit.cpp \
-    commandthread.cpp \
     chargevaluedelegate.cpp \
     rundetailslistwidgetitem.cpp \
     opcuaclientdialog.cpp \
@@ -74,7 +72,6 @@ HEADERS  += mainwindow.h \
     signalvaluedialog.h \
     runinfo.h \
     channelschargefit.h \
-    commandthread.h \
     chargevaluedelegate.h \
     rundetailslistwidgetitem.h \
     opcuaclientdialog.h \

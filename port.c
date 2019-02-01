@@ -35,7 +35,7 @@ port_init(const char *device)
 {
     int fd = -1;
 
-    fd = open( device, O_RDWR | O_NOCTTY);
+    fd = open( device, O_RDWR | O_NOCTTY | O_NDELAY);
 
     if (fd == -1) {
         printf("unable to open device: %s\n", device);
@@ -93,8 +93,8 @@ port_init(const char *device)
     // ignore input parity
     newio.c_iflag |= IGNPAR;
     // 1 character output, timeout 0 sec
-    newio.c_cc[VMIN] = 1;
-    newio.c_cc[VTIME] = 1;
+//    newio.c_cc[VMIN] = 1;
+//    newio.c_cc[VTIME] = 1;
 
     // set the new options for the port
     if (tcsetattr( fd, TCSANOW, &newio) == -1) {
@@ -133,6 +133,7 @@ port_flush(int fd)
         fprintf( stderr, "error flushing device: %s\n", strerror(errno));
         return -1;
     }
+    return 0;
 }
 
 size_t
@@ -152,13 +153,15 @@ port_readn( int fd, char* buf, size_t count, int* err)
                 ptr += nread;
             }
             else if (nread == -1) {
-                err = errno;
+                *err = errno;
                 printf( "%s.\n", strerror(errno));
                 break;
             }
         }
-        else
+        else {
+            *err = 1;
             break;
+        }
     }
 
     return bytes_read;

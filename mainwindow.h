@@ -69,7 +69,7 @@ private slots:
     void treeWidgetItemDoubleClicked( QTreeWidgetItem*, int);
     void treeWidgetItemClicked( QTreeWidgetItem*, int);
     void runDetailsSelectionTriggered(QAction*);
-    void externalBeamSignalReceived(); // Beam start (spill) external signal
+    void externalBeamSignalReceived(); // Beam start (batch) external signal
     void externalOpcUaSignalReceived( int, const QDateTime&); // OPC UA start acquisition external signal
     void newBatchStateReceived(bool);
     void movementFinished();
@@ -85,6 +85,7 @@ private slots:
     void deviceError();
     void acquireDeviceError(int);
     void commandDeviceError(QSerialPort::SerialPortError);
+    void commandDeviceAnswer(const QString&);
     void connectDevices();
     void disconnectDevices();
     void startRun();

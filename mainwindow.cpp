@@ -256,7 +256,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( process_thread, SIGNAL(finished()), this, SLOT(processThreadFinished()));
     connect( acquire_thread, SIGNAL(started()), this, SLOT(acquireThreadStarted()));
     connect( acquire_thread, SIGNAL(finished()), this, SLOT(acquireThreadFinished()));
-    connect( acquire_thread, SIGNAL(signalDeviceError()), this, SLOT(acquireDeviceError()));
+    connect( acquire_thread, SIGNAL(signalDeviceError(int)), this, SLOT(acquireDeviceError(int)));
 
     connect( profile_thread, SIGNAL(started()), this, SLOT(processFileStarted()));
     connect( profile_thread, SIGNAL(finished()), this, SLOT(processFileFinished()));
@@ -267,6 +267,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( channel_a, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
     connect( channel_a, SIGNAL(signalMovementFinished()), this, SLOT(movementFinished()));
     connect( channel_a, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(commandDeviceError(QSerialPort::SerialPortError)));
+    connect( channel_a, SIGNAL(signalDeviceAnswer(QString)), this, SLOT(commandDeviceAnswer(QString)));
 
     connect( this, SIGNAL(signalStateChanged(StateType)), opcua_client, SLOT(writeStateValue(StateType)));
     connect( this, SIGNAL(signalBeamSpectrumChanged(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)),
@@ -329,10 +330,6 @@ MainWindow::~MainWindow()
 
     timer->stop();
     delete timer;
-
-    command_thread->stop();
-    command_thread->wait();
-    delete command_thread;
 
     profile_thread->stop();
     profile_thread->wait();
@@ -632,55 +629,44 @@ MainWindow::createTreeWidgetItems()
 void
 MainWindow::triggersItemChanged(int value)
 {
-/*
-    char buf[5] = "T000";
-    buf[3] += value;
-
-    command_thread->writeCommand( buf, towrite);
-*/
     std::stringstream com_stream;
     com_stream << "T00" << char(value + '0');
-    command_thread->writeCommand(com_stream.str());
-    QString message = (value) ? tr("Triggers activated") : tr("Triggers diactivated");
-    statusBar()->showMessage( message, 1000);
+
+    QString trigger_command = QString::fromStdString(com_stream.str());
+    if (channel_a->write_command(trigger_command)) {
+        QString message = (value) ? tr("Triggers activated") : tr("Triggers diactivated");
+        statusBar()->showMessage( message, 1000);
+    }
 }
 
 void
 MainWindow::motorItemChanged(int value)
 {
-/*
-    char buf[5] = "M000";
-    buf[1] += value;
-    int steps = ui->scanningStepSpinBox->value();
-    local_itoa( steps, buf + 2, 2);
-
-    command_thread->writeCommand( buf, towrite);
-*/
-
     int steps = ui->scanningStepSpinBox->value();
     std::stringstream com_stream;
     com_stream << "M" << char(value + '0') << std::setfill('0') << std::setw(2) << steps;
-    command_thread->writeCommand(com_stream.str());
+    QString motor_command = QString::fromStdString(com_stream.str());
+    if (channel_a->write_command(motor_command)) {
+        QString message;
+        switch (value) {
+        case 0:
+            message = QString(tr("Motor stopped"));
+            sys_state = STATE_POSITION_FINISH;
+            break;
+        case 1:
+            message = QString(tr("Hide away"));
+            sys_state = STATE_POSITION_REMOVE;
+            break;
+        case 2:
+        default:
+            message = QString(tr("Move out"));
+            sys_state = STATE_POSITION_MOVE;
+            break;
+        }
+        emit signalStateChanged(sys_state);
 
-    QString message;
-    switch (value) {
-    case 0:
-        message = QString(tr("Motor stopped"));
-        sys_state = STATE_POSITION_FINISH;
-        break;
-    case 1:
-        message = QString(tr("Hide away"));
-        sys_state = STATE_POSITION_REMOVE;
-        break;
-    case 2:
-    default:
-        message = QString(tr("Move out"));
-        sys_state = STATE_POSITION_MOVE;
-        break;
+        statusBar()->showMessage( message, 1000);
     }
-    emit signalStateChanged(sys_state);
-
-    statusBar()->showMessage( message, 1000);
 }
 
 void
@@ -807,7 +793,6 @@ MainWindow::processThreadStarted()
     ui->actionSettings->setEnabled(false);
 
     ui->startRunButton->setEnabled(false);
-    ui->startTestRunButton->setEnabled(false);
     ui->stopRunButton->setEnabled(true);
     ui->runNumberSpinBox->setEnabled(false);
     ui->runTypeGroupBox->setEnabled(false);
@@ -860,7 +845,6 @@ MainWindow::processThreadFinished()
     ui->actionSettings->setEnabled(true);
 
     ui->startRunButton->setEnabled(true);
-    ui->startTestRunButton->setEnabled(true);
     ui->stopRunButton->setEnabled(false);
     ui->runNumberSpinBox->setEnabled(true);
     int run = ui->runNumberSpinBox->value();
@@ -1034,9 +1018,11 @@ MainWindow::acquisitionTimingChanged(int value)
 
         std::stringstream com_stream;
         com_stream << "A1" << char(delay_time + '0') << acquition_code;
-        command_thread->writeCommand(com_stream.str());
 
-        statusBar()->showMessage( tr("Extraction signal update"), 1000);
+        QString extraction_command = QString::fromStdString(com_stream.str());
+        if (channel_a->write_command(extraction_command)) {
+            statusBar()->showMessage( tr("Extraction signal update"), 1000);
+        }
     }
 }
 
@@ -1078,39 +1064,19 @@ MainWindow::dataUpdateChanged(int id)
 
     if (rbutton == ui->dataUpdateStartRadioButton) {
         qDebug() << "Extraction signal update";
-//        flag_batch_state = false;
         disconnect( timer_data, SIGNAL(timeout()), this, SLOT(processData()));
-        connect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalBeamSignalReceived()));
-        connect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
         delay_time = ui->delayTimeComboBox->currentIndex();
         acquisition_time = ui->acquisitionTimeComboBox->currentIndex();
         state = 1;
     }
     else if (rbutton == ui->dataUpdateAutoRadioButton) {
         qDebug() << "Automatic timeout update";
-//        flag_batch_state = true;
         connect( timer_data, SIGNAL(timeout()), this, SLOT(processData()));
-        disconnect( command_thread, SIGNAL(signalExternalSignal()), this, SLOT(externalBeamSignalReceived()));
-        disconnect( command_thread, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
     }
 
     if (rbutton) {
         ui->acquisitionTimeComboBox->setEnabled(state);
         ui->delayTimeComboBox->setEnabled(state);
-/*
-        char buf[5] = "A000";
-        buf[1] = state + '0';
-        buf[2] = delay_time + '0';
-
-        if (acquisition_time >= 0 && acquisition_time <= 9)
-            buf[3] = acquisition_time + '0';
-        else if (acquisition_time >= 10 && acquisition_time <= 15)
-            buf[3] = (acquisition_time - 10) + 'A';
-        else
-            buf[3] = '5';
-
-        command_thread->writeCommand( buf, towrite);
-*/
 
         char acquition_code = '5'; // default '5' = 600 ms
         if (acquisition_time >= 0 && acquisition_time <= 9)
@@ -1120,12 +1086,14 @@ MainWindow::dataUpdateChanged(int id)
 
         std::stringstream com_stream;
         com_stream << "A" << char(state + '0') << char(delay_time + '0') << acquition_code;
-        command_thread->writeCommand(com_stream.str());
 
-        if (state)
-            statusBar()->showMessage( tr("Extraction signal update"), 1000);
-        else
-            statusBar()->showMessage( tr("Automatic timeout update"), 1000);
+        QString extraction_command = QString::fromStdString(com_stream.str());
+        if (channel_a->write_command(extraction_command)) {
+            if (state)
+                statusBar()->showMessage( tr("Extraction signal update"), 1000);
+            else
+                statusBar()->showMessage( tr("Automatic timeout update"), 1000);
+        }
     }
 }
 
@@ -1302,10 +1270,10 @@ MainWindow::connectDevices()
         channel_a->flush();
         channel_a->close();
     }
-    int fdb = port_init("/dev/ft2232h_mm_1");
+    int fd = port_init("/dev/ft2232h_mm_2");
 
-    channel_a->setPortName("/dev/ft2232h_mm_0");
-    if (!channel_a->open(QSerialPort::ReadWrite) || fdb == -1) {
+    channel_a->setPortName("/dev/ft2232h_mm_1");
+    if (!channel_a->open(QSerialPort::ReadWrite) || fd == -1) {
         sys_state = STATE_DEVICE_DISCONNECTED;
         emit signalStateChanged(sys_state);
 
@@ -1317,8 +1285,8 @@ MainWindow::connectDevices()
         return;
     }
 
-    channel_b_fd = fdb;
-    acquire_thread->setDeviceHandle(channel_b_fd);
+    acquire_thread->setFileDescriptor(fd);
+    channel_b_fd = fd;
 
     ui->connectButton->setEnabled(false);
     ui->disconnectButton->setEnabled(true);
@@ -1329,7 +1297,7 @@ MainWindow::connectDevices()
     ui->scanningRunRadioButton->setEnabled(false);
     ui->startRunButton->setEnabled(true);
     ui->stopRunButton->setEnabled(false);
-
+/*
     // stop motor
     int mindex = ui->motorComboBox->currentIndex();
     motorItemChanged(mindex);
@@ -1369,7 +1337,7 @@ MainWindow::connectDevices()
         button_id = ui->runTypeButtonGroup->id(ui->scanningRunRadioButton);
     if (button_id != -1)
         runTypeChanged(button_id);
-
+*/
     sys_state = STATE_DEVICE_CONNECTED;
     emit signalStateChanged(sys_state);
 }
@@ -1387,12 +1355,12 @@ MainWindow::disconnectDevices()
         channel_a->close();
     }
 
-    int res = port_close(channel_b_fd);
-    if (res == -1) {
-        std::cerr << "FT2232H Channel B close error." << std::endl;
+    if (channel_b_fd != -1) {
+        int res = port_close(channel_b_fd);
+        if (res == -1) {
+            std::cerr << "FT2232H Channel B close error." << std::endl;
+        }
     }
-    channel_b_fd = -1;
-    acquire_thread->setFileDescriptor(-1);
 
     if (timer_data->isActive())
         timer_data->stop();
@@ -1413,15 +1381,17 @@ MainWindow::disconnectDevices()
 }
 
 void
-MainWindow::commandDeviceError()
+MainWindow::commandDeviceError(QSerialPort::SerialPortError err)
 {
+    Q_UNUSED(err);
     deviceError();
     statusBar()->showMessage(tr("FT2232H Channel A error"));
 }
 
 void
-MainWindow::acquireDeviceError()
+MainWindow::acquireDeviceError(int err)
 {
+    Q_UNUSED(err);
     deviceError();
     statusBar()->showMessage(tr("FT2232H Channel B error"));
 
@@ -1573,7 +1543,7 @@ void
 MainWindow::deviceError()
 {
     disconnectDevices();
-
+/*
     QString msg;
     switch (ftStatus) {
     case FT_INVALID_HANDLE:
@@ -1629,6 +1599,7 @@ MainWindow::deviceError()
     QMessageBox::warning( this, tr("Error message"),
         tr("%1\n\n%2").arg(channel).arg(msg),
         QMessageBox::Ok | QMessageBox::Default);
+*/
 }
 
 RunInfo
@@ -1950,25 +1921,20 @@ MainWindow::closeEvent(QCloseEvent* event)
 void
 MainWindow::resetAlteraClicked()
 {
-//    char buf[5] = "R000";
-//    command_thread->writeCommand( buf, towrite);
-    command_thread->writeCommand(std::string("R000"));
-    statusBar()->showMessage( tr("reset ALTERA"), 1000);
+    if (channel_a->write_command(QString("R000"))) {
+        statusBar()->showMessage( tr("reset ALTERA"), 1000);
+    }
 }
 
 void
 MainWindow::setDelayChanged(int delay)
 {
-/*
-    char buf[5] = "DXXX";
-    local_itoa( delay, buf + 1);
-
-    command_thread->writeCommand( buf, towrite);
-*/
     std::stringstream com_stream;
     com_stream << "D" << std::setfill('0') << std::setw(3) << delay;
-    command_thread->writeCommand(com_stream.str());
-    statusBar()->showMessage( tr("Delay %1").arg(delay), 1000);
+    QString delay_command = QString::fromStdString(com_stream.str());
+    if (channel_a->write_command(delay_command)) {
+        statusBar()->showMessage( tr("Delay %1").arg(delay), 1000);
+    }
 }
 
 void
@@ -2279,30 +2245,12 @@ MainWindow::onOpcUaTimeout()
 void
 MainWindow::onOpcUaClientDisconnected()
 {
+    ui->statusBar->showMessage( "OPC UA server successfully disconnected", 1000);
 }
 
 void
-MainWindow::onCommandDeviceReadyRead()
+MainWindow::commandDeviceAnswer(const QString &answer)
 {
     QTextStream output(stdout);
-    QByteArray bytes_array = channel_a->readAll();
-    output << bytes_array << endl;
+    output << "Command device (Channel A) answer: " << answer << endl;
 }
-
-void
-MainWindow::onCommandDeviceReadFinished()
-{
-}
-
-void
-MainWindow::onCommandDeviceBytesWritten(qint64)
-{
-}
-
-#if defined(QT_VERSION >= 0x050100)
-void
-MainWindow::onCommandDeviceError(QSerialPort::SerialPortError)
-{
-
-}
-#endif

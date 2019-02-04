@@ -21,7 +21,11 @@
 extern "C" {
 #endif // __cplusplus
 
-int port_init(const char *device);
+#define COMMAND_SIZE 4
+#define RESPONSE_SUFFIX_SIZE 2
+#define RESPONSE_SIZE (COMMAND_SIZE + RESPONSE_SUFFIX_SIZE)
+
+int port_init( const char *device, int rdrw_flag);
 int port_close(int fd);
 size_t port_readn( int fd, char* buf, size_t count, int* err);
 int port_flush(int fd);

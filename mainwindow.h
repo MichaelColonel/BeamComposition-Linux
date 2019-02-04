@@ -28,7 +28,7 @@ namespace Ui {
 class MainWindow;
 }
 
-class SerialDevice;
+class QSocketNotifier;
 
 class QFile;
 class QTimer;
@@ -84,8 +84,7 @@ private slots:
     void processThreadFinished();
     void deviceError();
     void acquireDeviceError(int);
-    void commandDeviceError(QSerialPort::SerialPortError);
-    void commandDeviceAnswer(const QString&);
+    void commandDeviceError(int);
     void connectDevices();
     void disconnectDevices();
     void startRun();
@@ -117,6 +116,7 @@ private slots:
     void onOpcUaTimeout();
     void onOpcUaClientConnected();
     void onOpcUaClientDisconnected();
+    void onNotifierActivated(int);
 
 private:
     bool processRawFile( QFile* runfile, QList<QListWidgetItem*>& items);
@@ -137,7 +137,9 @@ private:
     QTimer* timer_opcua; // OPC UA iterate timer
     QTimer* timer_heartbeat; // OPC UA heartbeat timer
     SerialDevice* channel_a;
-    int channel_b_fd; // file discriptor
+    int channel_a_fd; // chanel a file discriptor
+    QSocketNotifier* channel_a_notifier; // notifier to read command response
+    int channel_b_fd; // chanel b file discriptor
     QFile* filerun;
     QFile* filedat;
     AcquireThread* acquire_thread;

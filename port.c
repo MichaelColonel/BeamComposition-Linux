@@ -27,44 +27,26 @@
 
 #include "port.h"
 
-#define COMMAND_SIZE 4
-#define RESPONSE_SUFFIX_SIZE 2
-#define RESPONSE_SIZE (COMMAND_SIZE + RESPONSE_SUFFIX_SIZE)
-
 static struct termios newio, oldio;
 
-static char command_buffer[COMMAND_SIZE + 1];
-static char response_buffer[RESPONSE_SIZE + 1];
-
-static const char* const OK_string = "OK";
-static const char* const NO_string = "NO";
-static const char* const Reset_string = "R000";
-
-static const char* const Signal_string = "Signal";
-static const char* const Accept_string = "Accept";
-static const char* const Reject_string = "Reject";
-static const char* const Finish_string = "Finish";
-static const char* const Carbon_string = "Carbon";
-
 static int port_check(int fd);
-static int port_check_response( const char* command, const char* response);
 
 int
-port_init(const char *device)
+port_init( const char *device, int rdrw_flag)
 {
     int fd = -1;
 
-    fd = open( device, O_RDWR | O_NOCTTY);
+    fd = open( device, rdrw_flag | O_NOCTTY);
 
     if (fd == -1) {
-        printf("unable to open device: %s\n", device);
-        printf("%s\n", strerror(errno));
+        fprintf( stderr, "unable to open device: %s\n", device);
+        fprintf( stderr, "%s\n", strerror(errno));
         return -1;
     }
 /*    else {
         printf("device %s has been opened successfully\n", device);
         if (fcntl( fd, F_SETFL, 0) == -1) {
-            printf("%s\n", strerror(errno));
+            fprintf( stderr, "%s\n", strerror(errno));
             return -1;
         }
     }
@@ -75,7 +57,7 @@ port_init(const char *device)
                  strerror(errno));
         return -1;
     }
-    memcpy( &oldio, &newio, sizeof(struct termios));
+    memcpy( &newio, &oldio, sizeof(struct termios));
 
     // set the baud rates to B19200
     if (cfsetispeed( &newio, B19200) == -1) {
@@ -111,9 +93,9 @@ port_init(const char *device)
     newio.c_cflag &= ~(IXON | IXOFF | IXANY);
     // ignore input parity
     newio.c_iflag |= IGNPAR;
-    // 1 character output, timeout 5 sec
+    // 1 character output, timeout 1 sec
     newio.c_cc[VMIN] = 1;
-    newio.c_cc[VTIME] = 5;
+    newio.c_cc[VTIME] = 1;
 
     // set the new options for the port
     if (tcsetattr( fd, TCSANOW, &newio) == -1) {
@@ -148,7 +130,7 @@ port_close(int fd)
 int
 port_flush(int fd)
 {
-    if (tcflush( fd, TCIOFLUSH) == -1) {
+    if (tcflush( fd, TCOFLUSH) == -1) {
         fprintf( stderr, "error flushing device: %s\n", strerror(errno));
         return -1;
     }
@@ -173,7 +155,7 @@ port_readn( int fd, char* buf, size_t count, int* err)
             }
             else if (nread == -1) {
                 *err = errno;
-                printf( "%s.\n", strerror(errno));
+                fprintf( stderr, "error reading from device: %s.\n", strerror(errno));
                 break;
             }
         }
@@ -197,8 +179,8 @@ port_check(int fd)
     FD_ZERO(&rfds);
     FD_SET( fd, &rfds);
 
-    /* Wait up to five seconds. */
-    tv.tv_sec = 5;
+    /* Wait up to one second. */
+    tv.tv_sec = 1;
     tv.tv_usec = 0;
 
     retval = select( fd + 1, &rfds, NULL, NULL, &tv);
@@ -214,7 +196,7 @@ port_check(int fd)
         return 0;
     }
     else {
-        printf("No data within five seconds.\n");
+        fprintf( stderr, "Timeout warning. No data within one second waiting interval!\n");
         return 1;
     }
     return 0;
@@ -223,36 +205,10 @@ port_check(int fd)
 int
 port_write_command( int fd,  const char* command)
 {
-    int error_no;
-    size_t result = -1;
     size_t cmdlen = strlen(command);
     ssize_t res = write( fd, command, cmdlen);
-    if (res != -1 && cmdlen == res) {
-        result = port_readn( fd, response_buffer, RESPONSE_SIZE, &error_no);
-    }
-    else
-        return -1;
-
-    if (!error_no && result == RESPONSE_SIZE) {
-        return port_check_response( Reset_string, response_buffer);
-    }
-    return -1;
-}
-
-int
-port_check_response( const char* command, const char* response)
-{
-    char tmp[RESPONSE_SIZE + 1] = {};
-    size_t cmdlen = strlen(command);
-    strcpy( tmp, command);
-    strcpy( tmp + cmdlen, OK_string);
-    if (!strcmp( tmp, response)) {
+    if (res != -1 && res == (ssize_t)cmdlen)
         return 0;
-    }
-    strcpy( tmp + cmdlen, NO_string);
-    if (!strcmp( tmp, response)) {
+    else
         return 1;
-    }
-
-    return -1;
 }

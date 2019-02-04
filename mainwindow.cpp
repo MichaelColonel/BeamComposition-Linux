@@ -36,6 +36,7 @@
 #include <QMessageBox>
 #include <QTextStream>
 #include <QThreadPool>
+#include <QSocketNotifier>
 #include <QDebug>
 
 #include <cstdio>
@@ -134,6 +135,14 @@ const Color_t ccolors[] = { kBlack, kRed, kBlue, kCyan, kOrange, kMagenta + 10, 
 // number of Gaus parameters
 const int gparams = 3;
 
+const char* const OK_string = "OK";
+const char* const NO_string = "NO";
+const char* const Signal_string = "Signal";
+const char* const Accept_string = "Accept";
+const char* const Reject_string = "Reject";
+const char* const Finish_string = "Finish";
+const char* const Carbon_string = "Carbon";
+
 } // namespace
 
 MainWindow::MainWindow(QWidget *parent)
@@ -144,7 +153,8 @@ MainWindow::MainWindow(QWidget *parent)
     timer_data(new QTimer(this)),
     timer_opcua(new QTimer(this)),
     timer_heartbeat(new QTimer(this)),
-    channel_a(new SerialDevice(this)),
+    channel_a_fd(-1),
+    channel_a_notifier(nullptr),
     channel_b_fd(-1),
     filerun(nullptr),
     filedat(nullptr),
@@ -262,13 +272,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect( profile_thread, SIGNAL(finished()), this, SLOT(processFileFinished()));
     connect( profile_thread, SIGNAL(progress(int)), progress_dialog, SLOT(setValue(int)));
     connect( progress_dialog, SIGNAL(canceled()), profile_thread, SLOT(stop()));
-
+/*
     connect( channel_a, SIGNAL(signalExternalSignal()), this, SLOT(externalBeamSignalReceived()));
     connect( channel_a, SIGNAL(signalNewBatchState(bool)), this, SLOT(newBatchStateReceived(bool)));
     connect( channel_a, SIGNAL(signalMovementFinished()), this, SLOT(movementFinished()));
     connect( channel_a, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(commandDeviceError(QSerialPort::SerialPortError)));
     connect( channel_a, SIGNAL(signalDeviceAnswer(QString)), this, SLOT(commandDeviceAnswer(QString)));
-
+*/
     connect( this, SIGNAL(signalStateChanged(StateType)), opcua_client, SLOT(writeStateValue(StateType)));
     connect( this, SIGNAL(signalBeamSpectrumChanged(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)),
         opcua_client, SLOT(writeBeamSpectrumValue(RunInfo::BeamSpectrumArray,RunInfo::BeamSpectrumArray,QDateTime)));
@@ -631,9 +641,14 @@ MainWindow::triggersItemChanged(int value)
 {
     std::stringstream com_stream;
     com_stream << "T00" << char(value + '0');
-
+/*
     QString trigger_command = QString::fromStdString(com_stream.str());
     if (channel_a->write_command(trigger_command)) {
+        QString message = (value) ? tr("Triggers activated") : tr("Triggers diactivated");
+        statusBar()->showMessage( message, 1000);
+    }
+*/
+    if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
         QString message = (value) ? tr("Triggers activated") : tr("Triggers diactivated");
         statusBar()->showMessage( message, 1000);
     }
@@ -645,8 +660,31 @@ MainWindow::motorItemChanged(int value)
     int steps = ui->scanningStepSpinBox->value();
     std::stringstream com_stream;
     com_stream << "M" << char(value + '0') << std::setfill('0') << std::setw(2) << steps;
+/*
     QString motor_command = QString::fromStdString(com_stream.str());
     if (channel_a->write_command(motor_command)) {
+        QString message;
+        switch (value) {
+        case 0:
+            message = QString(tr("Motor stopped"));
+            sys_state = STATE_POSITION_FINISH;
+            break;
+        case 1:
+            message = QString(tr("Hide away"));
+            sys_state = STATE_POSITION_REMOVE;
+            break;
+        case 2:
+        default:
+            message = QString(tr("Move out"));
+            sys_state = STATE_POSITION_MOVE;
+            break;
+        }
+        emit signalStateChanged(sys_state);
+
+        statusBar()->showMessage( message, 1000);
+    }
+*/
+    if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
         QString message;
         switch (value) {
         case 0:
@@ -1018,9 +1056,13 @@ MainWindow::acquisitionTimingChanged(int value)
 
         std::stringstream com_stream;
         com_stream << "A1" << char(delay_time + '0') << acquition_code;
-
+/*
         QString extraction_command = QString::fromStdString(com_stream.str());
         if (channel_a->write_command(extraction_command)) {
+            statusBar()->showMessage( tr("Extraction signal update"), 1000);
+        }
+*/
+        if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
             statusBar()->showMessage( tr("Extraction signal update"), 1000);
         }
     }
@@ -1086,9 +1128,18 @@ MainWindow::dataUpdateChanged(int id)
 
         std::stringstream com_stream;
         com_stream << "A" << char(state + '0') << char(delay_time + '0') << acquition_code;
-
+/*
         QString extraction_command = QString::fromStdString(com_stream.str());
+
         if (channel_a->write_command(extraction_command)) {
+            if (state)
+                statusBar()->showMessage( tr("Extraction signal update"), 1000);
+            else
+                statusBar()->showMessage( tr("Automatic timeout update"), 1000);
+        }
+*/
+
+        if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
             if (state)
                 statusBar()->showMessage( tr("Extraction signal update"), 1000);
             else
@@ -1266,11 +1317,13 @@ MainWindow::openFile(bool background_data)
 void
 MainWindow::connectDevices()
 {
+/*
     if (channel_a->isOpen()) {
         channel_a->flush();
         channel_a->close();
     }
-    int fd = port_init("/dev/ft2232h_mm_1");
+
+    fd = port_init("/dev/ft2232h_mm_1");
 
     channel_a->setPortName("/dev/ft2232h_mm_0");
     if (!channel_a->open(QSerialPort::ReadWrite) || fd == -1) {
@@ -1287,59 +1340,81 @@ MainWindow::connectDevices()
 
     acquire_thread->setFileDescriptor(fd);
     channel_b_fd = fd;
-
-    ui->connectButton->setEnabled(false);
-    ui->disconnectButton->setEnabled(true);
-    ui->dataUpdateGroupBox->setEnabled(true);
-    ui->detectorsPositionGroupBox->setEnabled(true);
-    ui->acquisitionGroupBox->setEnabled(true);
-    ui->runTypeGroupBox->setEnabled(true);
-    ui->scanningRunRadioButton->setEnabled(false);
-    ui->startRunButton->setEnabled(true);
-    ui->stopRunButton->setEnabled(false);
-/*
-    // stop motor
-    int mindex = ui->motorComboBox->currentIndex();
-    motorItemChanged(mindex);
-
-    // stop internal trigger
-    int cindex = ui->triggersComboBox->currentIndex();
-    triggersItemChanged(cindex);
-
-    // reset ALTERA
-    resetAlteraClicked();
-
-    // set delay
-    int delay = ui->delaySpinBox->value();
-    setDelayChanged(delay);
-
-    // set automatic or external signal update
-    int button_id = -1;
-    if (ui->dataUpdateAutoRadioButton->isChecked())
-        button_id = ui->updateDataButtonGroup->id(ui->dataUpdateAutoRadioButton);
-    else if (ui->dataUpdateStartRadioButton->isChecked())
-        button_id = ui->updateDataButtonGroup->id(ui->dataUpdateStartRadioButton);
-
-//    ui->dataUpdateStartRadioButton->setChecked(true);
-//    int button_id = ui->updateDataButtonGroup->id(ui->dataUpdateStartRadioButton);
-    if (button_id != -1)
-        dataUpdateChanged(button_id);
-
-    // set run type
-    button_id = -1;
-    if (ui->backgroundRunRadioButton->isChecked())
-        button_id = ui->runTypeButtonGroup->id(ui->backgroundRunRadioButton);
-    else if (ui->fixedRunRadioButton->isChecked())
-        button_id = ui->runTypeButtonGroup->id(ui->fixedRunRadioButton);
-    else if (ui->extCommandRunRadioButton->isChecked())
-        button_id = ui->runTypeButtonGroup->id(ui->extCommandRunRadioButton);
-    else if (ui->scanningRunRadioButton->isChecked())
-        button_id = ui->runTypeButtonGroup->id(ui->scanningRunRadioButton);
-    if (button_id != -1)
-        runTypeChanged(button_id);
 */
-    sys_state = STATE_DEVICE_CONNECTED;
-    emit signalStateChanged(sys_state);
+    channel_a_fd = port_init( "/dev/ft2232h_mm_0", O_RDWR | O_NONBLOCK); // Channel A - commands
+    channel_b_fd = port_init( "/dev/ft2232h_mm_1", O_RDONLY); // Channel B - data
+
+    if (channel_a_fd == -1 || channel_b_fd == -1) {
+        sys_state = STATE_DEVICE_DISCONNECTED;
+        emit signalStateChanged(sys_state);
+
+        QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
+            tr("Error during connection of FT2232H Channel A. This can fail if the ftdi_sio\n" \
+               "driver is loaded, use lsmod to check this and rmmod ftdi_sio\n" \
+               "to remove also rmmod usbserial."));
+        statusBar()->showMessage( tr("Channel A connection canceled"), 2000);
+        return;
+    }
+
+    channel_a_notifier = new QSocketNotifier( channel_a_fd, QSocketNotifier::Read, this);
+    connect( channel_a_notifier, SIGNAL(activated(int)), this, SLOT(onNotifierActivated(int)));
+
+    if (!port_write_command( channel_a_fd, "I000")) { // handshake
+        acquire_thread->setFileDescriptor(channel_b_fd);
+
+        ui->connectButton->setEnabled(false);
+        ui->disconnectButton->setEnabled(true);
+        ui->dataUpdateGroupBox->setEnabled(true);
+        ui->detectorsPositionGroupBox->setEnabled(true);
+        ui->acquisitionGroupBox->setEnabled(true);
+        ui->runTypeGroupBox->setEnabled(true);
+        ui->scanningRunRadioButton->setEnabled(false);
+        ui->startRunButton->setEnabled(true);
+        ui->stopRunButton->setEnabled(false);
+
+        // stop motor
+        int mindex = ui->motorComboBox->currentIndex();
+        motorItemChanged(mindex);
+
+        // stop internal trigger
+        int cindex = ui->triggersComboBox->currentIndex();
+        triggersItemChanged(cindex);
+
+        // reset ALTERA
+        resetAlteraClicked();
+
+        // set delay
+        int delay = ui->delaySpinBox->value();
+        setDelayChanged(delay);
+
+        // set automatic or external signal update
+        int button_id = -1;
+        if (ui->dataUpdateAutoRadioButton->isChecked())
+            button_id = ui->updateDataButtonGroup->id(ui->dataUpdateAutoRadioButton);
+        else if (ui->dataUpdateStartRadioButton->isChecked())
+            button_id = ui->updateDataButtonGroup->id(ui->dataUpdateStartRadioButton);
+
+//      ui->dataUpdateStartRadioButton->setChecked(true);
+//      int button_id = ui->updateDataButtonGroup->id(ui->dataUpdateStartRadioButton);
+        if (button_id != -1)
+            dataUpdateChanged(button_id);
+
+        // set run type
+        button_id = -1;
+        if (ui->backgroundRunRadioButton->isChecked())
+            button_id = ui->runTypeButtonGroup->id(ui->backgroundRunRadioButton);
+        else if (ui->fixedRunRadioButton->isChecked())
+            button_id = ui->runTypeButtonGroup->id(ui->fixedRunRadioButton);
+        else if (ui->extCommandRunRadioButton->isChecked())
+            button_id = ui->runTypeButtonGroup->id(ui->extCommandRunRadioButton);
+        else if (ui->scanningRunRadioButton->isChecked())
+            button_id = ui->runTypeButtonGroup->id(ui->scanningRunRadioButton);
+        if (button_id != -1)
+            runTypeChanged(button_id);
+
+        sys_state = STATE_DEVICE_CONNECTED;
+        emit signalStateChanged(sys_state);
+    }
 }
 
 void
@@ -1349,14 +1424,28 @@ MainWindow::disconnectDevices()
     bool acquire_state = acquire_thread->isRunning();
     if (process_state && acquire_state)
         stopRun();
-
+/*
     if (channel_a->isOpen()) {
         channel_a->flush();
         channel_a->close();
     }
+*/
+    if (channel_a_notifier) {
+        delete channel_a_notifier;
+        channel_a_notifier = nullptr;
+    }
+
+    if (channel_a_fd != -1) {
+        int res = port_close(channel_a_fd);
+        channel_a_fd = -1;
+        if (res == -1) {
+            std::cerr << "FT2232H Channel A close error." << std::endl;
+        }
+    }
 
     if (channel_b_fd != -1) {
         int res = port_close(channel_b_fd);
+        channel_b_fd = -1;
         if (res == -1) {
             std::cerr << "FT2232H Channel B close error." << std::endl;
         }
@@ -1381,7 +1470,7 @@ MainWindow::disconnectDevices()
 }
 
 void
-MainWindow::commandDeviceError(QSerialPort::SerialPortError err)
+MainWindow::commandDeviceError(int err)
 {
     Q_UNUSED(err);
     deviceError();
@@ -1921,7 +2010,12 @@ MainWindow::closeEvent(QCloseEvent* event)
 void
 MainWindow::resetAlteraClicked()
 {
+/*
     if (channel_a->write_command(QString("R000"))) {
+        statusBar()->showMessage( tr("reset ALTERA"), 1000);
+    }
+*/
+    if (!port_write_command( channel_a_fd, "R000")) {
         statusBar()->showMessage( tr("reset ALTERA"), 1000);
     }
 }
@@ -1931,8 +2025,13 @@ MainWindow::setDelayChanged(int delay)
 {
     std::stringstream com_stream;
     com_stream << "D" << std::setfill('0') << std::setw(3) << delay;
+/*
     QString delay_command = QString::fromStdString(com_stream.str());
     if (channel_a->write_command(delay_command)) {
+        statusBar()->showMessage( tr("Delay %1").arg(delay), 1000);
+    }
+*/
+    if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
         statusBar()->showMessage( tr("Delay %1").arg(delay), 1000);
     }
 }
@@ -2249,8 +2348,42 @@ MainWindow::onOpcUaClientDisconnected()
 }
 
 void
-MainWindow::commandDeviceAnswer(const QString &answer)
+MainWindow::onNotifierActivated(int)
 {
     QTextStream output(stdout);
-    output << "Command device (Channel A) answer: " << answer << endl;
+    QTextStream streamerr(stderr);
+    char response_buffer[RESPONSE_SIZE + 1] = {};
+    ssize_t result;
+    while ((result = ::read( channel_a_fd, response_buffer, RESPONSE_SIZE)) > 0) {
+
+        QByteArray barray;
+        barray.append( response_buffer, result);
+
+        if (barray.endsWith(OK_string)) {
+            output << "Response OK: " << barray << endl;
+        }
+        else if (barray.endsWith(NO_string)) {
+            streamerr << "Response Error: " << barray << endl;
+        }
+        else if (barray == Signal_string) {
+            output << "Signal" << endl;
+        }
+        else if (barray == Accept_string) {
+            output << "Accept" << endl;
+            newBatchStateReceived(false); // acquisition is started, drop previous data
+        }
+        else if (barray == Reject_string) {
+            output << "Reject" << endl;
+            newBatchStateReceived(true); // acquisition is finished, process acquired data
+        }
+        else if (barray == Finish_string) {
+            movementFinished();
+        }
+        else if (barray == Carbon_string) {
+            output << "Carbon" << endl;
+        }
+        else {
+            streamerr << "Unknown Response" << QString(response_buffer) << endl;
+        }
+    }
 }

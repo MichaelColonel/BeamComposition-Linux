@@ -110,9 +110,6 @@ AcquireThread::run()
     while (true) {
         int error_res = 0;
         size_t nread;
-//        ssize_t res = ::read( fd, buffer, MASK_SIZE);
-//        if (res == -1)
-//            error_res = -1;
         nread = port_readn( fd, buffer, MASK_SIZE, &error_res);
         {
             QMutexLocker locker(mutex);

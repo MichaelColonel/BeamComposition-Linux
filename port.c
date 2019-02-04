@@ -27,8 +27,27 @@
 
 #include "port.h"
 
+#define COMMAND_SIZE 4
+#define RESPONSE_SUFFIX_SIZE 2
+#define RESPONSE_SIZE (COMMAND_SIZE + RESPONSE_SUFFIX_SIZE)
+
 static struct termios newio, oldio;
-static int check(int fd);
+
+static char command_buffer[COMMAND_SIZE + 1];
+static char response_buffer[RESPONSE_SIZE + 1];
+
+static const char* const OK_string = "OK";
+static const char* const NO_string = "NO";
+static const char* const Reset_string = "R000";
+
+static const char* const Signal_string = "Signal";
+static const char* const Accept_string = "Accept";
+static const char* const Reject_string = "Reject";
+static const char* const Finish_string = "Finish";
+static const char* const Carbon_string = "Carbon";
+
+static int port_check(int fd);
+static int port_check_response( const char* command, const char* response);
 
 int
 port_init(const char *device)
@@ -92,9 +111,9 @@ port_init(const char *device)
     newio.c_cflag &= ~(IXON | IXOFF | IXANY);
     // ignore input parity
     newio.c_iflag |= IGNPAR;
-    // 1 character output, timeout 0 sec
-//    newio.c_cc[VMIN] = 1;
-//    newio.c_cc[VTIME] = 1;
+    // 1 character output, timeout 5 sec
+    newio.c_cc[VMIN] = 1;
+    newio.c_cc[VTIME] = 5;
 
     // set the new options for the port
     if (tcsetattr( fd, TCSANOW, &newio) == -1) {
@@ -146,7 +165,7 @@ port_readn( int fd, char* buf, size_t count, int* err)
 
     *err = 0;
     while (nleft > 0) {
-        if (!check(fd)) {
+        if (!port_check(fd)) {
             if ((nread = read( fd, ptr, nleft)) > 0) {
                 bytes_read += nread;
                 nleft -= nread;
@@ -168,7 +187,7 @@ port_readn( int fd, char* buf, size_t count, int* err)
 }
 
 int
-check(int fd)
+port_check(int fd)
 {
     fd_set rfds;
     struct timeval tv;
@@ -187,6 +206,7 @@ check(int fd)
 
     if (retval == -1) {
         perror("select()");
+        return -1;
     }
     else if (retval) {
         /* printf("Data is available now.\n"); */
@@ -195,7 +215,44 @@ check(int fd)
     }
     else {
         printf("No data within five seconds.\n");
-        return -1;
+        return 1;
     }
     return 0;
+}
+
+int
+port_write_command( int fd,  const char* command)
+{
+    int error_no;
+    size_t result = -1;
+    size_t cmdlen = strlen(command);
+    ssize_t res = write( fd, command, cmdlen);
+    if (res != -1 && cmdlen == res) {
+        result = port_readn( fd, response_buffer, RESPONSE_SIZE, &error_no);
+    }
+    else
+        return -1;
+
+    if (!error_no && result == RESPONSE_SIZE) {
+        return port_check_response( Reset_string, response_buffer);
+    }
+    return -1;
+}
+
+int
+port_check_response( const char* command, const char* response)
+{
+    char tmp[RESPONSE_SIZE + 1] = {};
+    size_t cmdlen = strlen(command);
+    strcpy( tmp, command);
+    strcpy( tmp + cmdlen, OK_string);
+    if (!strcmp( tmp, response)) {
+        return 0;
+    }
+    strcpy( tmp + cmdlen, NO_string);
+    if (!strcmp( tmp, response)) {
+        return 1;
+    }
+
+    return -1;
 }

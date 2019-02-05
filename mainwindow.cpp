@@ -1316,8 +1316,8 @@ MainWindow::openFile(bool background_data)
 void
 MainWindow::connectDevices()
 {
-    channel_a_fd = port_init( "/dev/ft2232h_mm_a", O_RDWR | O_NONBLOCK | O_NDELAY); // Channel A - commands
-    channel_b_fd = port_init( "/dev/ft2232h_mm_b", O_RDONLY | O_NDELAY); // Channel B - data
+    channel_a_fd = port_init( "/dev/ft2232h_mm_a", O_RDWR | O_NONBLOCK); // Channel A - commands
+    channel_b_fd = port_init( "/dev/ft2232h_mm_b", O_RDONLY); // Channel B - data
 
     if (channel_a_fd == -1 || channel_b_fd == -1) {
         sys_state = STATE_DEVICE_DISCONNECTED;

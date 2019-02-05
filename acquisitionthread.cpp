@@ -38,14 +38,7 @@
 
 namespace {
 
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-// function to check mask within the sequence of raw buffer data
-bool
-check_mask( unsigned char value, unsigned char mask)
-{
-    return !((value & MASK_BITS) ^ mask);
-}
-#elif defined(__GNUG__) && (__cplusplus >= 201103L)
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
 // lambda to check mask within the sequence of raw buffer data
 std::function< bool( unsigned char, unsigned char) >
 check_mask = [] ( unsigned char value, unsigned char mask) -> bool {
@@ -59,16 +52,16 @@ check_mask( unsigned char value, unsigned char mask)
 }
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
+const std::array< unsigned char, MASK_SIZE > mask_vector{
+    0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03
+};
+#else
 // mask buffer of the batch (high byte, low byte)
 const unsigned char mask_array[MASK_SIZE] = {
     0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03
 };
 const DataVector mask_vector( mask_array, mask_array + MASK_SIZE);
-#elif defined(__GNUG__) && (__cplusplus >= 201103L)
-const std::array< unsigned char, MASK_SIZE > mask_vector{
-    0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03
-};
 #endif
 
 QWaitCondition cond_acquire;
@@ -188,12 +181,12 @@ ProcessThread::run()
 
             localdata = std::move(queue.front());
             queue.pop();
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-            for ( DataVector::const_iterator it = localdata.begin(); it != localdata.end(); ++it)
-                 bufferdata.push_back(*it);
-#elif defined(__GNUG__) && (__cplusplus >= 201103L)
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
             for ( unsigned char v : localdata)
                  bufferdata.push_back(v);
+#else
+            for ( DataVector::const_iterator it = localdata.begin(); it != localdata.end(); ++it)
+                 bufferdata.push_back(*it);
 #endif
         }
 
@@ -203,12 +196,12 @@ ProcessThread::run()
         size_t res = process_data( localcounts, localdata, proc);
         if (res) {
             QMutexLocker locker(mutex);
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-            for ( CountsList::const_iterator it = localcounts.begin(); it != localcounts.end(); ++it)
-                counts.push_back(*it);
-#elif defined(__GNUG__) && (__cplusplus >= 201103L)
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
             for ( const CountsArray& event_counts: localcounts)
                 counts.push_back(event_counts);
+#else
+            for ( CountsList::const_iterator it = localcounts.begin(); it != localcounts.end(); ++it)
+                counts.push_back(*it);
 #endif
         }
 
@@ -218,11 +211,11 @@ ProcessThread::run()
 
     // final background data (if it was any data obtained)
     if (n && flag_background) {
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
+        for ( auto& p : back) {
+#else
         for ( SignalArray::iterator it = back.begin(); it != back.end(); ++it) {
             SignalPair& p = *it;
-#elif defined(__GNUG__) && (__cplusplus >= 201103L)
-        for ( auto& p : back) {
 #endif
             p.second = sqrt(p.second);
         }
@@ -257,7 +250,9 @@ ProcessThread::process_data( CountsList& list, DataVector& data, size_t& proc) c
         if (it != data.end()) {
             DataVector batch( it, it + mask_vector.size());
 
-            batch_to_counts( list, batch);
+//            batch_to_counts( list, batch);
+            CountsArray counts = BufferData::array(batch);
+            list.push_back(counts);
 
             it += mask_vector.size();
             proc += mask_vector.size();
@@ -271,11 +266,11 @@ ProcessThread::process_data( CountsList& list, DataVector& data, size_t& proc) c
 void
 ProcessThread::fill_background( SignalArray& back, const CountsList& lcounts, size_t& n)
 {
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
+    for ( const CountsArray& ch : lcounts) {
+#else
     for ( CountsList::const_iterator it = lcounts.begin(); it != lcounts.end(); ++it) {
         const CountsArray& ch = *it;
-#elif defined(__GNUG__) && (__cplusplus >= 201103L)
-    for ( const CountsArray& ch : lcounts) {
 #endif
         n++;
         for ( int i = 0; i < CHANNELS; ++i) {
@@ -327,14 +322,9 @@ ProcessFileThread::run()
 void
 ProcessFileThread::processFileBatches()
 {
-#if QT_VERSION >= 0x040000
     std::string std_filename = filename.toStdString();
     std::ifstream file( std_filename.c_str(), std::ifstream::binary);
-#else
-    std::string std_filename = filename.toStdString();
-    std::ifstream file( std_filename.c_str(), std::ifstream::binary);
-//    std::ifstream file( filename.toAscii(), std::ifstream::binary);
-#endif
+
     runinfo.clear();
 
     if (file.is_open()) {
@@ -349,11 +339,11 @@ ProcessFileThread::processFileBatches()
         // buffer data
         char* buf = reinterpret_cast<char*>(buffer);
         int items_proc = 0;
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
+        for ( QListWidgetItem* item : batches) {
+#else
         for ( QList<QListWidgetItem*>::iterator it = batches.begin(); it != batches.end(); ++it) {
             QListWidgetItem* item = *it;
-#elif defined(__GNUG__) && (__cplusplus >= 201103L)
-        for ( QListWidgetItem* item : batches) {
 #endif
             if (file.eof())
                 break;
@@ -395,11 +385,11 @@ ProcessFileThread::processFileBatches()
 
         // final background data
         if (n && flag_background) {
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
+            for ( auto& p : back) {
+#else
             for ( SignalArray::iterator it = back.begin(); it != back.end(); ++it) {
                 SignalPair& p = *it;
-#elif defined(__GNUG__) && (__cplusplus >= 201103L)
-            for ( auto& p : back) {
 #endif
                 p.second = sqrt(p.second);
             }
@@ -415,13 +405,8 @@ ProcessFileThread::processFileBatches()
 void
 ProcessFileThread::processFileData()
 {
-#if QT_VERSION >= 0x040000
     std::string std_filename = filename.toStdString();
     std::ifstream file( std_filename.c_str(), std::ifstream::binary);
-#else
-    std::string std_filename = filename.toStdString();
-    std::ifstream file( std_filename.c_str(), std::ifstream::binary);
-#endif
     runinfo.clear();
 
     if (file.is_open()) {
@@ -474,11 +459,11 @@ ProcessFileThread::processFileData()
 
         // final background data
         if (n && flag_background) {
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
+            for ( auto& p : back) {
+#else
             for ( SignalArray::iterator it = back.begin(); it != back.end(); ++it) {
                 SignalPair& p = *it;
-#elif defined(__GNUG__) && (__cplusplus >= 201103L)
-            for ( auto& p : back) {
 #endif
                 p.second = sqrt(p.second);
             }

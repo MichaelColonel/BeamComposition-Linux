@@ -15,15 +15,15 @@
  *      MA 02110-1301, USA.
  */
 
-#include <unistd.h>     /* UNIX standard function definitions */
-#include <sys/ioctl.h>      /* File control definitions */
-#include <fcntl.h>      /* File control definitions */
-#include <errno.h>      /* Error number definitions */
-#include <termios.h>    /* POSIX terminal control definitions */
+#include <unistd.h>      /* UNIX standard function definitions */
+#include <sys/ioctl.h>   /* File control definitions */
+#include <fcntl.h>       /* File control definitions */
+#include <errno.h>       /* Error number definitions */
+#include <termios.h>     /* POSIX terminal control definitions */
 
-#include <stdio.h>      /* Standard input/output definitions */
-#include <stdlib.h>     /* Standard library definitions */
-#include <string.h>     /* String function definitions */
+#include <stdio.h>       /* Standard input/output definitions */
+#include <stdlib.h>      /* Standard library definitions */
+#include <string.h>      /* String function definitions */
 
 #include "port.h"
 
@@ -36,7 +36,7 @@ port_init( const char *device, int rdrw_flag)
 {
     int fd = -1;
 
-    fd = open( device, rdrw_flag | O_NOCTTY);
+    fd = open( device, rdrw_flag | O_NOCTTY | O_NDELAY);
 
     if (fd == -1) {
         fprintf( stderr, "unable to open device: %s\n", device);
@@ -140,7 +140,8 @@ port_flush(int fd)
 size_t
 port_readn( int fd, char* buf, size_t count, int* err)
 {
-    size_t nleft = count, bytes_read = 0;
+    size_t nleft = count;
+    size_t bytes_read = 0;
     char* ptr = buf;
 
     ssize_t nread;
@@ -210,5 +211,5 @@ port_write_command( int fd,  const char* command)
     if (res != -1 && res == (ssize_t)cmdlen)
         return 0;
     else
-        return 1;
+        return -1;
 }

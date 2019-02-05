@@ -19,7 +19,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif // __cplusplus
+#endif /* __cplusplus */
 
 #define COMMAND_SIZE 4
 #define RESPONSE_SUFFIX_SIZE 2
@@ -33,4 +33,4 @@ int port_write_command( int fd, const char* command);
 
 #ifdef __cplusplus
 }
-#endif // __cplusplus
+#endif /* __cplusplus */

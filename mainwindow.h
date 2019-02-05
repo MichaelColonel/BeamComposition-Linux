@@ -20,15 +20,12 @@
 #include <QMainWindow>
 
 #include "channelscountsfit.h"
-#include "serialdevice.h"
 #include "runinfo.h"
 #include "typedefs.h"
 
 namespace Ui {
 class MainWindow;
 }
-
-class QSocketNotifier;
 
 class QFile;
 class QTimer;
@@ -38,6 +35,7 @@ class QCloseEvent;
 class QProgressDialog;
 class QSettings;
 class QDateTime;
+class QSocketNotifier;
 
 class AcquireThread;
 class ProcessThread;
@@ -136,7 +134,6 @@ private:
     QTimer* timer_data; // data update timer
     QTimer* timer_opcua; // OPC UA iterate timer
     QTimer* timer_heartbeat; // OPC UA heartbeat timer
-    SerialDevice* channel_a;
     int channel_a_fd; // chanel a file discriptor
     QSocketNotifier* channel_a_notifier; // notifier to read command response
     int channel_b_fd; // chanel b file discriptor

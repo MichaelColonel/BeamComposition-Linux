@@ -87,8 +87,9 @@ RunDetailsListWidgetItem::update_text()
     QString date_text = date_time.toString("dd.MM.yyyy");
     QString time_text = date_time.toString("hh:mm:ss");
 
-    QString text = QObject::tr("Batch %1\nDate: %2, Time: %3\nBytes: %4\nEvents: %5\nProcessed events: %6") \
-            .arg(batch_number).arg(date_text).arg(time_text).arg(bytes).arg(events).arg(processed_events);
+//    QString text = QObject::tr("Batch %1\nDate: %2, Time: %3\nBytes: %4\nEvents: %5\nProcessed events: %6") \
+//            .arg(batch_number).arg(date_text).arg(time_text).arg(bytes).arg(events).arg(processed_events);
+    QString text = QObject::tr("Date: %1, Time: %2\nEvents: %3").arg(date_text).arg(time_text).arg(events);
 
     setText(text);
 }

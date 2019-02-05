@@ -63,7 +63,6 @@
 #include "opcuaclient.h"
 
 #include "port.h"
-#include "serialdevice.h"
 
 #include "ui_mainwindow.h"
 #include "mainwindow.h"
@@ -1317,32 +1316,8 @@ MainWindow::openFile(bool background_data)
 void
 MainWindow::connectDevices()
 {
-/*
-    if (channel_a->isOpen()) {
-        channel_a->flush();
-        channel_a->close();
-    }
-
-    fd = port_init("/dev/ft2232h_mm_1");
-
-    channel_a->setPortName("/dev/ft2232h_mm_0");
-    if (!channel_a->open(QSerialPort::ReadWrite) || fd == -1) {
-        sys_state = STATE_DEVICE_DISCONNECTED;
-        emit signalStateChanged(sys_state);
-
-        QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
-            tr("Error during connection of FT2232H Channel A. This can fail if the ftdi_sio\n" \
-               "driver is loaded, use lsmod to check this and rmmod ftdi_sio\n" \
-               "to remove also rmmod usbserial."));
-        statusBar()->showMessage( tr("Channel A connection canceled"), 2000);
-        return;
-    }
-
-    acquire_thread->setFileDescriptor(fd);
-    channel_b_fd = fd;
-*/
-    channel_a_fd = port_init( "/dev/ft2232h_mm_0", O_RDWR | O_NONBLOCK); // Channel A - commands
-    channel_b_fd = port_init( "/dev/ft2232h_mm_1", O_RDONLY); // Channel B - data
+    channel_a_fd = port_init( "/dev/ft2232h_mm_0", O_RDWR | O_NONBLOCK | O_NDELAY); // Channel A - commands
+    channel_b_fd = port_init( "/dev/ft2232h_mm_1", O_RDONLY | O_NDELAY); // Channel B - data
 
     if (channel_a_fd == -1 || channel_b_fd == -1) {
         sys_state = STATE_DEVICE_DISCONNECTED;

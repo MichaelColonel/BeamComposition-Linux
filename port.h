@@ -30,6 +30,8 @@ int port_close(int fd);
 size_t port_readn( int fd, char* buf, size_t count, int* err);
 int port_flush(int fd);
 int port_write_command( int fd, const char* command);
+int port_handshake(int fd);
+int port_reset_altera(int fd);
 
 #ifdef __cplusplus
 }

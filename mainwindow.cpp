@@ -1316,8 +1316,8 @@ MainWindow::openFile(bool background_data)
 void
 MainWindow::connectDevices()
 {
-    channel_a_fd = port_init( "/dev/ft2232h_mm_0", O_RDWR | O_NONBLOCK | O_NDELAY); // Channel A - commands
-    channel_b_fd = port_init( "/dev/ft2232h_mm_1", O_RDONLY | O_NDELAY); // Channel B - data
+    channel_a_fd = port_init( "/dev/ft2232h_mm_a", O_RDWR | O_NONBLOCK | O_NDELAY); // Channel A - commands
+    channel_b_fd = port_init( "/dev/ft2232h_mm_b", O_RDONLY | O_NDELAY); // Channel B - data
 
     if (channel_a_fd == -1 || channel_b_fd == -1) {
         sys_state = STATE_DEVICE_DISCONNECTED;
@@ -1334,7 +1334,7 @@ MainWindow::connectDevices()
     channel_a_notifier = new QSocketNotifier( channel_a_fd, QSocketNotifier::Read, this);
     connect( channel_a_notifier, SIGNAL(activated(int)), this, SLOT(onNotifierActivated(int)));
 
-    if (!port_write_command( channel_a_fd, "I000")) { // handshake
+    if (!port_handshake(channel_a_fd)) { // handshake
         acquire_thread->setFileDescriptor(channel_b_fd);
 
         ui->connectButton->setEnabled(false);
@@ -1394,7 +1394,9 @@ MainWindow::connectDevices()
 
 void
 MainWindow::disconnectDevices()
-{    
+{
+    QTextStream output(stderr);
+
     bool process_state = process_thread->isRunning();
     bool acquire_state = acquire_thread->isRunning();
     if (process_state && acquire_state)
@@ -1414,7 +1416,7 @@ MainWindow::disconnectDevices()
         int res = port_close(channel_a_fd);
         channel_a_fd = -1;
         if (res == -1) {
-            std::cerr << "FT2232H Channel A close error." << std::endl;
+            output << "FT2232H Channel A close error." << endl;
         }
     }
 
@@ -1422,7 +1424,7 @@ MainWindow::disconnectDevices()
         int res = port_close(channel_b_fd);
         channel_b_fd = -1;
         if (res == -1) {
-            std::cerr << "FT2232H Channel B close error." << std::endl;
+            output << "FT2232H Channel B close error." << endl;
         }
     }
 
@@ -1961,6 +1963,8 @@ MainWindow::loadSettings(QSettings* set)
 void
 MainWindow::closeEvent(QCloseEvent* event)
 {
+    QTextStream output(stdout);
+
     int res = QMessageBox::Yes;
     if (acquire_thread->isRunning()) {
         res = QMessageBox::warning( this, tr("Close program"), \
@@ -1973,7 +1977,7 @@ MainWindow::closeEvent(QCloseEvent* event)
             int value = 0;
             QDateTime now = QDateTime::currentDateTime();
             bool res = opcua_client->writeHeartBeatValue( value, now);
-            std::cout << "OPC UA HeartBeat result: " << res << ", value: " << value << std::endl;
+            output << "OPC UA HeartBeat result: " << res << ", value: " << value << endl;
         }
         saveSettings(settings);
         event->accept();
@@ -1990,7 +1994,7 @@ MainWindow::resetAlteraClicked()
         statusBar()->showMessage( tr("reset ALTERA"), 1000);
     }
 */
-    if (!port_write_command( channel_a_fd, "R000")) {
+    if (!port_reset_altera(channel_a_fd)) {
         statusBar()->showMessage( tr("reset ALTERA"), 1000);
     }
 }
@@ -2307,12 +2311,13 @@ MainWindow::onOpcUaClientConnected()
 void
 MainWindow::onOpcUaTimeout()
 {
+    QTextStream output(stdout);
     if (opcua_client && opcua_client->isConnected()) {
         int value = 1;
         QDateTime now = QDateTime::currentDateTime();
         bool res = opcua_client->writeHeartBeatValue( value, now);
         if (opcua_dialog && res) opcua_dialog->setHeatBeatValue( value, now);
-        std::cout << "OPC UA HeartBeat result: " << res << ", value: " << value << std::endl;
+        output << "OPC UA HeartBeat result: " << res << ", value: " << value << endl;
     }
 }
 

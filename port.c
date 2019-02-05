@@ -28,13 +28,15 @@
 #include "port.h"
 
 static struct termios newio, oldio;
+static const char* const CommandHandshake_string = "I000";
+static const char* const CommandResetAltera_string = "R000";
 
 static int port_check(int fd);
 
 int
 port_init( const char *device, int rdrw_flag)
 {
-    int fd = -1;
+    int fd;
 
     fd = open( device, rdrw_flag | O_NOCTTY | O_NDELAY);
 
@@ -212,4 +214,16 @@ port_write_command( int fd,  const char* command)
         return 0;
     else
         return -1;
+}
+
+int
+port_handshake(int fd)
+{
+    return port_write_command( fd, CommandHandshake_string);
+}
+
+int
+port_reset_altera(int fd)
+{
+    return port_write_command( fd, CommandResetAltera_string);
 }

@@ -265,7 +265,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect( process_thread, SIGNAL(finished()), this, SLOT(processThreadFinished()));
     connect( acquire_thread, SIGNAL(started()), this, SLOT(acquireThreadStarted()));
     connect( acquire_thread, SIGNAL(finished()), this, SLOT(acquireThreadFinished()));
-    connect( acquire_thread, SIGNAL(signalDeviceError(int)), this, SLOT(acquireDeviceError(int)));
+    connect( acquire_thread, SIGNAL(signalDeviceError(int)), this, SLOT(dataDeviceError(int)));
 
     connect( profile_thread, SIGNAL(started()), this, SLOT(processFileStarted()));
     connect( profile_thread, SIGNAL(finished()), this, SLOT(processFileFinished()));
@@ -1317,7 +1317,7 @@ void
 MainWindow::connectDevices()
 {
     channel_a_fd = port_init( "/dev/ft2232h_mm_a", O_RDWR | O_NONBLOCK); // Channel A - commands
-    channel_b_fd = port_init( "/dev/ft2232h_mm_b", O_RDONLY); // Channel B - data
+    channel_b_fd = port_init( "/dev/ft2232h_mm_b", O_RDONLY | O_NONBLOCK); // Channel B - data
 
     if (channel_a_fd == -1 || channel_b_fd == -1) {
         sys_state = STATE_DEVICE_DISCONNECTED;
@@ -1331,8 +1331,11 @@ MainWindow::connectDevices()
         return;
     }
 
-    channel_a_notifier = new QSocketNotifier( channel_a_fd, QSocketNotifier::Read, this);
-    connect( channel_a_notifier, SIGNAL(activated(int)), this, SLOT(onNotifierActivated(int)));
+	channel_a_notifier = new QSocketNotifier( channel_a_fd, QSocketNotifier::Read, this);
+	connect( channel_a_notifier, SIGNAL(activated(int)), this, SLOT(onCommandDeviceNotifierActivated(int)));
+
+	channel_b_notifier = new QSocketNotifier( channel_b_fd, QSocketNotifier::Read, this);
+	connect( channel_b_notifier, SIGNAL(activated(int)), this, SLOT(onDataDeviceNotifierActivated(int)));
 
     if (!port_handshake(channel_a_fd)) { // handshake
         acquire_thread->setFileDescriptor(channel_b_fd);
@@ -1412,6 +1415,11 @@ MainWindow::disconnectDevices()
         channel_a_notifier = nullptr;
     }
 
+    if (channel_b_notifier) {
+        delete channel_b_notifier;
+        channel_b_notifier = nullptr;
+    }
+
     if (channel_a_fd != -1) {
         int res = port_close(channel_a_fd);
         channel_a_fd = -1;
@@ -1455,7 +1463,7 @@ MainWindow::commandDeviceError(int err)
 }
 
 void
-MainWindow::acquireDeviceError(int err)
+MainWindow::dataDeviceError(int err)
 {
     Q_UNUSED(err);
     deviceError();
@@ -2328,7 +2336,7 @@ MainWindow::onOpcUaClientDisconnected()
 }
 
 void
-MainWindow::onNotifierActivated(int)
+MainWindow::onCommandDeviceNotifierActivated(int)
 {
     QTextStream output(stdout);
     QTextStream streamerr(stderr);
@@ -2366,4 +2374,22 @@ MainWindow::onNotifierActivated(int)
             streamerr << "Unknown Response" << QString(response_buffer) << endl;
         }
     }
+}
+
+void
+MainWindow::onDataDeviceNotifierActivated(int)
+{
+	QTextStream output(stdout);
+	QTextStream streamerr(stderr);
+
+	char response_buffer[DATA_EVENT_SIZE] = {};
+	ssize_t result;
+	DataVector localdata;
+	while ((result = ::read( channel_b_fd, response_buffer, DATA_EVENT_SIZE)) > 0) {
+		// send then to the process thread
+		for ( ssize_t i = 0; i < result; ++i) {
+			localdata.push_back(response_buffer[i]);
+		}
+	}
+	this->acquire_thread->appendData(localdata);
 }

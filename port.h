@@ -22,6 +22,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define COMMAND_SIZE 4
+#define DATA_EVENT_SIZE 8
 #define RESPONSE_SUFFIX_SIZE 2
 #define RESPONSE_SIZE (COMMAND_SIZE + RESPONSE_SUFFIX_SIZE)
 

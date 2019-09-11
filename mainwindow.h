@@ -81,7 +81,7 @@ private slots:
     void processThreadStarted();
     void processThreadFinished();
     void deviceError();
-    void acquireDeviceError(int);
+    void dataDeviceError(int);
     void commandDeviceError(int);
     void connectDevices();
     void disconnectDevices();
@@ -114,7 +114,8 @@ private slots:
     void onOpcUaTimeout();
     void onOpcUaClientConnected();
     void onOpcUaClientDisconnected();
-    void onNotifierActivated(int);
+    void onCommandDeviceNotifierActivated(int);
+    void onCommandDeviceNotifierActivated(int);
 
 private:
     bool processRawFile( QFile* runfile, QList<QListWidgetItem*>& items);
@@ -137,6 +138,7 @@ private:
     int channel_a_fd; // chanel a file discriptor
     QSocketNotifier* channel_a_notifier; // notifier to read command response
     int channel_b_fd; // chanel b file discriptor
+    QSocketNotifier* channel_b_notifier; // notifier to read data
     QFile* filerun;
     QFile* filedat;
     AcquireThread* acquire_thread;

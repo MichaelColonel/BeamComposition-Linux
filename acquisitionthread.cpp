@@ -155,6 +155,14 @@ ProcessThread::stop()
 }
 
 void
+ProcessThread::appendData(const DataVector& rawdata)
+{
+	QMutexLocker locker(mutex);
+	queue.push(rawdata);
+	cond_acquire.wakeOne();
+}
+
+void
 ProcessThread::run()
 {
     // background data
@@ -231,6 +239,13 @@ ProcessThread::run()
     stopped = false;
 }
 
+/**
+ * @brief Transform batch of raw data into ADC counts array
+ * @param list - list of ADC arrays
+ * @param data - batch of raw data
+ * @param proc - number of process events
+ * @return
+ */
 size_t
 ProcessThread::process_data( CountsList& list, DataVector& data, size_t& proc) const
 {
@@ -248,10 +263,9 @@ ProcessThread::process_data( CountsList& list, DataVector& data, size_t& proc) c
         it = std::search( it, data.end(), mask_vector.begin(), mask_vector.end(), check_mask);
 
         if (it != data.end()) {
-            DataVector batch( it, it + mask_vector.size());
-
+//            DataVector batch( it, it + mask_vector.size());
 //            batch_to_counts( list, batch);
-            CountsArray counts = BufferData::array(batch);
+            CountsArray counts = BufferData::array(DataVector( it, it + mask_vector.size()));
             list.push_back(counts);
 
             it += mask_vector.size();

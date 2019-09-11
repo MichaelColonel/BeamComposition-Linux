@@ -58,6 +58,7 @@ public:
     void getProcessedData( DataList&, CountsList&);
     void setBackground(bool background) { flag_background = background; }
     bool isBackground() const { return flag_background; }
+	void appendData(const DataVector& data); // append data for processing
 
 public slots:
     virtual void stop();
@@ -90,7 +91,11 @@ private:
         }
     private:
         unsigned short h, l;
+#if defined(__GNUG__) && (__cplusplus >= 201103L)
+        static constexpr int MO = 2, BO = 6;
+#else
         static const int MO = 2, BO = 6;
+#endif
     };
 
     // Batch of raw buffer data transforms into counts array

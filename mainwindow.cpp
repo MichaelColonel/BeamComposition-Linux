@@ -155,6 +155,7 @@ MainWindow::MainWindow(QWidget *parent)
     channel_a_fd(-1),
     channel_a_notifier(nullptr),
     channel_b_fd(-1),
+    channel_b_notifier(nullptr),
     filerun(nullptr),
     filedat(nullptr),
     acquire_thread(new AcquireThread(this)),
@@ -344,13 +345,8 @@ MainWindow::~MainWindow()
     profile_thread->wait();
     delete profile_thread;
 
-    acquire_thread->stop();
     process_thread->stop();
-
-    acquire_thread->wait();
     process_thread->wait();
-
-    delete acquire_thread;
     delete process_thread;
 
     if (filerun) {
@@ -952,12 +948,6 @@ MainWindow::processFileFinished()
 void
 MainWindow::startRun()
 {
-    if (acquire_thread->isRunning()) {
-        QMessageBox::warning( this, tr("Error"),
-            tr("Acquisition thread is still running."), QMessageBox::Ok | QMessageBox::Default);
-        return;
-    }
-
     if (process_thread->isRunning()) {
         QMessageBox::warning( this, tr("Error"),
             tr("Processing thread is still running."), QMessageBox::Ok | QMessageBox::Default);
@@ -967,7 +957,6 @@ MainWindow::startRun()
     if (ui->dataUpdateAutoRadioButton->isChecked())
         timer_data->start();
 
-    acquire_thread->start();
     process_thread->start();
 }
 
@@ -977,7 +966,6 @@ MainWindow::stopRun()
     if (ui->dataUpdateAutoRadioButton->isChecked())
         timer_data->stop();
 
-    acquire_thread->stop();
     process_thread->stop();
 }
 
@@ -1338,7 +1326,7 @@ MainWindow::connectDevices()
 	connect( channel_b_notifier, SIGNAL(activated(int)), this, SLOT(onDataDeviceNotifierActivated(int)));
 
     if (!port_handshake(channel_a_fd)) { // handshake
-        acquire_thread->setFileDescriptor(channel_b_fd);
+        // flush channel b device
 
         ui->connectButton->setEnabled(false);
         ui->disconnectButton->setEnabled(true);
@@ -1401,15 +1389,9 @@ MainWindow::disconnectDevices()
     QTextStream output(stderr);
 
     bool process_state = process_thread->isRunning();
-    bool acquire_state = acquire_thread->isRunning();
-    if (process_state && acquire_state)
+    if (process_state)
         stopRun();
-/*
-    if (channel_a->isOpen()) {
-        channel_a->flush();
-        channel_a->close();
-    }
-*/
+
     if (channel_a_notifier) {
         delete channel_a_notifier;
         channel_a_notifier = nullptr;
@@ -1974,7 +1956,7 @@ MainWindow::closeEvent(QCloseEvent* event)
     QTextStream output(stdout);
 
     int res = QMessageBox::Yes;
-    if (acquire_thread->isRunning()) {
+    if (process_thread->isRunning()) {
         res = QMessageBox::warning( this, tr("Close program"), \
             tr("Acquisition is still active.\nDo you want to quit program?"), \
             QMessageBox::Yes, QMessageBox::No | QMessageBox::Default);
@@ -2336,8 +2318,10 @@ MainWindow::onOpcUaClientDisconnected()
 }
 
 void
-MainWindow::onCommandDeviceNotifierActivated(int)
+MainWindow::onCommandDeviceNotifierActivated(int fd)
 {
+    Q_UNUSED(fd);
+
     QTextStream output(stdout);
     QTextStream streamerr(stderr);
     char response_buffer[RESPONSE_SIZE + 1] = {};
@@ -2377,19 +2361,22 @@ MainWindow::onCommandDeviceNotifierActivated(int)
 }
 
 void
-MainWindow::onDataDeviceNotifierActivated(int)
+MainWindow::onDataDeviceNotifierActivated(int fd)
 {
-	QTextStream output(stdout);
-	QTextStream streamerr(stderr);
+    Q_UNUSED(fd);
 
-	char response_buffer[DATA_EVENT_SIZE] = {};
+	QTextStream output(stdout);
+
+    char response_buffer[80] = {};
 	ssize_t result;
 	DataVector localdata;
 	while ((result = ::read( channel_b_fd, response_buffer, DATA_EVENT_SIZE)) > 0) {
 		// send then to the process thread
+        output << result << endl;
 		for ( ssize_t i = 0; i < result; ++i) {
 			localdata.push_back(response_buffer[i]);
 		}
 	}
-	this->acquire_thread->appendData(localdata);
+    if (localdata.size())
+        this->process_thread->appendData(localdata);
 }

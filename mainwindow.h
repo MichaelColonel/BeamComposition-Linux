@@ -115,7 +115,7 @@ private slots:
     void onOpcUaClientConnected();
     void onOpcUaClientDisconnected();
     void onCommandDeviceNotifierActivated(int);
-    void onCommandDeviceNotifierActivated(int);
+    void onDataDeviceNotifierActivated(int);
 
 private:
     bool processRawFile( QFile* runfile, QList<QListWidgetItem*>& items);

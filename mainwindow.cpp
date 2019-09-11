@@ -1312,10 +1312,10 @@ MainWindow::connectDevices()
         emit signalStateChanged(sys_state);
 
         QMessageBox::warning( this, tr("Unable to open the FT2232H device"), \
-            tr("Error during connection of FT2232H Channel A. This can fail if the ftdi_sio\n" \
+            tr("Error during connection of FT2232H channels. This can fail if the ftdi_sio\n" \
                "driver is loaded, use lsmod to check this and rmmod ftdi_sio\n" \
                "to remove also rmmod usbserial."));
-        statusBar()->showMessage( tr("Channel A connection canceled"), 2000);
+        statusBar()->showMessage( tr("Channels connection canceled"), 2000);
         return;
     }
 

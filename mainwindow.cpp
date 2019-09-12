@@ -643,7 +643,8 @@ MainWindow::triggersItemChanged(int value)
         statusBar()->showMessage( message, 1000);
     }
 */
-    if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
+//    if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
+    if (!port_pedestal_triggers( channel_a_fd, value + '0')) {
         QString message = (value) ? tr("Triggers activated") : tr("Triggers diactivated");
         statusBar()->showMessage( message, 1000);
     }
@@ -679,7 +680,8 @@ MainWindow::motorItemChanged(int value)
         statusBar()->showMessage( message, 1000);
     }
 */
-    if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
+//    if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
+    if (!port_movement( channel_a_fd, value + '0', steps)) {
         QString message;
         switch (value) {
         case 0:
@@ -1035,21 +1037,22 @@ MainWindow::acquisitionTimingChanged(int value)
 
         command_thread->writeCommand( buf, towrite);
 */
-        char acquition_code = '5'; // default '5' = 600 ms
+        char acquisition_code = '5'; // default '5' = 600 ms
         if (acquisition_time >= 0 && acquisition_time <= 9)
-            acquition_code = acquisition_time + '0';
+            acquisition_code = acquisition_time + '0';
         else if (acquisition_time >= 10 && acquisition_time <= 15)
-            acquition_code = (acquisition_time - 10) + 'A';
+            acquisition_code = (acquisition_time - 10) + 'A';
 
         std::stringstream com_stream;
-        com_stream << "A1" << char(delay_time + '0') << acquition_code;
+        com_stream << "A1" << char(delay_time + '0') << acquisition_code;
 /*
         QString extraction_command = QString::fromStdString(com_stream.str());
         if (channel_a->write_command(extraction_command)) {
             statusBar()->showMessage( tr("Extraction signal update"), 1000);
         }
 */
-        if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
+//        if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
+        if (!port_acquisition_timing( channel_a_fd, delay_time + '0', acquisition_code)) {
             statusBar()->showMessage( tr("Extraction signal update"), 1000);
         }
     }
@@ -1107,14 +1110,14 @@ MainWindow::dataUpdateChanged(int id)
         ui->acquisitionTimeComboBox->setEnabled(state);
         ui->delayTimeComboBox->setEnabled(state);
 
-        char acquition_code = '5'; // default '5' = 600 ms
+        char acquisition_code = '5'; // default '5' = 600 ms
         if (acquisition_time >= 0 && acquisition_time <= 9)
-            acquition_code = acquisition_time + '0';
+            acquisition_code = acquisition_time + '0';
         else if (acquisition_time >= 10 && acquisition_time <= 15)
-            acquition_code = (acquisition_time - 10) + 'A';
+            acquisition_code = (acquisition_time - 10) + 'A';
 
         std::stringstream com_stream;
-        com_stream << "A" << char(state + '0') << char(delay_time + '0') << acquition_code;
+        com_stream << "A" << char(state + '0') << char(delay_time + '0') << acquisition_code;
 /*
         QString extraction_command = QString::fromStdString(com_stream.str());
 
@@ -1126,7 +1129,8 @@ MainWindow::dataUpdateChanged(int id)
         }
 */
 
-        if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
+//        if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
+        if (!port_acquisition_state_timing( channel_a_fd, state + '0', delay_time + '0', acquisition_code)) {
             if (state)
                 statusBar()->showMessage( tr("Extraction signal update"), 1000);
             else
@@ -1319,11 +1323,8 @@ MainWindow::connectDevices()
         return;
     }
 
-	channel_a_notifier = new QSocketNotifier( channel_a_fd, QSocketNotifier::Read, this);
-	connect( channel_a_notifier, SIGNAL(activated(int)), this, SLOT(onCommandDeviceNotifierActivated(int)));
-
-	channel_b_notifier = new QSocketNotifier( channel_b_fd, QSocketNotifier::Read, this);
-	connect( channel_b_notifier, SIGNAL(activated(int)), this, SLOT(onDataDeviceNotifierActivated(int)));
+    port_flush(channel_a_fd);
+    port_flush(channel_b_fd);
 
     if (!port_handshake(channel_a_fd)) { // handshake
         // flush channel b device
@@ -1380,6 +1381,13 @@ MainWindow::connectDevices()
 
         sys_state = STATE_DEVICE_CONNECTED;
         emit signalStateChanged(sys_state);
+
+        channel_a_notifier = new QSocketNotifier( channel_a_fd, QSocketNotifier::Read, this);
+        connect( channel_a_notifier, SIGNAL(activated(int)), this, SLOT(onCommandDeviceNotifierActivated(int)));
+
+        channel_b_notifier = new QSocketNotifier( channel_b_fd, QSocketNotifier::Read, this);
+        connect( channel_b_notifier, SIGNAL(activated(int)), this, SLOT(onDataDeviceNotifierActivated(int)));
+
     }
 }
 
@@ -2317,16 +2325,15 @@ MainWindow::onOpcUaClientDisconnected()
     ui->statusBar->showMessage( "OPC UA server successfully disconnected", 1000);
 }
 
+/// @param fd - channel_a_fd
 void
 MainWindow::onCommandDeviceNotifierActivated(int fd)
 {
-    Q_UNUSED(fd);
-
     QTextStream output(stdout);
     QTextStream streamerr(stderr);
     char response_buffer[RESPONSE_SIZE + 1] = {};
     ssize_t result;
-    while ((result = ::read( channel_a_fd, response_buffer, RESPONSE_SIZE)) > 0) {
+    while ((result = ::read( fd, response_buffer, RESPONSE_SIZE)) > 0) {
 
         QByteArray barray;
         barray.append( response_buffer, result);
@@ -2360,17 +2367,16 @@ MainWindow::onCommandDeviceNotifierActivated(int fd)
     }
 }
 
+/// @param fd - channel_b_fd
 void
 MainWindow::onDataDeviceNotifierActivated(int fd)
 {
-    Q_UNUSED(fd);
-
 	QTextStream output(stdout);
 
     char response_buffer[80] = {};
 	ssize_t result;
 	DataVector localdata;
-	while ((result = ::read( channel_b_fd, response_buffer, DATA_EVENT_SIZE)) > 0) {
+    while ((result = ::read( fd, response_buffer, DATA_EVENT_SIZE)) > 0) {
 		// send then to the process thread
         output << result << endl;
 		for ( ssize_t i = 0; i < result; ++i) {

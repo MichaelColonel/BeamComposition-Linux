@@ -139,7 +139,7 @@ ProcessThread::ProcessThread(QObject* parent)
     flag_background(false)
 {
 //    counts.reserve(BUFFER_SIZE);
-//    bufferdata.reserve(BUFFER_SIZE * mask.size());
+//    bufferdata.reserve(BUFFER_SIZE * mask_vector.size());
 }
 
 ProcessThread::~ProcessThread()

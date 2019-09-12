@@ -33,10 +33,11 @@ int port_flush(int fd);
 int port_write_command( int fd, const char* command);
 int port_handshake(int fd);
 int port_reset_altera(int fd);
-int port_movement( int fd, int move, int distance);
+int port_movement( int fd, char move, int distance);
 int port_acquisition_timing( int fd, char delay_time, char acquisition_time);
+int port_acquisition_state_timing( int fd, char state, char delay_time, char acquisition_time);
 int port_acquisition_delay( int fd, int delay_time);
-int port_pedestal_triggers( int fd, int trigger_code);
+int port_pedestal_triggers( int fd, char trigger_code);
 
 #ifdef __cplusplus
 }

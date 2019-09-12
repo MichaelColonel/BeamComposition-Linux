@@ -31,6 +31,8 @@ static struct termios newio, oldio;
 static const char* const CommandHandshake_string = "I000";
 static const char* const CommandResetAltera_string = "R000";
 
+static char port_string[80]; // local buffer for commands
+
 static int port_check(int fd);
 
 int
@@ -208,6 +210,8 @@ port_check(int fd)
 int
 port_write_command( int fd,  const char* command)
 {
+    if (fd == -1) return -1;
+
     size_t cmdlen = strlen(command);
     ssize_t res = write( fd, command, cmdlen);
     if (res != -1 && res == (ssize_t)cmdlen)
@@ -219,11 +223,65 @@ port_write_command( int fd,  const char* command)
 int
 port_handshake(int fd)
 {
+    if (fd == -1) return -1;
+
     return port_write_command( fd, CommandHandshake_string);
 }
 
 int
 port_reset_altera(int fd)
 {
+    if (fd == -1) return -1;
+
     return port_write_command( fd, CommandResetAltera_string);
+}
+
+int
+port_movement( int fd, char move, int distance)
+{
+    if (fd == -1) return -1;
+
+    sprintf( port_string, "M%c%02d", move, distance);
+    printf( "Port movement buffer: %s\n", port_string);
+    return port_write_command( fd, port_string);
+}
+
+int
+port_acquisition_timing( int fd, char delay_time, char acquisition_time)
+{
+    if (fd == -1) return -1;
+
+    sprintf( port_string, "A1%c%c", delay_time, acquisition_time);
+    printf( "Port acquisition timing buffer: %s\n", port_string);
+    return port_write_command( fd, port_string);
+}
+
+int
+port_acquisition_state_timing( int fd, char state, char delay_time, char acquisition_time)
+{
+    if (fd == -1) return -1;
+
+    sprintf( port_string, "A%c%c%c", state, delay_time, acquisition_time);
+    printf( "Port acquisition state timing buffer: %s\n", port_string);
+    return port_write_command( fd, port_string);
+}
+
+int
+port_acquisition_delay( int fd, int delay_time)
+{
+    if (fd == -1) return -1;
+
+    sprintf( port_string, "D%03d", delay_time);
+    printf( "Acquisition delay buffer: %s\n", port_string);
+    return port_write_command( fd, port_string);
+}
+
+int
+port_pedestal_triggers( int fd, char trigger_code)
+{
+    if (fd == -1) return -1;
+
+    sprintf( port_string, "T00%c", trigger_code);
+    printf( "Pedestals triggers buffer: %s\n", port_string);
+    return port_write_command( fd, port_string);
 }

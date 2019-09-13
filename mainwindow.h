@@ -74,15 +74,13 @@ private slots:
     void opcUaClientDialog(bool state = true);
     void commandThreadStarted();
     void commandThreadFinished();
-    void acquireThreadStarted();
-    void acquireThreadFinished();
     void processFileStarted();
     void processFileFinished();
     void processThreadStarted();
     void processThreadFinished();
-    void deviceError();
-    void dataDeviceError(int);
-    void commandDeviceError(int);
+    void deviceError(int);
+//    void dataDeviceError(int);
+//    void commandDeviceError(int);
     void connectDevices();
     void disconnectDevices();
     void startRun();
@@ -114,8 +112,10 @@ private slots:
     void onOpcUaTimeout();
     void onOpcUaClientConnected();
     void onOpcUaClientDisconnected();
-    void onCommandDeviceNotifierActivated(int);
-    void onDataDeviceNotifierActivated(int);
+    void onCommandDeviceRead(int);
+    void onDataDeviceRead(int);
+//    void onCommandDeviceException(int);
+//    void onDataDeviceException(int);
 
 private:
     bool processRawFile( QFile* runfile, QList<QListWidgetItem*>& items);
@@ -135,13 +135,14 @@ private:
     QTimer* timer_data; // data update timer
     QTimer* timer_opcua; // OPC UA iterate timer
     QTimer* timer_heartbeat; // OPC UA heartbeat timer
-    int channel_a_fd; // chanel a file discriptor
-    QSocketNotifier* channel_a_notifier; // notifier to read command response
-    int channel_b_fd; // chanel b file discriptor
-    QSocketNotifier* channel_b_notifier; // notifier to read data
+    int channel_a_fd; // channel a file discriptor
+    QSocketNotifier* notifier_a_read; // channel a notifier to read command response
+    QSocketNotifier* notifier_a_except; // channel a notifier for exception
+    int channel_b_fd; // channel b file discriptor
+    QSocketNotifier* notifier_b_read; // channel b notifier to read data
+    QSocketNotifier* notifier_b_except; // channel b notifier for exception
     QFile* filerun;
     QFile* filedat;
-    AcquireThread* acquire_thread;
     ProcessThread* process_thread;
     ProcessFileThread* profile_thread;
     QProgressDialog* progress_dialog;

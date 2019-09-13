@@ -25,29 +25,6 @@
 class QListWidgetItem;
 
 /**
- * @brief The AcquireThread class -- acquire raw data from FT2232H channel B
- */
-class AcquireThread : public QThread {
-    Q_OBJECT
-public:
-    explicit AcquireThread(QObject* parent = 0);
-    virtual ~AcquireThread();
-    void setFileDescriptor(int fd);
-
-public slots:
-    void stop();
-
-signals:
-    void signalDeviceError(int);
-
-protected:
-    virtual void run();
-
-    bool stopped;
-    int fd;
-};
-
-/**
  * @brief The ProcessThread class -- process the acquired raw data to detectors counts
  */
 class ProcessThread : public QThread {

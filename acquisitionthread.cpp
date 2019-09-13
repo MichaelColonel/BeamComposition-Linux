@@ -71,67 +71,6 @@ DataQueue queue;
 
 } // namespace
 
-AcquireThread::AcquireThread(QObject* parent)
-    :
-    QThread(parent),
-    stopped(false),
-    fd(-1)
-{
-}
-
-AcquireThread::~AcquireThread()
-{
-    fd = -1;
-}
-
-void
-AcquireThread::stop()
-{
-    QMutexLocker locker(mutex);
-    stopped = true;
-}
-
-void
-AcquireThread::setFileDescriptor(int fd_)
-{
-    fd = fd_;
-}
-
-void
-AcquireThread::run()
-{
-    while (true) {
-        int error_res = 0;
-        size_t nread;
-        nread = port_readn( fd, buffer, MASK_SIZE, &error_res);
-        {
-            QMutexLocker locker(mutex);
-            if (stopped)
-                break;
-        }
-        if (nread >= mask_vector.size() && !error_res) {
-            // put available data in the queue
-            // acquire condition signal for processing thread
-
-            DataVector localdata( buffer, buffer + nread);
-            {
-//                qDebug() << "Data Acquisition Thread: signal data is ready";
-                QMutexLocker locker(mutex);
-                queue.push(std::move(localdata));
-                cond_acquire.wakeOne();
-            }
-        }
-        else if (error_res < 0) {
-            emit signalDeviceError(error_res);
-            break;
-        }
-        else if (error_res == 1) {
-            std::cerr << "No data within timeout interval" << std::endl;
-        }
-    }
-    stopped = false;
-}
-
 ProcessThread::ProcessThread(QObject* parent)
     :
     QThread(parent),
@@ -158,7 +97,7 @@ void
 ProcessThread::appendData(const DataVector& rawdata)
 {
 	QMutexLocker locker(mutex);
-	queue.push(rawdata);
+	queue.push(std::move(rawdata));
 	cond_acquire.wakeOne();
 }
 

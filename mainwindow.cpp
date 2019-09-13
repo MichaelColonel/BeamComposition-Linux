@@ -152,13 +152,14 @@ MainWindow::MainWindow(QWidget *parent)
     timer_data(new QTimer(this)),
     timer_opcua(new QTimer(this)),
     timer_heartbeat(new QTimer(this)),
-    channel_a_fd(-1),
-    channel_a_notifier(nullptr),
-    channel_b_fd(-1),
-    channel_b_notifier(nullptr),
+    channel_a_fd(-1), // channel a file discriptor
+    notifier_a_read(nullptr), // channel a notifier to read command response
+    notifier_a_except(nullptr), // channel a notifier for exception
+    channel_b_fd(-1), // channel b file discriptor
+    notifier_b_read(nullptr), // channel b notifier to read data
+    notifier_b_except(nullptr), // channel b notifier for exception
     filerun(nullptr),
     filedat(nullptr),
-    acquire_thread(new AcquireThread(this)),
     process_thread(new ProcessThread(this)),
     profile_thread(new ProcessFileThread(this)),
     progress_dialog(new QProgressDialog( tr("Processing file..."), \
@@ -264,9 +265,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect( process_thread, SIGNAL(started()), this, SLOT(processThreadStarted()));
     connect( process_thread, SIGNAL(finished()), this, SLOT(processThreadFinished()));
-    connect( acquire_thread, SIGNAL(started()), this, SLOT(acquireThreadStarted()));
-    connect( acquire_thread, SIGNAL(finished()), this, SLOT(acquireThreadFinished()));
-    connect( acquire_thread, SIGNAL(signalDeviceError(int)), this, SLOT(dataDeviceError(int)));
 
     connect( profile_thread, SIGNAL(started()), this, SLOT(processFileStarted()));
     connect( profile_thread, SIGNAL(finished()), this, SLOT(processFileFinished()));
@@ -634,8 +632,8 @@ MainWindow::createTreeWidgetItems()
 void
 MainWindow::triggersItemChanged(int value)
 {
-    std::stringstream com_stream;
-    com_stream << "T00" << char(value + '0');
+//    std::stringstream com_stream;
+//    com_stream << "T00" << char(value + '0');
 /*
     QString trigger_command = QString::fromStdString(com_stream.str());
     if (channel_a->write_command(trigger_command)) {
@@ -654,8 +652,8 @@ void
 MainWindow::motorItemChanged(int value)
 {
     int steps = ui->scanningStepSpinBox->value();
-    std::stringstream com_stream;
-    com_stream << "M" << char(value + '0') << std::setfill('0') << std::setw(2) << steps;
+//    std::stringstream com_stream;
+//    com_stream << "M" << char(value + '0') << std::setfill('0') << std::setw(2) << steps;
 /*
     QString motor_command = QString::fromStdString(com_stream.str());
     if (channel_a->write_command(motor_command)) {
@@ -766,18 +764,6 @@ void
 MainWindow::commandThreadFinished()
 {
     qDebug() << "GUI: Command thread finished";
-}
-
-void
-MainWindow::acquireThreadStarted()
-{
-    qDebug() << "GUI: Data acquisition started";
-}
-
-void
-MainWindow::acquireThreadFinished()
-{
-    qDebug() << "GUI: Data acquisition finished";
 }
 
 void
@@ -1043,8 +1029,8 @@ MainWindow::acquisitionTimingChanged(int value)
         else if (acquisition_time >= 10 && acquisition_time <= 15)
             acquisition_code = (acquisition_time - 10) + 'A';
 
-        std::stringstream com_stream;
-        com_stream << "A1" << char(delay_time + '0') << acquisition_code;
+//        std::stringstream com_stream;
+//        com_stream << "A1" << char(delay_time + '0') << acquisition_code;
 /*
         QString extraction_command = QString::fromStdString(com_stream.str());
         if (channel_a->write_command(extraction_command)) {
@@ -1116,8 +1102,8 @@ MainWindow::dataUpdateChanged(int id)
         else if (acquisition_time >= 10 && acquisition_time <= 15)
             acquisition_code = (acquisition_time - 10) + 'A';
 
-        std::stringstream com_stream;
-        com_stream << "A" << char(state + '0') << char(delay_time + '0') << acquisition_code;
+//        std::stringstream com_stream;
+//        com_stream << "A" << char(state + '0') << char(delay_time + '0') << acquisition_code;
 /*
         QString extraction_command = QString::fromStdString(com_stream.str());
 
@@ -1323,8 +1309,8 @@ MainWindow::connectDevices()
         return;
     }
 
-    port_flush(channel_a_fd);
-    port_flush(channel_b_fd);
+//    port_flush(channel_a_fd);
+//    port_flush(channel_b_fd);
 
     if (!port_handshake(channel_a_fd)) { // handshake
         // flush channel b device
@@ -1382,12 +1368,17 @@ MainWindow::connectDevices()
         sys_state = STATE_DEVICE_CONNECTED;
         emit signalStateChanged(sys_state);
 
-        channel_a_notifier = new QSocketNotifier( channel_a_fd, QSocketNotifier::Read, this);
-        connect( channel_a_notifier, SIGNAL(activated(int)), this, SLOT(onCommandDeviceNotifierActivated(int)));
+        notifier_a_read = new QSocketNotifier( channel_a_fd, QSocketNotifier::Read, this);
+        notifier_a_except = new QSocketNotifier( channel_a_fd, QSocketNotifier::Exception, this);
+        connect( notifier_a_read, SIGNAL(activated(int)), this, SLOT(onCommandDeviceRead(int)));
+        connect( notifier_a_except, SIGNAL(activated(int)), this, SLOT(deviceError(int)));
+//        connect( notifier_a_except, SIGNAL(activated(int)), this, SLOT(onCommandDeviceException(int)));
 
-        channel_b_notifier = new QSocketNotifier( channel_b_fd, QSocketNotifier::Read, this);
-        connect( channel_b_notifier, SIGNAL(activated(int)), this, SLOT(onDataDeviceNotifierActivated(int)));
-
+        notifier_b_read = new QSocketNotifier( channel_b_fd, QSocketNotifier::Read, this);
+        notifier_b_except = new QSocketNotifier( channel_b_fd, QSocketNotifier::Exception, this);
+        connect( notifier_b_read, SIGNAL(activated(int)), this, SLOT(onDataDeviceRead(int)));
+        connect( notifier_b_except, SIGNAL(activated(int)), this, SLOT(deviceError(int)));
+//        connect( notifier_b_except, SIGNAL(activated(int)), this, SLOT(onDataDeviceException(int)));
     }
 }
 
@@ -1400,14 +1391,24 @@ MainWindow::disconnectDevices()
     if (process_state)
         stopRun();
 
-    if (channel_a_notifier) {
-        delete channel_a_notifier;
-        channel_a_notifier = nullptr;
+    if (notifier_a_read) {
+        delete notifier_a_read;
+        notifier_a_read = nullptr;
     }
 
-    if (channel_b_notifier) {
-        delete channel_b_notifier;
-        channel_b_notifier = nullptr;
+    if (notifier_a_except) {
+        delete notifier_a_except;
+        notifier_a_except = nullptr;
+    }
+
+    if (notifier_b_read) {
+        delete notifier_b_read;
+        notifier_b_read = nullptr;
+    }
+
+    if (notifier_b_except) {
+        delete notifier_b_except;
+        notifier_b_except = nullptr;
     }
 
     if (channel_a_fd != -1) {
@@ -1443,7 +1444,7 @@ MainWindow::disconnectDevices()
     sys_state = STATE_DEVICE_DISCONNECTED;
     emit signalStateChanged(sys_state);
 }
-
+/*
 void
 MainWindow::commandDeviceError(int err)
 {
@@ -1461,7 +1462,7 @@ MainWindow::dataDeviceError(int err)
 
     stopRun();
 }
-
+*/
 void
 MainWindow::externalBeamSignalReceived()
 {
@@ -1604,12 +1605,12 @@ MainWindow::processData()
 }
 
 void
-MainWindow::deviceError()
+MainWindow::deviceError(int fd)
 {
     disconnectDevices();
-/*
+
     QString msg;
-    switch (ftStatus) {
+/*    switch (ftStatus) {
     case FT_INVALID_HANDLE:
         msg = tr("Invalid handle");
         break;
@@ -1651,11 +1652,11 @@ MainWindow::deviceError()
         msg = tr("Other error");
         break;
     }
-
+*/
     QString channel;
-    if (dev == channel_a)
+    if (fd == channel_a_fd)
         channel = tr("FT2232H Channel A error.");
-    else if (dev == channel_b)
+    else if (fd == channel_b_fd)
         channel = tr("FT2232H Channel B error.");
     else
         channel = tr("Unknown device error.");
@@ -1663,7 +1664,6 @@ MainWindow::deviceError()
     QMessageBox::warning( this, tr("Error message"),
         tr("%1\n\n%2").arg(channel).arg(msg),
         QMessageBox::Ok | QMessageBox::Default);
-*/
 }
 
 RunInfo
@@ -2000,15 +2000,16 @@ MainWindow::resetAlteraClicked()
 void
 MainWindow::setDelayChanged(int delay)
 {
-    std::stringstream com_stream;
-    com_stream << "D" << std::setfill('0') << std::setw(3) << delay;
+//    std::stringstream com_stream;
+//    com_stream << "D" << std::setfill('0') << std::setw(3) << delay;
 /*
     QString delay_command = QString::fromStdString(com_stream.str());
     if (channel_a->write_command(delay_command)) {
         statusBar()->showMessage( tr("Delay %1").arg(delay), 1000);
     }
 */
-    if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
+//    if (!port_write_command( channel_a_fd, com_stream.str().c_str())) {
+    if (!port_acquisition_delay( channel_a_fd, delay)) {
         statusBar()->showMessage( tr("Delay %1").arg(delay), 1000);
     }
 }
@@ -2327,7 +2328,7 @@ MainWindow::onOpcUaClientDisconnected()
 
 /// @param fd - channel_a_fd
 void
-MainWindow::onCommandDeviceNotifierActivated(int fd)
+MainWindow::onCommandDeviceRead(int fd)
 {
     QTextStream output(stdout);
     QTextStream streamerr(stderr);
@@ -2367,22 +2368,45 @@ MainWindow::onCommandDeviceNotifierActivated(int fd)
     }
 }
 
+/// @param fd - channel_a_fd
+/*
+void
+MainWindow::onCommandDeviceException(int fd)
+{
+	Q_UNUSED(fd);
+	deviceError();
+}
+*/
+
 /// @param fd - channel_b_fd
 void
-MainWindow::onDataDeviceNotifierActivated(int fd)
+MainWindow::onDataDeviceRead(int fd)
 {
-	QTextStream output(stdout);
+//	QTextStream output(stdout);
 
     char response_buffer[80] = {};
 	ssize_t result;
 	DataVector localdata;
     while ((result = ::read( fd, response_buffer, DATA_EVENT_SIZE)) > 0) {
 		// send then to the process thread
-        output << result << endl;
+//        output << result << endl;
 		for ( ssize_t i = 0; i < result; ++i) {
 			localdata.push_back(response_buffer[i]);
 		}
+
+		if (localdata.size() >= DATA_EVENT_SIZE * 10)
+		    break;
 	}
-    if (localdata.size())
+    if (this->process_thread->isRunning() && localdata.size())
         this->process_thread->appendData(localdata);
 }
+
+/// @param fd - channel_b_fd
+/*
+void
+MainWindow::onDataDeviceException(int fd)
+{
+	Q_UNUSED(fd);
+	deviceError();
+}
+*/

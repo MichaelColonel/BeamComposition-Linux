@@ -1308,12 +1308,10 @@ MainWindow::connectDevices()
         statusBar()->showMessage( tr("Channels connection canceled"), 2000);
         return;
     }
-
-//    port_flush(channel_a_fd);
-//    port_flush(channel_b_fd);
+    port_flush(channel_a_fd);
 
     if (!port_handshake(channel_a_fd)) { // handshake
-        // flush channel b device
+        port_flush(channel_b_fd); // flush channel b device
 
         ui->connectButton->setEnabled(false);
         ui->disconnectButton->setEnabled(true);
@@ -2359,7 +2357,7 @@ MainWindow::onCommandDeviceRead(int fd)
         else if (barray == Finish_string) {
             movementFinished();
         }
-        else if (barray == Carbon_string) {
+        else if (barray == Carbon_string) { // handshake
             output << "Carbon" << endl;
         }
         else {

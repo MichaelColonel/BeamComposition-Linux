@@ -24,6 +24,8 @@
 
 class QListWidgetItem;
 
+// AcquisitionThread deleted (QSocketNotifier instead)
+
 /**
  * @brief The ProcessThread class -- process the acquired raw data to detectors counts
  */

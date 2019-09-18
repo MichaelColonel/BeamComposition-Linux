@@ -214,7 +214,8 @@ port_write_command( int fd,  const char* command)
 
     size_t cmdlen = strlen(command);
     ssize_t res = write( fd, command, cmdlen);
-    if (res != -1 && res == (ssize_t)cmdlen)
+//    if (res != -1 && res == (ssize_t)cmdlen)
+    if (res == (ssize_t)cmdlen)
         return 0;
     else
         return -1;

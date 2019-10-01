@@ -34,7 +34,6 @@ protected:
     DataList data;
 };
 
-/*
 class WriteCountsProcess : public WriteDataProcess {
 public:
     explicit WriteCountsProcess( QFile* file, const CountsList& c = CountsList());
@@ -44,7 +43,6 @@ public:
 protected:
     CountsList counts;
 };
-*/
 
 class WriteDataTimeProcess : public WriteDataProcess {
 public:

@@ -17,6 +17,7 @@
 
 #include <QWaitCondition>
 #include <QMutex>
+#include <QDebug>
 
 #include <TH1.h>
 #include <TH2.h>
@@ -141,6 +142,10 @@ ProcessThread::run()
         size_t proc = 0; // number of processed buffer data
         CountsList localcounts; // processed ADC counts list
         size_t res = process_data( localcounts, localdata, proc);
+
+//		for ( const CountsArray& array : localcounts) {
+//			qDebug() << array[0] << " " << array[1] << " " << array[2] << " " << array[3];
+//		}
         if (res) {
             QMutexLocker locker(mutex);
 #if defined(__GNUG__) && (__cplusplus >= 201103L)

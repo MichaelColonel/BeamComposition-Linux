@@ -16,7 +16,7 @@
  */
 
 #include <QDataStream>
-//#include <QTextStream>
+#include <QTextStream>
 #include <QFile>
 
 #include "writeprocess.h"
@@ -48,7 +48,7 @@ WriteDataProcess::run()
         filerun->flush();
     }
 }
-/*
+
 WriteCountsProcess::WriteCountsProcess( QFile* file, const CountsList& c)
     :
     WriteDataProcess(file),
@@ -71,7 +71,7 @@ WriteCountsProcess::run()
         }
     }
 }
-*/
+
 WriteDataTimeProcess::WriteDataTimeProcess( QFile* file, time_t tm, const DataList& d)
     :
     WriteDataProcess( file, d),

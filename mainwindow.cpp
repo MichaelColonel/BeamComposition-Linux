@@ -160,6 +160,7 @@ MainWindow::MainWindow(QWidget *parent)
     notifier_b_except(nullptr), // channel b notifier for exception
     filerun(nullptr),
     filedat(nullptr),
+    filecnt(nullptr),
     process_thread(new ProcessThread(this)),
     profile_thread(new ProcessFileThread(this)),
     progress_dialog(new QProgressDialog( tr("Processing file..."), \
@@ -357,6 +358,11 @@ MainWindow::~MainWindow()
         filedat->flush();
         filedat->close();
         delete filedat;
+    }
+    if (filecnt) {
+        filecnt->flush();
+        filecnt->close();
+        delete filecnt;
     }
 /*
     delete progress_dialog;
@@ -775,20 +781,23 @@ MainWindow::processThreadStarted()
 
     QDateTime dt = QDateTime::currentDateTime();
     QString dt_string = dt.toString("ddMMyyyy_hhmmss");
-    QString namerun, nameraw;
+    QString namerun, nameraw, namecnt;
 
     if (flag_background) {
         namerun = QString("Run%1_back_%2.dat").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
         nameraw = QString("Run%1_back_%2.raw").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+        namecnt = QString("Run%1_back_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
     }
     else {
         namerun = QString("Run%1_data_%2.dat").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
         nameraw = QString("Run%1_data_%2.raw").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
+        namecnt = QString("Run%1_data_%2.txt").arg( int(n), int(4), int(10), QLatin1Char('0')).arg(dt_string);
     }
 
     QDir* dir = new QDir(rundir);
     QString filenamedat = dir->filePath(namerun);
     QString filenameraw = dir->filePath(nameraw);
+    QString filenamecnt = dir->filePath(namecnt);
     delete dir;
 
     // clear list of received data
@@ -797,8 +806,10 @@ MainWindow::processThreadStarted()
     if (flag_write_run) {
         filerun = new QFile(filenamedat);
         filedat = new QFile(filenameraw);
+        filecnt = new QFile(filenamecnt);
         filerun->open(QFile::WriteOnly);
         filedat->open(QFile::WriteOnly);
+        filecnt->open(QFile::WriteOnly);
 
         // write pedestals flag
         QDataStream out(filedat);
@@ -840,6 +851,11 @@ MainWindow::processThreadFinished()
         filedat->close();
         delete filedat;
         filedat = nullptr;
+
+        filecnt->flush();
+        filecnt->close();
+        delete filecnt;
+        filecnt = nullptr;
     }
 
     // if it was a background run, then save background results
@@ -1558,8 +1574,8 @@ MainWindow::processData()
     if (listsize)
         batch_info = batchCountsReceived(countslist);
 
-    if (filerun && filedat)
-        batchDataReceived( datalist, datetime);
+    if (filerun && filedat && filecnt)
+        batchDataReceived( datalist, countslist, datetime);
 
     int batch_counts = ui->runDetailsListWidget->count();
 
@@ -1671,20 +1687,27 @@ MainWindow::batchCountsReceived(const CountsList &list)
     RunInfo info = params->fit( list, diagrams, process_thread->isBackground());
     runinfo += info;
     emit updateDiagram();
+
     return info;
 }
 
 void
-MainWindow::batchDataReceived( const DataList& datalist, const QDateTime& dt)
+MainWindow::batchDataReceived( const DataList& datalist, const CountsList &countslist, 
+	const QDateTime& dt)
 {
     time_t dtime = dt.toTime_t();
 
     WriteDataProcess* writedata = new WriteDataProcess( filerun, datalist);
     writedata->setAutoDelete(true);
+
     WriteDataTimeProcess* writedatatime = new WriteDataTimeProcess( filedat, dtime, datalist);
     writedatatime->setAutoDelete(true);
 
+    WriteCountsProcess* writecounts = new WriteCountsProcess( filecnt, countslist);
+    writecounts->setAutoDelete(true);
+
     QThreadPool* threadPool = QThreadPool::globalInstance();
+    threadPool->start(writecounts);
     threadPool->start(writedata);
     threadPool->start(writedatatime);
 }

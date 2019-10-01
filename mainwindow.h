@@ -119,7 +119,7 @@ private slots:
 
 private:
     bool processRawFile( QFile* runfile, QList<QListWidgetItem*>& items);
-    void batchDataReceived( const DataList& list, const QDateTime&);
+    void batchDataReceived( const DataList& datalist, const CountsList& countslist, const QDateTime&);
     RunInfo batchCountsReceived(const CountsList& list);
     void saveSettings(QSettings* set);
     void loadSettings(QSettings* set);
@@ -143,6 +143,7 @@ private:
     QSocketNotifier* notifier_b_except; // channel b notifier for exception
     QFile* filerun;
     QFile* filedat;
+    QFile* filecnt;
     ProcessThread* process_thread;
     ProcessFileThread* profile_thread;
     QProgressDialog* progress_dialog;

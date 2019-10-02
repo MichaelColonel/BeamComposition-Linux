@@ -427,12 +427,12 @@ MainWindow::~MainWindow()
         filedat->close();
         delete filedat;
     }
-/*
+
     delete progress_dialog;
     delete opcua_client;
     if (opcua_dialog)
         delete opcua_dialog;
-*/
+
     delete settings;
     delete ui;
 }

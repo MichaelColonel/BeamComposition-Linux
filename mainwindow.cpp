@@ -2415,11 +2415,13 @@ MainWindow::onDataDeviceRead(int fd)
 			localdata.push_back(response_buffer[i]);
 		}
 
-		if (localdata.size() >= DATA_EVENT_SIZE * 10)
-		    break;
+//		if (localdata.size() >= DATA_EVENT_SIZE * 10)
+//		    break;
 	}
-    if (this->process_thread->isRunning() && localdata.size())
-        this->process_thread->appendData(localdata);
+	if (this->process_thread->isRunning() && localdata.size()) {
+		this->process_thread->appendData(localdata);
+		localdata.clear();
+	}
 }
 
 /// @param fd - channel_b_fd

@@ -98,7 +98,7 @@ void
 ProcessThread::appendData(const DataVector& rawdata)
 {
 	QMutexLocker locker(mutex);
-	queue.push(std::move(rawdata));
+	queue.push(rawdata);
 	cond_acquire.wakeOne();
 }
 

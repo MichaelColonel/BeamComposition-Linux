@@ -95,7 +95,8 @@ private:
 #define BO 6 // high byte bits offset
 #define MO 2 // mask bits offset
 #endif
-        unsigned short value() const { return (high >> MO) << BO | low >> MO; }
+        unsigned short value() const { return ((high >> MO) << BO) | (low >> MO); }
+//        unsigned short value() const { return (low >> MO); }
     private:
         unsigned char high;
         unsigned char low;

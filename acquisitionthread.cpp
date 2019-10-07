@@ -22,8 +22,11 @@
 #include <TH1.h>
 #include <TH2.h>
 
+#include <iostream>
+#include <iomanip>
 #include <functional>
 #include <fstream>
+#include <bitset>
 
 #include "runinfo.h"
 #include "channelscountsfit.h"
@@ -74,6 +77,8 @@ QWaitCondition cond_acquire;
 QMutex* mutex = new QMutex;
 unsigned char* buffer = new unsigned char[BUFFER_SIZE];
 DataQueue queue;
+
+//std::ofstream ff("output.txt");
 
 } // namespace
 
@@ -197,11 +202,18 @@ ProcessThread::run()
             localdata = std::move(queue.front());
             queue.pop();
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
-            for ( DataVector::const_iterator it = localdata.begin(); it != localdata.end(); ++it)
+            for ( DataVector::const_iterator it = localdata.begin(); it != localdata.end(); ++it)  {
                  bufferdata.push_back(*it);
+//                 ff << std::setw(3) << int(*it) << " " << std::bitset<8>(*it).to_string() << std::endl;//"\t";
+//                 ff << std::setw(3) << int(*it >> 2) << "\t" << std::bitset<8>(*it >> 2).to_string() << std::endl;
+			 }
 #elif defined(__GNUG__) && (__cplusplus >= 201103L)
-            for ( unsigned char v : localdata)
+            for ( unsigned char v : localdata) {
                  bufferdata.push_back(v);
+//                 if (v && v != 15)
+//                   ff << std::setw(3) << int(v) << " " << std::bitset<8>(v).to_string() << std::endl;//"\t";
+//                 ff << std::setw(3) << int(v >> 2) << "\t" << std::bitset<6>(v >> 2).to_string() << std::endl;
+			 }
 #endif
         }
 

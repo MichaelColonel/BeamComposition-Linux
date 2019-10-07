@@ -2409,8 +2409,6 @@ MainWindow::onDataDeviceRead(int fd)
 	ssize_t result;
 	DataVector localdata;
     while ((result = ::read( fd, response_buffer, DATA_EVENT_SIZE)) > 0) {
-		// send then to the process thread
-//        output << result << endl;
 		for ( ssize_t i = 0; i < result; ++i) {
 			localdata.push_back(response_buffer[i]);
 		}
@@ -2418,9 +2416,10 @@ MainWindow::onDataDeviceRead(int fd)
 //		if (localdata.size() >= DATA_EVENT_SIZE * 10)
 //		    break;
 	}
+	// send then to the process thread
+//    output << localdata.size() << endl;
 	if (this->process_thread->isRunning() && localdata.size()) {
 		this->process_thread->appendData(localdata);
-		localdata.clear();
 	}
 }
 

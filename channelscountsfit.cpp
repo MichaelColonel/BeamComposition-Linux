@@ -32,8 +32,8 @@
 #include "channelscountsfit.h"
 
 #define SIZE ((CHANNELS) * 2 + 1)
-#define N 13
-
+//#define N 13
+#define N 9
 namespace {
 /*
 const struct {
@@ -122,8 +122,8 @@ const ReferenceCountsSignals reference_signal_counts_data[N] = {
     { 450.0, 2636.0, 16.0, 2098.0,  12.5, 2735.0, 15.3, 2685.0, 14.1 },
 };
 */
-
-// 25 m trigger, 37 m signal, 24 delay, 100 ns GATE (01.12.2016) N=15
+/*
+// Old detector 25 m trigger, 37 m signal, 24 delay, 100 ns GATE (01.12.2016) N=15
 const ReferenceCountsSignals reference_signal_counts_data[N] = {
     {   0.0,   35.3,  3.2,   32.7,   2.8,  127.0,  3.0,   79.5,  3.2 },
 //    {   5.0,   70.3,  3.7,   58.3,   4.0,  159.9,  4.4,  117.0,  4.1 },
@@ -141,6 +141,21 @@ const ReferenceCountsSignals reference_signal_counts_data[N] = {
     { 400.0, 2690.0, 16.7, 2022.0,  11.6, 2608.0, 24.4, 2695.0, 17.4 },
     { 450.0, 2804.0, 16.8, 2084.0,  11.0, 2689.0, 27.3, 2791.0, 16.9 }
 };
+*/
+
+// New detector 100 ns GATE (20.11.2019) N=9
+const ReferenceCountsSignals reference_signal_counts_data[N] = {
+    {   0.0,   48.8,  7.4,  69.89,   7.0,   47.8,  7.0,   65.9,  8.0 },
+    {   5.0,  139.0,  3.4,  160.2,   6.7,  134.6,  6.6,  160.6, 11.3 },
+    {  10.0,  228.6,  8.0,  250.2,   6.7,  221.1,  7.1,  255.1,  8.8 },
+    {  50.0,  954.3,  8.8,  979.5,   6.8,  920.1,  7.0, 1023.0, 11.2 },
+    { 100.0, 1871.0,  8.1, 1896.0,   7.1, 1796.0,  6.4, 1993.0, 11.2 },
+    { 150.0, 2786.0,  8.7, 2811.0,   7.1, 2669.0,  6.7, 2967.0, 11.9 },
+    { 200.0, 3731.0,  8.5, 3752.0,   7.3, 3563.0,  7.4, 3971.0, 12.5 },
+    { 210.0, 3923.0, 10.4, 3944.0,   6.8, 3745.0,  8.2, 4171.8, 13.6 },
+    { 220.0, 4115.0, 11.4, 4136.0,   7.8, 3927.0,  8.2, 4372.6, 14.1 }
+};
+
 /*
 const struct ChargeCountsSignals {
     int z;
@@ -281,7 +296,8 @@ correction( double beta, double projm)
     return res;
 }
 
-const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.955349248, 1.025628856 };
+//const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.955349248, 1.025628856 };
+const std::array< double, CHANNELS> channel_amp = { 1.0, 2423.2 / 1842.7, 2423.2 / 2331.8, 2423.2 / 1846.2 };
 
 //size_t accepted[6] = {};
 //size_t rejected[6] = {};
@@ -691,10 +707,16 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
                 }
                 if (skip)
                     continue;
-
+/*
+                d.channels[0]->Fill(values[0]);
+                d.channels[1]->Fill(values[1]);
+                d.channels[2]->Fill(values[2]);
+                d.channels[3]->Fill(values[3]);
+*/
                 skip = false;
                 for ( int i = 0; i < CHANNELS; ++i) {
-                    values[i] = channel_amp[i] * ccmath_splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
+                    values[i] = channel_amp[i] * values[i] / 11.5;
+//                    values[i] = channel_amp[i] /* * (1.55 / 1.5) */ * ccmath_splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
 //                    values[i] = splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
                     if (values[i] <= 0.)
                         skip = true;
@@ -706,6 +728,15 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
             // if it's not a background measurement and signals in channels
             // are higher than background then calculate the charge
             if (!flag_background) {
+
+                d.c12->Fill( values[0], values[1]);
+                d.c23->Fill( values[1], values[2]);
+                d.c34->Fill( values[2], values[3]);
+                d.c14->Fill( values[0], values[3]);
+                d.c13->Fill( values[0], values[2]);
+                d.c24->Fill( values[1], values[3]);
+
+//                events_counted++;
 
                 ChannelsArray charge;
                 int z = counts_to_charge( values, charge, signal, beta, kpower);
@@ -727,8 +758,9 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
                 d.fit_median->Fill(median);
                 d.fit_mean->Fill(mean);
 
-                if (z > 0) {
+                if (z > 1) {
                     size_t& charge_event = charge_events[z - 1];
+
                     d.z12->Fill( charge[0], charge[1]);
                     d.z23->Fill( charge[1], charge[2]);
                     d.z34->Fill( charge[2], charge[3]);
@@ -736,20 +768,13 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
                     d.z13->Fill( charge[0], charge[2]);
                     d.z24->Fill( charge[1], charge[3]);
 
-                    d.c12->Fill( values[0], values[1]);
-                    d.c23->Fill( values[1], values[2]);
-                    d.c34->Fill( values[2], values[3]);
-                    d.c14->Fill( values[0], values[3]);
-                    d.c13->Fill( values[0], values[2]);
-                    d.c24->Fill( values[1], values[3]);
-
                     charge_event++; // increase a number of proccessed events for particular charge
                     events_processed++; // increase a number of all proccessed events
 
                     ChannelsArray tmp(charge);
                     std::sort( tmp.begin(), tmp.end());
 
-                    double charge_rank2 = (tmp[1] + tmp[2]) / 2.;
+                    double charge_rank2 = (tmp[1] + tmp[2] + tmp[0] + tmp[3]) / 4.;
                     d.z->Fill(charge_rank2); // rank 2
                     d.z2->Fill(charge_rank2 * charge_rank2);
 

@@ -1454,7 +1454,7 @@ MainWindow::openFile(bool background_data)
             QApplication::restoreOverrideCursor();
         }
 ////////////////
-        flag_background = true;
+//        flag_background = false;
 ////////////////
         delete runfile;
 

@@ -298,7 +298,7 @@ correction( double beta, double projm)
 }
 
 //const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.955349248, 1.025628856 };
-const std::array< double, CHANNELS> channel_amp = { 216.0 / 3087.96, 1.5 * 216.0 / 2660.16, 1.5 * 216.0 / 3152.59, 1.5 * 216.0 / 3724 };
+//const std::array< double, CHANNELS> channel_amp = { 216.0 / 3087.96, 1.5 * 216.0 / 2660.16, 1.5 * 216.0 / 3152.59, 1.5 * 216.0 / 3724 };
 
 //size_t accepted[6] = {};
 //size_t rejected[6] = {};
@@ -711,8 +711,8 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
 
                 skip = false;
                 for ( int i = 0; i < CHANNELS; ++i) {
-                    values[i] = channel_amp[i] * values[i];
-//                    values[i] = channel_amp[i] * ccmath_splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
+//                    values[i] = channel_amp[i] * values[i];
+                    values[i] = ccmath_splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
 //                    values[i] = splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
                     if (values[i] <= 0.)
                         skip = true;

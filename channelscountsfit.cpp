@@ -300,6 +300,10 @@ correction( double beta, double projm)
 //const std::array< double, CHANNELS> channel_amp = { 1.0, 1.003715745, 0.955349248, 1.025628856 };
 //const std::array< double, CHANNELS> channel_amp = { 216.0 / 3087.96, 1.5 * 216.0 / 2660.16, 1.5 * 216.0 / 3152.59, 1.5 * 216.0 / 3724 };
 
+//const std::array< double, CHANNELS> channel_amp = { 1., 75.68 / 74.60, 75.68 / 78.40, 75.68 / 89.02 }; // self trigger
+const std::array< double, CHANNELS> channel_amp = { 1., 169.238 / 100.54, 169.238 / 122.02, 169.238 / 108.47 }; // ext trigger
+//const std::array< double, CHANNELS> channel_amp = { 1., 18.4 / 18.44, 18.4 / 17.57, 18.4 / 19.46 };
+
 //size_t accepted[6] = {};
 //size_t rejected[6] = {};
 
@@ -702,6 +706,9 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
             if (!flag_background) {
                 // add correct reference pedestals offset
                 for ( int i = 0; i < CHANNELS; ++i) {
+                    if (values[i] == 0 || values[i] >= 4095)
+                        skip = true;
+
                     values[i] -= back[i].first;
                     if (values[i] <= 0.)
                         skip = true;
@@ -712,7 +719,7 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
                 skip = false;
                 for ( int i = 0; i < CHANNELS; ++i) {
 //                    values[i] = channel_amp[i] * values[i];
-                    values[i] = ccmath_splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
+                    values[i] = channel_amp[i] * ccmath_splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
 //                    values[i] = splfit( values[i], yy[i], x, pp[i], fitn, tension_parameter);
                     if (values[i] <= 0.)
                         skip = true;
@@ -720,7 +727,14 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
                 if (skip)
                     continue;
             }
-
+            else {
+                d.c12->Fill( values[0], values[1]);
+                d.c23->Fill( values[1], values[2]);
+                d.c34->Fill( values[2], values[3]);
+                d.c14->Fill( values[0], values[3]);
+                d.c13->Fill( values[0], values[2]);
+                d.c24->Fill( values[1], values[3]);
+            }
             // if it's not a background measurement and signals in channels
             // are higher than background then calculate the charge
             if (!flag_background) {
@@ -745,6 +759,13 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
                 d.fit_median->Fill(median);
                 d.fit_mean->Fill(mean);
 
+                d.c12->Fill( values[0], values[1]);
+                d.c23->Fill( values[1], values[2]);
+                d.c34->Fill( values[2], values[3]);
+                d.c14->Fill( values[0], values[3]);
+                d.c13->Fill( values[0], values[2]);
+                d.c24->Fill( values[1], values[3]);
+
                 if (z > 0) {
                     size_t& charge_event = charge_events[z - 1];
                     d.z12->Fill( charge[0], charge[1]);
@@ -753,13 +774,6 @@ Parameters::fit( const CountsList& list, Diagrams& d, bool flag_background)
                     d.z14->Fill( charge[0], charge[3]);
                     d.z13->Fill( charge[0], charge[2]);
                     d.z24->Fill( charge[1], charge[3]);
-
-                    d.c12->Fill( values[0], values[1]);
-                    d.c23->Fill( values[1], values[2]);
-                    d.c34->Fill( values[2], values[3]);
-                    d.c14->Fill( values[0], values[3]);
-                    d.c13->Fill( values[0], values[2]);
-                    d.c24->Fill( values[1], values[3]);
 
                     charge_event++; // increase a number of proccessed events for particular charge
                     events_processed++; // increase a number of all proccessed events

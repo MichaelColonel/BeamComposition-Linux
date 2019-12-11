@@ -1376,10 +1376,10 @@ MainWindow::openFile(bool background_data)
             while (*iter) {
                 DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(*iter);
                 if (ditem) {
-                    TH1* h1 = ditem->getTH1();
-                    TH2* h2 = ditem->getTH2();
-                    if (h1) h1->Reset();
-                    if (h2) h2->Reset();
+//                    TH1* h1 = ditem->getTH1();
+//                    TH2* h2 = ditem->getTH2();
+//                    if (h1) h1->Reset();
+//                    if (h2) h2->Reset();
                 }
                 ++iter;
             }
@@ -1463,10 +1463,10 @@ MainWindow::openFile(bool background_data)
         while (*iter) {
             DiagramTreeWidgetItem* ditem = dynamic_cast<DiagramTreeWidgetItem*>(*iter);
             if (ditem) {
-                TH1* h1 = ditem->getTH1();
-                TH2* h2 = ditem->getTH2();
-                if (h1) h1->Reset();
-                if (h2) h2->Reset();
+//                TH1* h1 = ditem->getTH1();
+//                TH2* h2 = ditem->getTH2();
+//                if (h1) h1->Reset();
+//                if (h2) h2->Reset();
             }
             ++iter;
         }

@@ -301,7 +301,8 @@ correction( double beta, double projm)
 //const std::array< double, CHANNELS> channel_amp = { 216.0 / 3087.96, 1.5 * 216.0 / 2660.16, 1.5 * 216.0 / 3152.59, 1.5 * 216.0 / 3724 };
 
 //const std::array< double, CHANNELS> channel_amp = { 1., 75.68 / 74.60, 75.68 / 78.40, 75.68 / 89.02 }; // self trigger
-const std::array< double, CHANNELS> channel_amp = { 1., 169.238 / 100.54, 169.238 / 122.02, 169.238 / 108.47 }; // ext trigger
+//const std::array< double, CHANNELS> channel_amp = { 1.5 * 1., 146.64 / 127.54, 1.5 * 146.64 / 149.79, 1.5 * 146.64 / 163.19 }; // ext trigger
+const std::array< double, CHANNELS> channel_amp = { 1.5, 1.0 * 194.51 / 159.00, 1.5 * 194.51 / 214.53, 1.5 *194.51 / 204.01 }; // ext trigger
 //const std::array< double, CHANNELS> channel_amp = { 1., 18.4 / 18.44, 18.4 / 17.57, 18.4 / 19.46 };
 
 //size_t accepted[6] = {};
